@@ -5,66 +5,73 @@
 // Entry point for HeliView application.
 // -----------------------------------------------------------------------------
 
+#include <iostream>
+#include <boost/program_options.hpp>
 #include <QApplication>
 #include <QDebug>
-#include <unistd.h>
 #include "ApplicationFrame.h"
+#include "DeviceController.h"
+
+using namespace std;
+namespace po = boost::program_options;
+
+#define S_ARG(name, desc) (name, po::value<string>(), desc)
+#define N_ARG(name, desc) (name, desc)
+
+// -----------------------------------------------------------------------------
+template <typename T>
+void optional_arg(po::variables_map &vm, const string &name, T &var)
+{
+    if (vm.count(name))
+        var = vm[name].as<T>();
+}
 
 // -----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-    // parse the command line arguments 
-    QString device = "/dev/null";
-    QString scheme = "none";
-    QString logfile = "";
-
-    char c;
-    while (-1 != (c = getopt(argc, argv, "s:d:l:")))
-    {
-        switch (c)
-        {
-        case 's':
-            scheme = QString(optarg).toLower();
-            break;
-        case 'd':
-            device = optarg;
-            break;
-        case 'l':
-            logfile = optarg;
-            break;
-        default:
-            return 1;
-        }
-    }
- 
     QApplication app(argc, argv);
-    ApplicationFrame frame;
+    string source("network"), logfile("heliview.log"), device;
 
-    if (scheme == "serial")
+    po::options_description desc("Program options");
+    desc.add_options()
+        S_ARG("source,s", "select data source (network|serial|sim)")
+        S_ARG("device,d", "specify device for network or serial communication")
+        S_ARG("log,l",    "specify log file path")
+        N_ARG("help,h",   "produce this help message");
+
+    try
     {
-        // use the serial port
-        if (!frame.openSerialCommunication(device))
-            return 1;
+        po::variables_map vm;
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);
+
+        optional_arg(vm, "source", source);
+        optional_arg(vm, "device", device);
+        optional_arg(vm, "log", logfile);
     }
-    else if (scheme == "sim")
+    catch (exception &e)
     {
-        // generate a simulated sensor input without noise
-        frame.attachSimulatedSource(false);
-    }
-    else if (scheme == "nsim")
-    {
-        // generate a simulated sensor input with random noise
-        frame.attachSimulatedSource(true);
-    }
-    else if (scheme != "none")
-    {
-        qDebug() << "invalid scheme" << scheme << "specified";
-        return 1;
+        cerr << "command line error\n" << desc;
+        return EXIT_FAILURE;
     }
 
-    if (logfile.length() != 0)
+    DeviceController *controller = CreateDeviceController(source);
+    if (!controller)
     {
-        frame.openLogFile(logfile);
+        cerr << "invalid source type '" << source << "' specified\n";
+        return EXIT_FAILURE;
+    }
+
+    if (!controller->open(QString::fromStdString(device)))
+    {
+        cerr << "failed to open device '" << device << "'\n";
+        return EXIT_FAILURE;
+    }
+
+    ApplicationFrame frame(controller);
+    if (0 != logfile.length())
+    {
+        frame.openLogFile(QString::fromStdString(logfile));
         frame.enableLogging(true);
     }
 

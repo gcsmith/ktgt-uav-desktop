@@ -9,8 +9,8 @@
 #include <QWidget>
 #include <QTcpSocket>
 #include <qextserialport.h>
-
 #include "ui_ApplicationFrame.h"
+#include "DeviceController.h"
 #include "CVWebcamView.h"
 #include "LineGraph.h"
 #include "VirtualView.h"
@@ -20,7 +20,7 @@ class ApplicationFrame : public QMainWindow, public Ui::ApplicationFrame
     Q_OBJECT
 
 public:
-    ApplicationFrame(QWidget *parent = NULL);
+    ApplicationFrame(DeviceController *controller);
     virtual ~ApplicationFrame();
 
     bool openSerialCommunication(const QString &device);
@@ -49,19 +49,20 @@ public slots:
     void onGraphsChanged();
 
 protected:
-    LineGraph      *m_graphs[AXIS_COUNT];
-    CVWebcamView   *m_camera;
-    VirtualView    *m_virtual;
-    QextSerialPort *m_serial;
-    char            m_buffer[64];
-    int             m_offset;
-    double          m_index;
-    bool            m_noise;
-    float           m_ro[9];
-    QFile          *m_file;
-    QTextStream    *m_log;
-    QTcpSocket     *m_sock;
-    bool            m_logEnabled;
+    LineGraph        *m_graphs[AXIS_COUNT];
+    CVWebcamView     *m_camera;
+    VirtualView      *m_virtual;
+    QextSerialPort   *m_serial;
+    char              m_buffer[64];
+    int               m_offset;
+    double            m_index;
+    bool              m_noise;
+    float             m_ro[9];
+    QFile            *m_file;
+    QTextStream      *m_log;
+    QTcpSocket       *m_sock;
+    bool              m_logging;
+    DeviceController *m_controller;
 
     void setupCameraView();
     void setupSensorView();

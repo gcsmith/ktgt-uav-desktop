@@ -27,27 +27,15 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-ApplicationFrame::ApplicationFrame(QWidget * /*parent*/)
-: m_camera(NULL), m_virtual(NULL), m_serial(NULL), m_offset(0),
-  m_index(0.0), m_file(NULL), m_log(NULL), m_logEnabled(false)
+ApplicationFrame::ApplicationFrame(DeviceController *controller)
+: m_camera(NULL), m_virtual(NULL), m_serial(NULL), m_offset(0), m_index(0.0),
+  m_file(NULL), m_log(NULL), m_logging(false), m_controller(controller)
 {
     setupUi(this);
     setupCameraView();
     setupSensorView();
     setupVirtualView();
 
-    // XXX: this is just for testing -- clean up later
-
-    m_sock = new QTcpSocket();
-    connect(m_sock, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
-    connect(m_sock, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onSocketError(QAbstractSocket::SocketError)));
-
-    cout << "connecting to 192.168.1.103..." << endl;
-    m_sock->connectToHost("192.168.1.103", 8090);
-    if (!m_sock->waitForConnected()) {
-        cerr << "failed to connect to 192.168.1.103" << endl;
-        exit(1);
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -147,7 +135,7 @@ void ApplicationFrame::closeLogFile()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::enableLogging(bool enable)
 {
-    m_logEnabled = enable;
+    m_logging = enable;
 }
 
 // -----------------------------------------------------------------------------
@@ -252,7 +240,7 @@ void ApplicationFrame::updateLine(const char *message)
 
     printf("%d %d %d %d %d %d %d\n", ax, ay, az, gx, gy, gz, us);
 
-    if (m_logEnabled)
+    if (m_logging)
     {
         *m_log << ax << " " << ay << " " << az << " "
                << gx << " " << gy << " " << gz << endl;
@@ -274,7 +262,7 @@ void ApplicationFrame::onSocketReadyRead()
     float x, y, z;
     memset((void *)cmd_buffer, 0, sizeof(int32_t) * 32);
 
-    unsigned long num_bytes = m_sock->bytesAvailable();
+    size_t num_bytes = m_sock->bytesAvailable();
     if (num_bytes < 4)
         return;
 
