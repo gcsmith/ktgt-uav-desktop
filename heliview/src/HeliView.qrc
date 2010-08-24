@@ -1,0 +1,12 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>../data/camera.png</file>
+    <file>../data/go-bottom.png</file>
+    <file>../data/go-up.png</file>
+    <file>../data/graph.png</file>
+    <file>../data/kill.png</file>
+    <file>../data/manual.png</file>
+    <file>../data/virtual.png</file>
+</qresource>
+</RCC>
+
