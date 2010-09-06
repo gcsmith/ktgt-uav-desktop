@@ -6,25 +6,14 @@
 // -----------------------------------------------------------------------------
 
 #include <iostream>
-#include <boost/program_options.hpp>
 #include <QApplication>
 #include <QDebug>
 #include "ApplicationFrame.h"
 #include "DeviceController.h"
+#include "CommandLine.h"
 
 using namespace std;
 namespace po = boost::program_options;
-
-#define S_ARG(name, desc) (name, po::value<string>(), desc)
-#define N_ARG(name, desc) (name, desc)
-
-// -----------------------------------------------------------------------------
-template <typename T>
-void optional_arg(po::variables_map &vm, const string &name, T &var)
-{
-    if (vm.count(name))
-        var = vm[name].as<T>();
-}
 
 // -----------------------------------------------------------------------------
 int main(int argc, char *argv[])
@@ -32,6 +21,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     string source("network"), logfile("heliview.log"), device;
 
+    bool show_usage = false;
     po::options_description desc("Program options");
     desc.add_options()
         S_ARG("source,s", "select data source (network|serial|sim)")
@@ -41,6 +31,7 @@ int main(int argc, char *argv[])
 
     try
     {
+        // parse the command line arguments
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
         po::notify(vm);
@@ -48,10 +39,20 @@ int main(int argc, char *argv[])
         optional_arg(vm, "source", source);
         optional_arg(vm, "device", device);
         optional_arg(vm, "log", logfile);
+
+        show_usage = !!vm.count("help");
     }
     catch (exception &e)
     {
-        cerr << "command line error\n" << desc;
+        // some critical error occurred - print error and exit
+        cerr << "command line error\n";
+        show_usage = true;
+    }
+
+    if (show_usage)
+    {
+        // print the usage message
+        cerr << "usage: HeliView [options]\n\n" << desc << endl;
         return EXIT_FAILURE;
     }
 
@@ -62,12 +63,14 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    // attempt to open the specified device
     if (!controller->open(QString::fromStdString(device)))
     {
         cerr << "failed to open device '" << device << "'\n";
         return EXIT_FAILURE;
     }
 
+    // create and show the interface
     ApplicationFrame frame(controller);
     if (0 != logfile.length())
     {

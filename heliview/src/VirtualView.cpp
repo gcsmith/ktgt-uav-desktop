@@ -4,10 +4,11 @@
 // -----------------------------------------------------------------------------
 
 #include "VirtualView.h"
+#include "Utility.h"
 
 // -----------------------------------------------------------------------------
 VirtualView::VirtualView(QWidget *parent)
-: QGLWidget(parent), m_angle(0.0f), m_rx(0.0f), m_ry(0.0f), m_rz(0.0f)
+: QGLWidget(parent), m_angle(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f)
 {
     m_timer = new QTimer(this);
     m_timer->setInterval(20);
@@ -38,11 +39,11 @@ void VirtualView::initializeGL()
 }
 
 // -----------------------------------------------------------------------------
-void VirtualView::setAngles(float x, float y, float z)
+void VirtualView::setAngles(float yaw, float pitch, float roll)
 {
-    m_rx = x;
-    m_ry = y;
-    m_rz = z;
+    m_yaw   = yaw;
+    m_pitch = pitch;
+    m_roll  = roll;
 }
 
 // -----------------------------------------------------------------------------
@@ -64,7 +65,6 @@ void VirtualView::resizeGL(int width, int height)
 void VirtualView::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glLoadIdentity();
     glTranslatef(0.0f, 0.0f, -10.0f);
 
@@ -98,9 +98,11 @@ void VirtualView::paintGL()
     glEnd();
 
     glTranslatef(0.0f, 2.0f, 0.0f);
-    glRotatef(m_rx, 1.0f, 0.0f, 0.0f);
-    glRotatef(m_ry, 0.0f, 1.0f, 0.0f);
-    glRotatef(m_rz, 0.0f, 0.0f, 1.0f);
+
+    glRotatef(-m_yaw, 0.0f, 1.0f, 0.0f);
+    glRotatef(m_pitch, 1.0f, 0.0f, 0.0f);
+    glRotatef(-m_roll, 0.0f, 0.0f, 1.0f);
+
     glBegin(GL_QUADS);
     glColor3f(3.0f, 0.0f, 0.0f);
     glVertex3f(-3.0f, 0.0f, -3.0f);
@@ -122,7 +124,7 @@ void VirtualView::setRunning(bool flag)
 // -----------------------------------------------------------------------------
 void VirtualView::onPaintTick()
 {
-    m_angle += 0.1f;
+    //m_angle += 0.1f;
     updateGL();
 }
 

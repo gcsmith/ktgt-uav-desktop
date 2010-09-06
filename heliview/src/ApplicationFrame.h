@@ -8,7 +8,6 @@
 
 #include <QWidget>
 #include <QTcpSocket>
-#include <qextserialport.h>
 #include "ui_ApplicationFrame.h"
 #include "DeviceController.h"
 #include "CVWebcamView.h"
@@ -23,20 +22,20 @@ public:
     ApplicationFrame(DeviceController *controller);
     virtual ~ApplicationFrame();
 
-    bool openSerialCommunication(const QString &device);
     void attachSimulatedSource(bool noise);
     void openLogFile(const QString &logfile);
     void closeLogFile();
     void enableLogging(bool enable);
 
 public slots:
-    void onSerialDataReady();
     void onSimulateTick();
-    void onTelemetryTick();
-    void updateLine(const char *message);
+    void onTelemetryReady(float yaw, float pitch, float roll);
 
+#if 0
+    void onTelemetryTick();
     void onSocketReadyRead();
     void onSocketError(QAbstractSocket::SocketError error);
+#endif
 
     void onShowXFChanged(bool flag);
     void onShowXUFChanged(bool flag);
@@ -52,7 +51,6 @@ protected:
     LineGraph        *m_graphs[AXIS_COUNT];
     CVWebcamView     *m_camera;
     VirtualView      *m_virtual;
-    QextSerialPort   *m_serial;
     char              m_buffer[64];
     int               m_offset;
     double            m_index;

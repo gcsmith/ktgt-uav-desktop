@@ -9,6 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include "ApplicationFrame.h"
+#include "Utility.h"
 
 #define IDENT_MAGIC     0x09291988  // identification number
 #define IDENT_VERSION   0x00000001  // software version
@@ -28,7 +29,7 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 ApplicationFrame::ApplicationFrame(DeviceController *controller)
-: m_camera(NULL), m_virtual(NULL), m_serial(NULL), m_offset(0), m_index(0.0),
+: m_camera(NULL), m_virtual(NULL), m_offset(0), m_index(0.0),
   m_file(NULL), m_log(NULL), m_logging(false), m_controller(controller)
 {
     setupUi(this);
@@ -36,6 +37,8 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller)
     setupSensorView();
     setupVirtualView();
 
+    connect(m_controller, SIGNAL(telemetryReady(float, float, float)),
+            this, SLOT(onTelemetryReady(float, float, float)));
 }
 
 // -----------------------------------------------------------------------------
@@ -53,8 +56,8 @@ ApplicationFrame::~ApplicationFrame()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::setupCameraView()
 {
-    m_camera = new CVWebcamView(tabPaneCamera);
-    tabPaneCameraLayout->addWidget(m_camera);
+    // m_camera = new CVWebcamView(tabPaneCamera);
+    // tabPaneCameraLayout->addWidget(m_camera);
 }
 
 // -----------------------------------------------------------------------------
@@ -74,28 +77,6 @@ void ApplicationFrame::setupVirtualView()
 {
     m_virtual = new VirtualView(tabPaneVirtual);
     tabPaneVirtualLayout->addWidget(m_virtual);
-}
-
-// -----------------------------------------------------------------------------
-bool ApplicationFrame::openSerialCommunication(const QString &device)
-{
-    if (m_serial)
-        return false;
-
-    m_serial = new QextSerialPort(device, QextSerialPort::EventDriven);
-    m_serial->setBaudRate(BAUD38400);
-    m_serial->setDataBits(DATA_8);
-    m_serial->setParity(PAR_NONE);
-    m_serial->setStopBits(STOP_1);
-    m_serial->setFlowControl(FLOW_OFF);
-
-    connect(m_serial, SIGNAL(readyRead()), this, SLOT(onSerialDataReady()));
-
-    if (!m_serial->open(QIODevice::ReadOnly))
-        return false;
-
-    onSerialDataReady();
-    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -139,36 +120,6 @@ void ApplicationFrame::enableLogging(bool enable)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onSerialDataReady()
-{
-    int bytes_avail = m_serial->bytesAvailable();
-    // cerr << "bytes available is " << bytes_avail << endl;
-    if (!bytes_avail)
-        return;
-    
-    QByteArray data;
-    data.resize(bytes_avail);
-    m_serial->read(data.data(), data.size());
-
-    for (int i = 0; i < bytes_avail; i++)
-    {
-        if (data[i] == '\n')
-        {
-            m_buffer[m_offset - 1] = '\0';
-            updateLine(m_buffer);
-            m_offset = 0;
-        }
-        else
-        {
-            m_buffer[m_offset] = data[i];
-            m_offset++;
-        }
-    }
-}
-
-#define RAD 3.141592654 / 180.0
-
-// -----------------------------------------------------------------------------
 void ApplicationFrame::onSimulateTick()
 {
     m_index += 0.5;
@@ -188,6 +139,14 @@ void ApplicationFrame::onSimulateTick()
     }
 }
 
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onTelemetryReady(float yaw, float pitch, float roll)
+{
+    cerr << "received telemetry " << yaw << ", " << pitch << ", " << roll << endl;
+    if (m_virtual) m_virtual->setAngles(yaw, pitch, roll);
+}
+
+#if 0
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onTelemetryTick()
 {
@@ -326,6 +285,7 @@ void ApplicationFrame::onSocketError(QAbstractSocket::SocketError error)
         break;
     }
 }
+#endif
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)

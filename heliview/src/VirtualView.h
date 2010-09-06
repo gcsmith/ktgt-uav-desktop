@@ -22,7 +22,7 @@ public:
     virtual void paintGL();
 
     void setRunning(bool flag);
-    void setAngles(float x, float y, float z);
+    void setAngles(float yaw, float pitch, float roll);
 
 protected slots:
     void onPaintTick();
@@ -30,7 +30,7 @@ protected slots:
 protected:
     QTimer *m_timer;
     float m_angle;
-    float m_rx, m_ry, m_rz;
+    float m_yaw, m_pitch, m_roll;
 };
 
 #endif // _HELIVIEW_VIRTUALVIEW__H_

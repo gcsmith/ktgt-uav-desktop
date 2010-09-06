@@ -19,7 +19,7 @@ public:
     virtual void close() = 0;
 
 signals:
-    void receivedTelemetry();
+    void telemetryReady(float x, float y, float z);
 };
 
 DeviceController *CreateDeviceController(const std::string &name);

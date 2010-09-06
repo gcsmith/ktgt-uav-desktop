@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------------
+// File:    DeviceController.cpp
+// Authors: Garrett Smith
+//
+// Abstract interface for device communication.
+// -----------------------------------------------------------------------------
+
 #include <string>
 #include "NetworkDeviceController.h"
 #include "SerialDeviceController.h"
