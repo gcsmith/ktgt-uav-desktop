@@ -33,8 +33,6 @@ public slots:
 
 #if 0
     void onTelemetryTick();
-    void onSocketReadyRead();
-    void onSocketError(QAbstractSocket::SocketError error);
 #endif
 
     void onShowXFChanged(bool flag);

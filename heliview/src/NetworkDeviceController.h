@@ -22,6 +22,11 @@ public:
     virtual bool open(const QString &device);
     virtual void close();
 
+public slots:
+    void onTelemetryTick();
+    void onSocketReadyRead();
+    void onSocketError(QAbstractSocket::SocketError error);
+
 protected:
     QTcpSocket *m_sock;
 };
