@@ -8,236 +8,156 @@
 #include "Utility.h"
 
 using namespace std;
-using namespace Ogre;
 
 // -----------------------------------------------------------------------------
 VirtualView::VirtualView(QWidget *parent)
-: QGLWidget(parent), m_angle(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f)
+: QWidget(parent), m_angle(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
+  m_root(NULL), m_window(NULL), m_camera(NULL), m_view(NULL), m_manager(NULL)
 {
     m_timer = new QTimer(this);
     m_timer->setInterval(20);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onPaintTick()));
 
-    // Create the main Ogre object
-    mOgreRoot = new Root(
-            "cfg/plugins.cfg", 
-            "cfg/ogre.cfg", 
-            "cfg/ogre.log");
-
-    mOgreRoot->loadPlugin("RenderSystem_GL");
+    // create the Ogre root object and load the OpenGL render plugin
+    m_root = new Ogre::Root("cfg/plugins.cfg", "cfg/ogre.cfg");
+    m_root->loadPlugin("RenderSystem_GL");
 
     // load resource paths from config file
-    ConfigFile cf;
+    Ogre::ConfigFile cf;
     cf.load("cfg/resources.cfg");
 
     // iterate over each setting and add resource patch
-    ConfigFile::SectionIterator seci = cf.getSectionIterator();
-    String section, type, arch;
+    Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
+    Ogre::String section, type, arch;
 
     while (seci.hasMoreElements())
     {
         section = seci.peekNextKey();
-        ConfigFile::SettingsMultiMap *settings = seci.getNext();
-        ConfigFile::SettingsMultiMap::iterator i;
+        Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
+        Ogre::ConfigFile::SettingsMultiMap::iterator i;
         for (i = settings->begin(); i != settings->end(); ++i)
         {
             type = i->first;
             arch = i->second;
-            ResourceGroupManager::getSingleton().addResourceLocation(
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
                     arch, type, section);
         }
     }
 
-    // Setup a renderer
-    Ogre::RenderSystemList *renderers = mOgreRoot->getAvailableRenderers();
+    // setup a renderer
+    const Ogre::RenderSystemList &renderers = m_root->getAvailableRenderers();
+    assert(!renderers.empty());
 
-    // We need at least one renderer
-    assert(!renderers->empty());
-
-    Ogre::RenderSystem *renderSystem;
-    renderSystem = chooseRenderer(renderers);
-
-    // Watch if we pass back a null renderer
+    Ogre::RenderSystem *renderSystem = chooseRenderer(renderers);
     assert(renderSystem);
 
-    mOgreRoot->setRenderSystem(renderSystem);
-    QString dimensions = QString("%1x%2").arg(this->width()).arg(this->height());
-
+    m_root->setRenderSystem(renderSystem);
+    QString dimensions = QString("%1x%2").arg(width()).arg(height());
     renderSystem->setConfigOption("Video Mode", dimensions.toStdString());
 
     // Initialize without creating a window
-    mOgreRoot->getRenderSystem()->setConfigOption("Full Screen", "No");
-    mOgreRoot->saveConfig();
+    m_root->getRenderSystem()->setConfigOption("Full Screen", "No");
+    m_root->saveConfig();
 
     // Don't create a window
-    mOgreRoot->initialise(false);
+    m_root->initialise(false);
 }
 
 // -----------------------------------------------------------------------------
 VirtualView::~VirtualView()
 {
-    // mOgreRoot->shutdown();
-    delete mOgreRoot;
+    m_root->shutdown();
     destroy();
 }
 
+#include <X11/Xlib.h>
+
 // -----------------------------------------------------------------------------
-void VirtualView::initializeGL()
+void VirtualView::createRenderWindows()
 {
-#if 0
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    const QX11Info info = this->x11Info();
+    Ogre::NameValuePairList params;
+    Ogre::String win_handle;
+    win_handle = Ogre::StringConverter::toString((unsigned long)(info.display()));
+    win_handle += ":";
+    win_handle += Ogre::StringConverter::toString((unsigned int)(info.screen()));
+    win_handle += ":";
+    win_handle += Ogre::StringConverter::toString((unsigned long)(this->winId()));
+    win_handle += ":";
+    win_handle += Ogre::StringConverter::toString((unsigned long)(info.visual()));
+    params["externalWindowHandle"] = win_handle;
 
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POINT_SMOOTH);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_LIGHT0);
+    XSync(info.display(), False);
+    m_window = m_root->createRenderWindow(
+            "HeliView_RenderWindow",
+            width(),
+            height(),
+            false,
+            &params);
 
-    glShadeModel(GL_SMOOTH);
-    glFrontFace(GL_CCW);
-    glPolygonMode(GL_FRONT, GL_FILL);
-#endif
+    m_window->setActive(true);
+    m_window->setVisible(true);
 
-    // Get the parameters of the window QT created
-    QX11Info info = x11Info();
-    String winHandle;
-
-    winHandle = StringConverter::toString((unsigned long)(info.display()));
-
-    winHandle += ":";
-
-    winHandle += StringConverter::toString((unsigned long)(info.screen()));
-
-    winHandle += ":";
-
-    winHandle += StringConverter::toString(
-            (unsigned long)(this->parentWidget()->winId()));
-
-    NameValuePairList params;
-    params["parentWindowHandle"] = winHandle;
-
-    mOgreWindow = mOgreRoot->createRenderWindow("QOgreWidget_RenderWindow",
-                                this->width(),
-                                this->height(),
-                                false,
-                                &params);
-
-    mOgreWindow->setActive(true);
-    WId ogreWinId = 0x0;
-    mOgreWindow->getCustomAttribute("WINDOW", &ogreWinId);
-
-    // We need a valid window id
-    assert(ogreWinId);
-
-    this->create(ogreWinId);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NoBackground);
-
-    // Ogre Initialization
-    SceneType scene_manager_type = ST_EXTERIOR_CLOSE;
-
-    mSceneMgr = mOgreRoot->createSceneManager(scene_manager_type);
-
-    // Set light & fog
-    mSceneMgr->setAmbientLight(ColourValue(1, 1, 1));
-    mSceneMgr->setFog(
-            FOG_LINEAR, 
-            ColourValue(1, 1, 0.8f), 
-            0, 
-            80, 
-            200);
-
-    mCamera = mSceneMgr->createCamera("QOgreWidget_Cam");
-    mCamera->setPosition(Vector3(0, 1, 0));
-    mCamera->lookAt(Vector3(0, 0, 0));
-    mCamera->setNearClipDistance(5.0);
-
-    Viewport *mViewport = mOgreWindow->addViewport(mCamera);
-    mViewport->setBackgroundColour(ColourValue(0.8, 0.8, 1));
-
-    // Create scene
-    SceneNode *n_root = mSceneMgr->getRootSceneNode();
-
-    TextureManager::getSingleton().setDefaultNumMipmaps(5);
-
-    // Initialize resources
-    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
-    //m_physics = new HSPhysicsWorld();
-    //m_physics->getDynamics()->setGravity(btVector3(0, -9.8, 0));
-    //m_physics->setDebugMode(false);
-
-    // Create the floor plane's mesh and entity
-    MeshManager::getSingleton().createPlane(
-            "floor", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-            Plane(Vector3::UNIT_Y, 0), 500, 500, 10, 10,
-            true, 1, 10, 10, Vector3(1,1,1));
-
-    // Create floor
-#if 0
-    Ogre::Entity *e_floor = mSceneMgr->createEntity("Floor", "floor");
-    e_floor->setMaterialName("world/dirt");
-    e_floor->setCastShadows(false);
-    n_root->attachObject(e_floor);
-#endif
-
-    // Create the ground collision plane
-#if 0
-    btCollisionShape *gnd = OGRE_NEW btStaticPlaneShape(btVector3(0, 1, 0), 0);
-    {
-        btTransform transform;
-        transform.setIdentity();
-        transform.setOrigin(btVector3(0, 0, 0));
-
-        btScalar mass(0.0f);
-        btVector3 inertia(0, 0, 0);
-
-        HSMotionState *motion = OGRE_NEW HSMotionState(n_root, transform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, gnd, inertia);
-        btRigidBody *body = OGRE_NEW btRigidBody(rbInfo);
-
-        m_physics->getDynamics()->addRigidBody(body);
-    }
-#endif
-
-    // Create and attach a helicopter entity and scene node
-    e_heli = mSceneMgr->createEntity("Helicopter", "apache_body.mesh");
-    n_heli = n_root->createChildSceneNode("HeliNode");
-    n_heli->setPosition(Vector3(0, 40, 0));
-    n_heli->setScale(Vector3(3, 3, 3));
-    n_heli->attachObject(e_heli);
-
-    // Create the helicopter collision box
-#if 0
-    btCollisionShape *box = OGRE_NEW btBoxShape(btVector3(3, 3, 3));
-    {
-        btTransform transform;
-        transform.setIdentity();
-        transform.setOrigin(btVector3(0, 40, 0));
-
-        btScalar mass(1000.0f);
-        btVector3 inertia(0, 0, 0);
-
-        HSMotionState *motion = OGRE_NEW HSMotionState(n_heli, transform);
-        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, box, inertia);
-        btRigidBody *body = OGRE_NEW btRigidBody(rbInfo);
-
-        m_physics->getDynamics()->addRigidBody(body);
-        m_physics->addObject(motion);
-    }
-#endif
-
 }
 
 // -----------------------------------------------------------------------------
-RenderSystem* VirtualView::chooseRenderer(RenderSystemList *renderers)
+void VirtualView::initialize()
 {
-    RenderSystemList::iterator i = renderers->begin();
-    return *i;
+    createRenderWindows();
 
+    // create a generic scene manager
+    m_manager = m_root->createSceneManager(Ogre::ST_GENERIC, "HeliViewScene");
+
+    m_camera = m_manager->createCamera("PlayerCam");
+    m_camera->setPosition(Ogre::Vector3(0, 40, 50));
+    m_camera->lookAt(Ogre::Vector3(0, 40, 0));
+    m_camera->setNearClipDistance(5);
+
+    m_view = m_window->addViewport(m_camera);
+    m_view->setBackgroundColour(Ogre::ColourValue(1, 1, 0.8f));
+
+    // match camera aspect ratio to viewport
+    Ogre::Real aspect = Ogre::Real(m_view->getActualWidth()) /
+                        Ogre::Real(m_view->getActualHeight());
+    m_camera->setAspectRatio(aspect);
+
+    // initialize resource system
+    Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
+    // create scene
+    Ogre::SceneNode *n_root = m_manager->getRootSceneNode();
+
+    m_manager->setAmbientLight(Ogre::ColourValue(1, 1, 0.8f));
+    m_manager->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(1, 1, 0.8f), 0, 80, 200);
+
+    // create the floor plane's mesh and entity
+    Ogre::MeshManager::getSingleton().createPlane(
+            "floor", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 500, 500, 10, 10,
+            true, 1, 10, 10, Ogre::Vector3::UNIT_Z);
+
+    Ogre::Entity *e_floor = m_manager->createEntity("Floor", "floor");
+    e_floor->setMaterialName("world/dirt");
+    e_floor->setCastShadows(false);
+    n_root->attachObject(e_floor);
+
+    // create and attach a helicopter entity and scene node
+    e_heli = m_manager->createEntity("Helicopter", "apache_body.mesh");
+    n_heli = n_root->createChildSceneNode("HeliNode");
+    n_heli->setPosition(Ogre::Vector3(0, 40, 0));
+    n_heli->setScale(Ogre::Vector3(3, 3, 3));
+    n_heli->attachObject(e_heli);
+}
+
+// -----------------------------------------------------------------------------
+Ogre::RenderSystem* VirtualView::chooseRenderer(const Ogre::RenderSystemList &renderers)
+{
+    Ogre::RenderSystemList::const_iterator i = renderers.begin();
 #if 0
-    while(i != renderers->end())
+    while(i != renderers.end())
     {
         // Debugging purposes
         std::cout << "Renderer Name: " << (*i)->getName() << std::endl;
@@ -247,9 +167,9 @@ RenderSystem* VirtualView::chooseRenderer(RenderSystemList *renderers)
 
         i++;
     }
+#endif
 
     return *i;
-#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -261,74 +181,12 @@ void VirtualView::setAngles(float yaw, float pitch, float roll)
 }
 
 // -----------------------------------------------------------------------------
-void VirtualView::resizeGL(int width, int height)
+void VirtualView::paintEvent(QPaintEvent *)
 {
+    if (!m_window)
+        initialize();
+
 #if 0
-    glViewport(1.0f, 1.0f, (float)width, (float)height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(90.0f, 1.0f, 1.0f, 1000.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-#endif
-}
-
-#define PI_180 3.141592654f / 180.0f
-
-// -----------------------------------------------------------------------------
-void VirtualView::paintGL()
-{
-#if 0
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -10.0f);
-
-    // this is all temporary. just using it as a placeholder
-    gluLookAt(cos(m_angle * PI_180) * 10.0f, 3.0f, sin(m_angle * PI_180) * 10.0f,
-              0.0f, 0.0f, 0.0f,
-              0.0f, 1.0f, 0.0f);
-
-    const int steps = 40;
-    const float width = 100.0f;
-
-    float cur = -(width/2), step = (width / steps);
-
-    glBegin(GL_LINES);
-    glColor3f(0.5f, 0.5f, 0.5f);
-
-    for (int i = 0; i < steps; i++)
-    {
-        glVertex3f(-(width/2), 0.0f, (float)cur);
-        glVertex3f(width/2, 0.0f, (float)cur);
-        cur += step;
-    }
-
-    cur = -(width/2);
-    for (int i = 0; i < steps; i++)
-    {
-        glVertex3f((float)cur, 0.0f, -(width/2));
-        glVertex3f((float)cur, 0.0f, width/2);
-        cur += step;
-    }
-    glEnd();
-
-    glTranslatef(0.0f, 2.0f, 0.0f);
-
-    glRotatef(-m_yaw, 0.0f, 1.0f, 0.0f);
-    glRotatef(m_pitch, 1.0f, 0.0f, 0.0f);
-    glRotatef(-m_roll, 0.0f, 0.0f, 1.0f);
-
-    glBegin(GL_QUADS);
-    glColor3f(3.0f, 0.0f, 0.0f);
-    glVertex3f(-3.0f, 0.0f, -3.0f);
-    glVertex3f(-3.0f, 0.0f, 3.0f);
-    glVertex3f(3.0f, 0.0f, 3.0f);
-    glVertex3f(3.0f, 0.0f, -3.0f);
-    glEnd();
-#endif
-
     // Convert Euler angles to quaternion
     Real w = cos(-m_roll/2)*cos(m_pitch/2)*cos(-m_yaw/2) + 
              sin(-m_roll/2)*sin(m_pitch/2)*sin(-m_yaw/2);
@@ -343,6 +201,8 @@ void VirtualView::paintGL()
              sin(-m_roll/2)*sin(m_pitch/2)*cos(-m_yaw/2);
 
     n_heli->setOrientation(w,x,y,z);
+#endif
+    m_root->renderOneFrame();
 }
 
 // -----------------------------------------------------------------------------
@@ -357,7 +217,21 @@ void VirtualView::setRunning(bool flag)
 // -----------------------------------------------------------------------------
 void VirtualView::onPaintTick()
 {
-    //m_angle += 0.1f;
-    updateGL();
+    assert(m_root);
+    update();
+}
+
+// -----------------------------------------------------------------------------
+void VirtualView::resizeEvent(QResizeEvent *event)
+{
+    if (m_window)
+    {
+        m_window->resize(width(), height());
+        m_window->windowMovedOrResized();
+        Ogre::Real aspect = Ogre::Real(m_view->getActualWidth()) / 
+                            Ogre::Real(m_view->getActualHeight());
+        m_camera->setAspectRatio(aspect);
+        cerr << "resize (" << width() << "," << height() << ")\n";
+    }
 }
 

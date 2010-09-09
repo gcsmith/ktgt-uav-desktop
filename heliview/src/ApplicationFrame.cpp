@@ -61,6 +61,7 @@ void ApplicationFrame::setupSensorView()
 void ApplicationFrame::setupVirtualView()
 {
     m_virtual = new VirtualView(tabPaneVirtual);
+    m_virtual->initialize();
     tabPaneVirtualLayout->addWidget(m_virtual);
 
     //m_virtual = new OgreWidget(tabPaneVirtual);
