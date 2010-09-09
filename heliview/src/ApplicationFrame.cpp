@@ -62,6 +62,9 @@ void ApplicationFrame::setupVirtualView()
 {
     m_virtual = new VirtualView(tabPaneVirtual);
     tabPaneVirtualLayout->addWidget(m_virtual);
+
+    //m_virtual = new OgreWidget(tabPaneVirtual);
+    //tabPaneVirtualLayout->addWidget(m_virtual);
 }
 
 // -----------------------------------------------------------------------------

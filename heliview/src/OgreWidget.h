@@ -6,7 +6,7 @@
 #ifndef _HELIVIEW_OGREWIDGET__H_
 #define _HELIVIEW_OGREWIDGET__H_
 
-#include "OGRE/Ogre.h"
+#include "Ogre.h"
 #include <QGLWidget>
 #include <QX11Info>
 #include "Utility.h"
@@ -17,9 +17,9 @@ public:
     OgreWidget(QWidget *parent = 0):
         QGLWidget(parent),
         mOgreWindow(NULL)
-        {
-            init("../bin/plugins.cfg", "../bin/ogre.cfg", "../bin/ogre.log");
-        }
+    {
+        init("../bin/plugins.cfg", "../bin/ogre.cfg", "../bin/ogre.log");
+    }
     
      virtual ~OgreWidget()
      {
@@ -39,11 +39,12 @@ protected:
 
     virtual Ogre::RenderSystem* chooseRenderer(Ogre::RenderSystemList*);
 
-    Ogre::Root *mOgreRoot;
+    Ogre::Root         *mOgreRoot;
     Ogre::RenderWindow *mOgreWindow;
-    Ogre::Camera *mCamera;
-    Ogre::Viewport *mViewport;
+    Ogre::Camera       *mCamera;
+    Ogre::Viewport     *mViewport;
     Ogre::SceneManager *mSceneMgr;
 };
 
-#endif
+#endif // _HELIVIEW_OGREWIDGET__H_
+

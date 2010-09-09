@@ -3,8 +3,12 @@
 // Authors: Garrett Smith
 // -----------------------------------------------------------------------------
 
+#include <iostream>
 #include "VirtualView.h"
 #include "Utility.h"
+
+using namespace std;
+using namespace Ogre;
 
 // -----------------------------------------------------------------------------
 VirtualView::VirtualView(QWidget *parent)
@@ -13,16 +17,55 @@ VirtualView::VirtualView(QWidget *parent)
     m_timer = new QTimer(this);
     m_timer->setInterval(20);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onPaintTick()));
+
+    // Create the main Ogre object
+    mOgreRoot = new Root(
+            "cfg/plugins.cfg", 
+            "cfg/ogre.cfg", 
+            "cfg/ogre.log");
+
+    mOgreRoot->loadPlugin("RenderSystem_GL");
+
+    // Setup a renderer
+    Ogre::RenderSystemList *renderers = mOgreRoot->getAvailableRenderers();
+
+    // We need at least one renderer
+    assert(!renderers->empty());
+
+    Ogre::RenderSystem *renderSystem;
+    renderSystem = chooseRenderer(renderers);
+
+    // Watch if we pass back a null renderer
+    assert(renderSystem);
+
+    mOgreRoot->setRenderSystem(renderSystem);
+    QString dimensions = QString("%1x%2").arg(this->width()).arg(this->height());
+
+    renderSystem->setConfigOption("Video Mode", dimensions.toStdString());
+
+    // Initialize without creating a window
+    mOgreRoot->getRenderSystem()->setConfigOption("Full Screen", "No");
+    mOgreRoot->saveConfig();
+
+    // Don't create a window
+    if (!mOgreRoot->initialise(false))
+        cerr << "failed to initialize ogre" << endl;
+    else
+        cerr << "initialized ogre" << endl;
 }
 
 // -----------------------------------------------------------------------------
 VirtualView::~VirtualView()
 {
+    mOgreRoot->shutdown();
+    delete mOgreRoot;
+    destroy();
 }
 
 // -----------------------------------------------------------------------------
 void VirtualView::initializeGL()
 {
+#if 0
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
@@ -35,7 +78,152 @@ void VirtualView::initializeGL()
     glShadeModel(GL_SMOOTH);
     glFrontFace(GL_CCW);
     glPolygonMode(GL_FRONT, GL_FILL);
+#endif
 
+    // Get the parameters of the window QT created
+    QX11Info info = x11Info();
+    String winHandle;
+
+    winHandle = StringConverter::toString((unsigned long)(info.display()));
+
+    winHandle += ":";
+
+    winHandle += StringConverter::toString((unsigned long)(info.screen()));
+
+    winHandle += ":";
+
+    winHandle += StringConverter::toString(
+            (unsigned long)(this->parentWidget()->winId()));
+
+    NameValuePairList params;
+    cerr << "creating handle " << winHandle << endl;
+    params["parentWindowHandle"] = winHandle;
+
+    mOgreWindow = mOgreRoot->createRenderWindow("QOgreWidget_RenderWindow",
+                                this->width(),
+                                this->height(),
+                                false,
+                                &params);
+
+    mOgreWindow->setActive(true);
+    WId ogreWinId = 0x0;
+    mOgreWindow->getCustomAttribute("WINDOW", &ogreWinId);
+
+    // We need a valid window id
+    assert(ogreWinId);
+
+    this->create(ogreWinId);
+    setAttribute(Qt::WA_PaintOnScreen, true);
+    setAttribute(Qt::WA_NoBackground);
+
+    // Ogre Initialization
+    SceneType scene_manager_type = ST_EXTERIOR_CLOSE;
+
+    mSceneMgr = mOgreRoot->createSceneManager(scene_manager_type);
+
+    // Set light & fog
+    mSceneMgr->setAmbientLight(ColourValue(1, 1, 1));
+    mSceneMgr->setFog(
+            FOG_LINEAR, 
+            ColourValue(1, 1, 0.8f), 
+            0, 
+            80, 
+            200);
+
+    mCamera = mSceneMgr->createCamera("QOgreWidget_Cam");
+    mCamera->setPosition(Vector3(0, 1, 0));
+    mCamera->lookAt(Vector3(0, 0, 0));
+    mCamera->setNearClipDistance(5.0);
+
+    Viewport *mViewport = mOgreWindow->addViewport(mCamera);
+    mViewport->setBackgroundColour(ColourValue(0.8, 0.8, 1));
+
+    // Create scene
+    SceneNode *n_root = mSceneMgr->getRootSceneNode();
+
+    //m_physics = new HSPhysicsWorld();
+    //m_physics->getDynamics()->setGravity(btVector3(0, -9.8, 0));
+    //m_physics->setDebugMode(false);
+
+    // Create the floor plane's mesh and entity
+    MeshManager::getSingleton().createPlane(
+            "floor", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Plane(Vector3::UNIT_Y, 0), 500, 500, 10, 10,
+            true, 1, 10, 10, Vector3::UNIT_Z);
+
+    // Create floor
+#if 0
+    Ogre::Entity *e_floor = mSceneMgr->createEntity("Floor", "floor");
+    e_floor->setMaterialName("world/dirt");
+    e_floor->setCastShadows(false);
+    n_root->attachObject(e_floor);
+#endif
+
+    // Create the ground collision plane
+#if 0
+    btCollisionShape *gnd = OGRE_NEW btStaticPlaneShape(btVector3(0, 1, 0), 0);
+    {
+        btTransform transform;
+        transform.setIdentity();
+        transform.setOrigin(btVector3(0, 0, 0));
+
+        btScalar mass(0.0f);
+        btVector3 inertia(0, 0, 0);
+
+        HSMotionState *motion = OGRE_NEW HSMotionState(n_root, transform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, gnd, inertia);
+        btRigidBody *body = OGRE_NEW btRigidBody(rbInfo);
+
+        m_physics->getDynamics()->addRigidBody(body);
+    }
+#endif
+
+    // Create and attach a helicopter entity and scene node
+    e_heli = mSceneMgr->createEntity("Helicopter", "apache_body.mesh");
+    n_heli = n_root->createChildSceneNode("HeliNode");
+    n_heli->setPosition(Vector3(0, 40, 0));
+    n_heli->setScale(Vector3(3, 3, 3));
+    n_heli->attachObject(e_heli);
+
+    // Create the helicopter collision box
+#if 0
+    btCollisionShape *box = OGRE_NEW btBoxShape(btVector3(3, 3, 3));
+    {
+        btTransform transform;
+        transform.setIdentity();
+        transform.setOrigin(btVector3(0, 40, 0));
+
+        btScalar mass(1000.0f);
+        btVector3 inertia(0, 0, 0);
+
+        HSMotionState *motion = OGRE_NEW HSMotionState(n_heli, transform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, box, inertia);
+        btRigidBody *body = OGRE_NEW btRigidBody(rbInfo);
+
+        m_physics->getDynamics()->addRigidBody(body);
+        m_physics->addObject(motion);
+    }
+#endif
+
+}
+
+// -----------------------------------------------------------------------------
+RenderSystem* VirtualView::chooseRenderer(RenderSystemList *renderers)
+{
+    RenderSystemList::iterator i = renderers->begin();
+
+    while(i != renderers->end())
+    {
+        // Debugging purposes
+        std::cout << "Renderer Name: " << (*i)->getName() << std::endl;
+
+        if((*i)->getName() == "OpenGL Rendering Subsystem")
+            break;
+
+        i++;
+    }
+
+    return *i;
 }
 
 // -----------------------------------------------------------------------------
@@ -110,6 +298,21 @@ void VirtualView::paintGL()
     glVertex3f(3.0f, 0.0f, 3.0f);
     glVertex3f(3.0f, 0.0f, -3.0f);
     glEnd();
+
+    // Convert Euler angles to quaternion
+    Real w = cos(-m_roll/2)*cos(m_pitch/2)*cos(-m_yaw/2) + 
+             sin(-m_roll/2)*sin(m_pitch/2)*sin(-m_yaw/2);
+
+    Real x = sin(-m_roll/2)*cos(m_pitch/2)*cos(-m_yaw/2) - 
+             cos(-m_roll/2)*sin(m_pitch/2)*sin(-m_yaw/2);
+
+    Real y = cos(-m_roll/2)*sin(m_pitch/2)*cos(-m_yaw/2) + 
+             sin(-m_roll/2)*cos(m_pitch/2)*sin(-m_yaw/2);
+
+    Real z = cos(-m_roll/2)*cos(m_pitch/2)*sin(-m_yaw/2) - 
+             sin(-m_roll/2)*sin(m_pitch/2)*cos(-m_yaw/2);
+
+    n_heli->setOrientation(w,x,y,z);
 }
 
 // -----------------------------------------------------------------------------

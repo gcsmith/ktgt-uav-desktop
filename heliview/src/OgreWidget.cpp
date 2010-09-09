@@ -81,7 +81,15 @@ void OgreWidget::initializeGL()
     Ogre::SceneType scene_manager_type = Ogre::ST_EXTERIOR_CLOSE;
 
     mSceneMgr = mOgreRoot->createSceneManager(scene_manager_type);
+
+    // Set light & fog
     mSceneMgr->setAmbientLight(Ogre::ColourValue(1, 1, 1));
+    mSceneMgr->setFog(
+            Ogre::FOG_LINEAR, 
+            Ogre::ColourValue(1, 1, 0.8f), 
+            0, 
+            80, 
+            200);
 
     mCamera = mSceneMgr->createCamera("QOgreWidget_Cam");
     mCamera->setPosition(Ogre::Vector3(0, 1, 0));
@@ -90,6 +98,73 @@ void OgreWidget::initializeGL()
 
     Ogre::Viewport *mViewport = mOgreWindow->addViewport(mCamera);
     mViewport->setBackgroundColour(Ogre::ColourValue(0.8, 0.8, 1));
+
+    // Create scene
+    Ogre::SceneNode *n_root = mSceneMgr->getRootSceneNode();
+
+    //m_physics = new HSPhysicsWorld();
+    //m_physics->getDynamics()->setGravity(btVector3(0, -9.8, 0));
+    //m_physics->setDebugMode(false);
+
+    // Create the floor plane's mesh and entity
+    Ogre::MeshManager::getSingleton().createPlane(
+            "floor", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 500, 500, 10, 10,
+            true, 1, 10, 10, Ogre::Vector3::UNIT_Z);
+
+    // Create floor
+#if 0
+    Ogre::Entity *e_floor = mSceneMgr->createEntity("Floor", "floor");
+    e_floor->setMaterialName("world/dirt");
+    e_floor->setCastShadows(false);
+    n_root->attachObject(e_floor);
+#endif
+
+    // Create the ground collision plane
+#if 0
+    btCollisionShape *gnd = OGRE_NEW btStaticPlaneShape(btVector3(0, 1, 0), 0);
+    {
+        btTransform transform;
+        transform.setIdentity();
+        transform.setOrigin(btVector3(0, 0, 0));
+
+        btScalar mass(0.0f);
+        btVector3 inertia(0, 0, 0);
+
+        HSMotionState *motion = OGRE_NEW HSMotionState(n_root, transform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, gnd, inertia);
+        btRigidBody *body = OGRE_NEW btRigidBody(rbInfo);
+
+        m_physics->getDynamics()->addRigidBody(body);
+    }
+#endif
+
+    // Create and attach a helicopter entity and scene node
+    Ogre::Entity *e_heli = mSceneMgr->createEntity("Helicopter", "apache_body.mesh");
+    Ogre::SceneNode *n_heli = n_root->createChildSceneNode("HeliNode");
+    n_heli->setPosition(Ogre::Vector3(0, 40, 0));
+    n_heli->setScale(Ogre::Vector3(3, 3, 3));
+    n_heli->attachObject(e_heli);
+
+    // Create the helicopter collision box
+#if 0
+    btCollisionShape *box = OGRE_NEW btBoxShape(btVector3(3, 3, 3));
+    {
+        btTransform transform;
+        transform.setIdentity();
+        transform.setOrigin(btVector3(0, 40, 0));
+
+        btScalar mass(1000.0f);
+        btVector3 inertia(0, 0, 0);
+
+        HSMotionState *motion = OGRE_NEW HSMotionState(n_heli, transform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motion, box, inertia);
+        btRigidBody *body = OGRE_NEW btRigidBody(rbInfo);
+
+        m_physics->getDynamics()->addRigidBody(body);
+        m_physics->addObject(motion);
+    }
+#endif
 }
 
 // -----------------------------------------------------------------------------
