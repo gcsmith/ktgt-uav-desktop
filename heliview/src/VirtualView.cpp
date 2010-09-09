@@ -26,6 +26,28 @@ VirtualView::VirtualView(QWidget *parent)
 
     mOgreRoot->loadPlugin("RenderSystem_GL");
 
+    // load resource paths from config file
+    ConfigFile cf;
+    cf.load("cfg/resources.cfg");
+
+    // iterate over each setting and add resource patch
+    ConfigFile::SectionIterator seci = cf.getSectionIterator();
+    String section, type, arch;
+
+    while (seci.hasMoreElements())
+    {
+        section = seci.peekNextKey();
+        ConfigFile::SettingsMultiMap *settings = seci.getNext();
+        ConfigFile::SettingsMultiMap::iterator i;
+        for (i = settings->begin(); i != settings->end(); ++i)
+        {
+            type = i->first;
+            arch = i->second;
+            ResourceGroupManager::getSingleton().addResourceLocation(
+                    arch, type, section);
+        }
+    }
+
     // Setup a renderer
     Ogre::RenderSystemList *renderers = mOgreRoot->getAvailableRenderers();
 
@@ -48,16 +70,13 @@ VirtualView::VirtualView(QWidget *parent)
     mOgreRoot->saveConfig();
 
     // Don't create a window
-    if (!mOgreRoot->initialise(false))
-        cerr << "failed to initialize ogre" << endl;
-    else
-        cerr << "initialized ogre" << endl;
+    mOgreRoot->initialise(false);
 }
 
 // -----------------------------------------------------------------------------
 VirtualView::~VirtualView()
 {
-    mOgreRoot->shutdown();
+    // mOgreRoot->shutdown();
     delete mOgreRoot;
     destroy();
 }
@@ -96,7 +115,6 @@ void VirtualView::initializeGL()
             (unsigned long)(this->parentWidget()->winId()));
 
     NameValuePairList params;
-    cerr << "creating handle " << winHandle << endl;
     params["parentWindowHandle"] = winHandle;
 
     mOgreWindow = mOgreRoot->createRenderWindow("QOgreWidget_RenderWindow",
@@ -141,6 +159,11 @@ void VirtualView::initializeGL()
     // Create scene
     SceneNode *n_root = mSceneMgr->getRootSceneNode();
 
+    TextureManager::getSingleton().setDefaultNumMipmaps(5);
+
+    // Initialize resources
+    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
     //m_physics = new HSPhysicsWorld();
     //m_physics->getDynamics()->setGravity(btVector3(0, -9.8, 0));
     //m_physics->setDebugMode(false);
@@ -149,7 +172,7 @@ void VirtualView::initializeGL()
     MeshManager::getSingleton().createPlane(
             "floor", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
             Plane(Vector3::UNIT_Y, 0), 500, 500, 10, 10,
-            true, 1, 10, 10, Vector3::UNIT_Z);
+            true, 1, 10, 10, Vector3(1,1,1));
 
     // Create floor
 #if 0
@@ -211,7 +234,9 @@ void VirtualView::initializeGL()
 RenderSystem* VirtualView::chooseRenderer(RenderSystemList *renderers)
 {
     RenderSystemList::iterator i = renderers->begin();
+    return *i;
 
+#if 0
     while(i != renderers->end())
     {
         // Debugging purposes
@@ -224,6 +249,7 @@ RenderSystem* VirtualView::chooseRenderer(RenderSystemList *renderers)
     }
 
     return *i;
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -237,6 +263,7 @@ void VirtualView::setAngles(float yaw, float pitch, float roll)
 // -----------------------------------------------------------------------------
 void VirtualView::resizeGL(int width, int height)
 {
+#if 0
     glViewport(1.0f, 1.0f, (float)width, (float)height);
 
     glMatrixMode(GL_PROJECTION);
@@ -245,6 +272,7 @@ void VirtualView::resizeGL(int width, int height)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+#endif
 }
 
 #define PI_180 3.141592654f / 180.0f
@@ -252,6 +280,7 @@ void VirtualView::resizeGL(int width, int height)
 // -----------------------------------------------------------------------------
 void VirtualView::paintGL()
 {
+#if 0
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
     glTranslatef(0.0f, 0.0f, -10.0f);
@@ -298,6 +327,7 @@ void VirtualView::paintGL()
     glVertex3f(3.0f, 0.0f, 3.0f);
     glVertex3f(3.0f, 0.0f, -3.0f);
     glEnd();
+#endif
 
     // Convert Euler angles to quaternion
     Real w = cos(-m_roll/2)*cos(m_pitch/2)*cos(-m_yaw/2) + 

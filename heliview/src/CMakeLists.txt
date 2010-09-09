@@ -30,7 +30,6 @@ SET(heliview_cpp
         DeviceController.cpp
         HeliView.cpp
         LineGraph.cpp
-        OgreWidget.cpp
         NetworkDeviceController.cpp
         SerialDeviceController.cpp
         SimulatedDeviceController.cpp
@@ -44,7 +43,6 @@ SET(heliview_src_moc
         CVWebcamView.h
         DeviceController.h
         LineGraph.h
-        OgreWidget.h
         NetworkDeviceController.h
         SerialDeviceController.h
         SimulatedDeviceController.h
