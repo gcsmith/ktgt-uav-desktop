@@ -4,6 +4,7 @@
 // -----------------------------------------------------------------------------
 
 #include <iostream>
+#include <OgreMath.h>
 #include "VirtualView.h"
 #include "Utility.h"
 
@@ -202,6 +203,20 @@ void VirtualView::paintEvent(QPaintEvent *)
 
     n_heli->setOrientation(w,x,y,z);
 #endif
+
+#define RAD_FACT (3.141592654 / 180.0)
+
+    Ogre::Radian yaw(m_yaw * RAD_FACT);
+    Ogre::Radian pitch(m_pitch * RAD_FACT);
+    Ogre::Radian roll(m_roll * RAD_FACT);
+
+
+    Ogre::Matrix3 m;
+    m.FromEulerAnglesYXZ(yaw, pitch, roll);
+    Ogre::Quaternion q(m);
+
+    n_heli->setOrientation(q);
+
     m_root->renderOneFrame();
 }
 
