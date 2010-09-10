@@ -27,13 +27,16 @@ public:
     void setAngles(float yaw, float pitch, float roll);
 
 protected slots:
-    void createRenderWindows();
-    Ogre::RenderSystem* chooseRenderer(const Ogre::RenderSystemList &);
     void onPaintTick();
 
 protected:
+    Ogre::RenderSystem* chooseRenderer(const Ogre::RenderSystemList &);
+    void createRenderWindows();
+    void loadConfiguration();
+    void setupRenderSystem();
+
     QTimer *m_timer;
-    float m_angle;
+    float m_time;
     float m_yaw, m_pitch, m_roll;
 
     Ogre::Root         *m_root;
@@ -41,8 +44,8 @@ protected:
     Ogre::Camera       *m_camera;
     Ogre::Viewport     *m_view;
     Ogre::SceneManager *m_scene;
-    Ogre::Entity       *e_heli;
-    Ogre::SceneNode    *n_heli;
+    Ogre::Entity       *e_heli, *e_main_rotor, *e_tail_rotor;
+    Ogre::SceneNode    *n_heli, *n_main_rotor, *n_tail_rotor;
     Ogre::LogManager   *m_logmgr;
     Ogre::Log          *m_log;
 };

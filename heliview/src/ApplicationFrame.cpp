@@ -14,7 +14,7 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 ApplicationFrame::ApplicationFrame(DeviceController *controller)
-: m_camera(NULL), m_virtual(NULL), m_offset(0), m_index(0.0),
+: m_camera(NULL), m_virtual(NULL), 
   m_file(NULL), m_log(NULL), m_logging(false), m_controller(controller)
 {
     setupUi(this);
@@ -31,8 +31,7 @@ ApplicationFrame::~ApplicationFrame()
 {
     for (int i = 0; i < AXIS_COUNT; ++i)
     {
-        delete m_graphs[i];
-        m_graphs[i] = NULL;
+        SafeDelete(m_graphs[i]);
     }
 
     closeLogFile();
@@ -66,21 +65,6 @@ void ApplicationFrame::setupVirtualView()
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::attachSimulatedSource(bool noise)
-{
-#if 0
-    m_noise = noise;
-
-    for (int i = 0; i < 9; i++)
-        m_ro[i] = 360.0f * qrand() / (float)RAND_MAX;
-
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateTick()));
-    timer->start(20);
-#endif
-}
-
-// -----------------------------------------------------------------------------
 void ApplicationFrame::openLogFile(const QString &logfile)
 {
     m_file = new QFile(logfile);
@@ -96,8 +80,8 @@ void ApplicationFrame::closeLogFile()
     if (m_file)
     {
         m_file->close();
-        delete m_file;
-        delete m_log;
+        SafeDelete(m_file);
+        SafeDelete(m_log);
     }
 }
 
@@ -105,28 +89,6 @@ void ApplicationFrame::closeLogFile()
 void ApplicationFrame::enableLogging(bool enable)
 {
     m_logging = enable;
-}
-
-// -----------------------------------------------------------------------------
-void ApplicationFrame::onSimulateTick()
-{
-#if 0
-    m_index += 0.5;
-
-    for (int i = 0; i < 3; i++)
-    {
-        float ra = 512 + 300 * sin(10 * m_index * RAD + m_ro[i*3]);
-        float rg = 512 + 300 * sin((10 * m_index + m_ro[i*3+1]) * RAD + m_ro[i*3+2]);
-
-        if (m_noise && (qrand() % 3) != 0)
-        {
-            ra += (500.0f * qrand() / (float)RAND_MAX - 250.0f);
-            rg += (500.0f * qrand() / (float)RAND_MAX - 250.0f);
-        }
-
-        m_graphs[i]->addDataPoint(m_index, ra, rg);
-    }
-#endif
 }
 
 // -----------------------------------------------------------------------------

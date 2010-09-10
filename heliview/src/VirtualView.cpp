@@ -13,7 +13,7 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 VirtualView::VirtualView(QWidget *parent)
-: QWidget(parent), m_angle(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
+: QWidget(parent), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
   m_root(NULL), m_window(NULL), m_camera(NULL), m_view(NULL), m_scene(NULL)
 {
     m_timer = new QTimer(this);
@@ -29,45 +29,8 @@ VirtualView::VirtualView(QWidget *parent)
     m_root = new Ogre::Root("cfg/plugins.cfg", "cfg/ogre.cfg");
     m_root->loadPlugin("RenderSystem_GL");
 
-    // load resource paths from config file
-    Ogre::ConfigFile cf;
-    cf.load("cfg/resources.cfg");
-
-    // iterate over each setting and add resource patch
-    Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
-    Ogre::String section, type, arch;
-
-    while (seci.hasMoreElements())
-    {
-        section = seci.peekNextKey();
-        Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
-        Ogre::ConfigFile::SettingsMultiMap::iterator i;
-        for (i = settings->begin(); i != settings->end(); ++i)
-        {
-            type = i->first;
-            arch = i->second;
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-                    arch, type, section);
-        }
-    }
-
-    // setup a renderer
-    const Ogre::RenderSystemList &renderers = m_root->getAvailableRenderers();
-    assert(!renderers.empty());
-
-    Ogre::RenderSystem *renderSystem = chooseRenderer(renderers);
-    assert(renderSystem);
-
-    m_root->setRenderSystem(renderSystem);
-    QString dimensions = QString("%1x%2").arg(width()).arg(height());
-    renderSystem->setConfigOption("Video Mode", dimensions.toStdString());
-
-    // Initialize without creating a window
-    m_root->getRenderSystem()->setConfigOption("Full Screen", "No");
-    m_root->saveConfig();
-
-    // Don't create a window
-    m_root->initialise(false);
+    loadConfiguration();
+    setupRenderSystem();
 }
 
 // -----------------------------------------------------------------------------
@@ -75,38 +38,6 @@ VirtualView::~VirtualView()
 {
     m_root->shutdown();
     destroy();
-}
-
-#include <X11/Xlib.h>
-
-// -----------------------------------------------------------------------------
-void VirtualView::createRenderWindows()
-{
-    const QX11Info info = this->x11Info();
-    Ogre::NameValuePairList params;
-    Ogre::String win_handle;
-    win_handle = Ogre::StringConverter::toString((unsigned long)(info.display()));
-    win_handle += ":";
-    win_handle += Ogre::StringConverter::toString((unsigned int)(info.screen()));
-    win_handle += ":";
-    win_handle += Ogre::StringConverter::toString((unsigned long)(this->winId()));
-    win_handle += ":";
-    win_handle += Ogre::StringConverter::toString((unsigned long)(info.visual()));
-    params["externalWindowHandle"] = win_handle;
-
-    XSync(info.display(), False);
-    m_window = m_root->createRenderWindow(
-            "HeliView_RenderWindow",
-            width(),
-            height(),
-            false,
-            &params);
-
-    m_window->setActive(true);
-    m_window->setVisible(true);
-
-    setAttribute(Qt::WA_PaintOnScreen, true);
-    setAttribute(Qt::WA_NoBackground);
 }
 
 // -----------------------------------------------------------------------------
@@ -152,11 +83,21 @@ void VirtualView::initialize()
     n_root->attachObject(e_floor);
 
     // create and attach a helicopter entity and scene node
-    e_heli = m_scene->createEntity("Helicopter", "apache_body.mesh");
-    n_heli = n_root->createChildSceneNode("HeliNode");
+    e_heli = m_scene->createEntity("Apache", "apache_body.mesh");
+    n_heli = n_root->createChildSceneNode("Apache");
     n_heli->setPosition(Ogre::Vector3(0, 40, 0));
     n_heli->setScale(Ogre::Vector3(3, 3, 3));
     n_heli->attachObject(e_heli);
+
+    e_main_rotor = m_scene->createEntity("Apache_MRotor", "main_rotor.mesh");
+    n_main_rotor = n_heli->createChildSceneNode("Apache_MRotor");
+    n_main_rotor->setPosition(0,0.987322, 0.573885);
+    n_main_rotor->attachObject(e_main_rotor);
+
+    e_tail_rotor = m_scene->createEntity("Apache_TRotor", "tail_rotor.mesh");
+    n_tail_rotor = n_heli->createChildSceneNode("Apache_TRotor");
+    n_tail_rotor->setPosition(0.174927, 0.173132, -3.50708);
+    n_tail_rotor->attachObject(e_tail_rotor);
 }
 
 // -----------------------------------------------------------------------------
@@ -177,6 +118,86 @@ Ogre::RenderSystem* VirtualView::chooseRenderer(const Ogre::RenderSystemList &re
 #endif
 
     return *i;
+}
+
+#include <X11/Xlib.h>
+
+// -----------------------------------------------------------------------------
+void VirtualView::createRenderWindows()
+{
+    const QX11Info info = this->x11Info();
+    Ogre::NameValuePairList params;
+    Ogre::String win_handle;
+    win_handle = Ogre::StringConverter::toString((unsigned long)(info.display()));
+    win_handle += ":";
+    win_handle += Ogre::StringConverter::toString((unsigned int)(info.screen()));
+    win_handle += ":";
+    win_handle += Ogre::StringConverter::toString((unsigned long)(this->winId()));
+    win_handle += ":";
+    win_handle += Ogre::StringConverter::toString((unsigned long)(info.visual()));
+    params["externalWindowHandle"] = win_handle;
+
+    XSync(info.display(), False);
+    m_window = m_root->createRenderWindow(
+            "HeliView_RenderWindow",
+            width(),
+            height(),
+            false,
+            &params);
+
+    m_window->setActive(true);
+    m_window->setVisible(true);
+
+    setAttribute(Qt::WA_PaintOnScreen, true);
+    setAttribute(Qt::WA_NoBackground);
+}
+
+// -----------------------------------------------------------------------------
+void VirtualView::loadConfiguration()
+{
+    // load resource paths from config file
+    Ogre::ConfigFile cf;
+    cf.load("cfg/resources.cfg");
+
+    // iterate over each setting and add resource patch
+    Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
+    Ogre::String section, type, arch;
+
+    while (seci.hasMoreElements())
+    {
+        section = seci.peekNextKey();
+        Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
+        Ogre::ConfigFile::SettingsMultiMap::iterator i;
+        for (i = settings->begin(); i != settings->end(); ++i)
+        {
+            type = i->first;
+            arch = i->second;
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+                    arch, type, section);
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+void VirtualView::setupRenderSystem()
+{
+    // setup a renderer
+    const Ogre::RenderSystemList &renderers = m_root->getAvailableRenderers();
+    assert(!renderers.empty());
+
+    Ogre::RenderSystem *renderSystem = chooseRenderer(renderers);
+    assert(renderSystem);
+
+    m_root->setRenderSystem(renderSystem);
+    QString dimensions = QString("%1x%2").arg(width()).arg(height());
+    renderSystem->setConfigOption("Video Mode", dimensions.toStdString());
+
+    // initialize without creating a window
+    m_root->getRenderSystem()->setConfigOption("Full Screen", "No");
+    m_root->saveConfig();
+
+    // don't create a window
+    m_root->initialise(false);
 }
 
 // -----------------------------------------------------------------------------
@@ -223,6 +244,10 @@ void VirtualView::setRunning(bool flag)
 void VirtualView::onPaintTick()
 {
     assert(m_root);
+
+    n_main_rotor->rotate(Ogre::Vector3::UNIT_Y, Ogre::Radian(0.4));
+    n_tail_rotor->rotate(Ogre::Vector3::UNIT_X, Ogre::Radian(0.4));
+
     update();
 }
 
@@ -236,7 +261,6 @@ void VirtualView::resizeEvent(QResizeEvent *event)
         Ogre::Real aspect = Ogre::Real(m_view->getActualWidth()) / 
                             Ogre::Real(m_view->getActualHeight());
         m_camera->setAspectRatio(aspect);
-//      cerr << "resize (" << width() << "," << height() << ")\n";
     }
 }
 

@@ -7,10 +7,9 @@
 #define _HELIVIEW_APPLICATIONFRAME__H_
 
 #include <QWidget>
-#include <QTcpSocket>
 #include "ui_ApplicationFrame.h"
-#include "DeviceController.h"
 #include "CVWebcamView.h"
+#include "DeviceController.h"
 #include "LineGraph.h"
 #include "VirtualView.h"
 
@@ -22,18 +21,12 @@ public:
     ApplicationFrame(DeviceController *controller);
     virtual ~ApplicationFrame();
 
-    void attachSimulatedSource(bool noise);
     void openLogFile(const QString &logfile);
     void closeLogFile();
     void enableLogging(bool enable);
 
 public slots:
-    void onSimulateTick();
     void onTelemetryReady(float yaw, float pitch, float roll);
-
-#if 0
-    void onTelemetryTick();
-#endif
 
     void onShowXFChanged(bool flag);
     void onShowXUFChanged(bool flag);
@@ -49,14 +42,8 @@ protected:
     LineGraph        *m_graphs[AXIS_COUNT];
     CVWebcamView     *m_camera;
     VirtualView      *m_virtual;
-    char              m_buffer[64];
-    int               m_offset;
-    double            m_index;
-    bool              m_noise;
-    float             m_ro[9];
     QFile            *m_file;
     QTextStream      *m_log;
-    QTcpSocket       *m_sock;
     bool              m_logging;
     DeviceController *m_controller;
 
