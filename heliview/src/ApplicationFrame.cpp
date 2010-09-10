@@ -63,14 +63,12 @@ void ApplicationFrame::setupVirtualView()
     m_virtual = new VirtualView(tabPaneVirtual);
     m_virtual->initialize();
     tabPaneVirtualLayout->addWidget(m_virtual);
-
-    //m_virtual = new OgreWidget(tabPaneVirtual);
-    //tabPaneVirtualLayout->addWidget(m_virtual);
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::attachSimulatedSource(bool noise)
 {
+#if 0
     m_noise = noise;
 
     for (int i = 0; i < 9; i++)
@@ -79,6 +77,7 @@ void ApplicationFrame::attachSimulatedSource(bool noise)
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateTick()));
     timer->start(20);
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -111,6 +110,7 @@ void ApplicationFrame::enableLogging(bool enable)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onSimulateTick()
 {
+#if 0
     m_index += 0.5;
 
     for (int i = 0; i < 3; i++)
@@ -126,12 +126,13 @@ void ApplicationFrame::onSimulateTick()
 
         m_graphs[i]->addDataPoint(m_index, ra, rg);
     }
+#endif
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onTelemetryReady(float yaw, float pitch, float roll)
 {
-    cerr << "received telemetry " << yaw << ", " << pitch << ", " << roll << endl;
+//  cerr << "received telemetry " << yaw << ", " << pitch << ", " << roll << endl;
     if (m_virtual) m_virtual->setAngles(yaw, pitch, roll);
 }
 

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <OgreMath.h>
+#include <QX11Info>
 #include "VirtualView.h"
 #include "Utility.h"
 
@@ -13,11 +14,16 @@ using namespace std;
 // -----------------------------------------------------------------------------
 VirtualView::VirtualView(QWidget *parent)
 : QWidget(parent), m_angle(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
-  m_root(NULL), m_window(NULL), m_camera(NULL), m_view(NULL), m_manager(NULL)
+  m_root(NULL), m_window(NULL), m_camera(NULL), m_view(NULL), m_scene(NULL)
 {
     m_timer = new QTimer(this);
     m_timer->setInterval(20);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onPaintTick()));
+
+    // create log and disable debug output
+    m_logmgr = new Ogre::LogManager();
+    m_log = Ogre::LogManager::getSingleton().createLog("ogre.log");
+    m_log->setDebugOutputEnabled(false);
 
     // create the Ogre root object and load the OpenGL render plugin
     m_root = new Ogre::Root("cfg/plugins.cfg", "cfg/ogre.cfg");
@@ -109,9 +115,9 @@ void VirtualView::initialize()
     createRenderWindows();
 
     // create a generic scene manager
-    m_manager = m_root->createSceneManager(Ogre::ST_GENERIC, "HeliViewScene");
+    m_scene = m_root->createSceneManager(Ogre::ST_GENERIC, "HeliViewScene");
 
-    m_camera = m_manager->createCamera("PlayerCam");
+    m_camera = m_scene->createCamera("PlayerCam");
     m_camera->setPosition(Ogre::Vector3(0, 40, 50));
     m_camera->lookAt(Ogre::Vector3(0, 40, 0));
     m_camera->setNearClipDistance(5);
@@ -129,10 +135,10 @@ void VirtualView::initialize()
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
     // create scene
-    Ogre::SceneNode *n_root = m_manager->getRootSceneNode();
+    Ogre::SceneNode *n_root = m_scene->getRootSceneNode();
 
-    m_manager->setAmbientLight(Ogre::ColourValue(1, 1, 0.8f));
-    m_manager->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(1, 1, 0.8f), 0, 80, 200);
+    m_scene->setAmbientLight(Ogre::ColourValue(1, 1, 0.8f));
+    m_scene->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(1, 1, 0.8f), 0, 80, 200);
 
     // create the floor plane's mesh and entity
     Ogre::MeshManager::getSingleton().createPlane(
@@ -140,13 +146,13 @@ void VirtualView::initialize()
             Ogre::Plane(Ogre::Vector3::UNIT_Y, 0), 500, 500, 10, 10,
             true, 1, 10, 10, Ogre::Vector3::UNIT_Z);
 
-    Ogre::Entity *e_floor = m_manager->createEntity("Floor", "floor");
+    Ogre::Entity *e_floor = m_scene->createEntity("Floor", "floor");
     e_floor->setMaterialName("world/dirt");
     e_floor->setCastShadows(false);
     n_root->attachObject(e_floor);
 
     // create and attach a helicopter entity and scene node
-    e_heli = m_manager->createEntity("Helicopter", "apache_body.mesh");
+    e_heli = m_scene->createEntity("Helicopter", "apache_body.mesh");
     n_heli = n_root->createChildSceneNode("HeliNode");
     n_heli->setPosition(Ogre::Vector3(0, 40, 0));
     n_heli->setScale(Ogre::Vector3(3, 3, 3));
@@ -176,9 +182,23 @@ Ogre::RenderSystem* VirtualView::chooseRenderer(const Ogre::RenderSystemList &re
 // -----------------------------------------------------------------------------
 void VirtualView::setAngles(float yaw, float pitch, float roll)
 {
+    // update current yaw/pitch/roll
     m_yaw   = yaw;
     m_pitch = pitch;
     m_roll  = roll;
+
+    // convert yaw pitch and roll degrees to radians
+    Ogre::Radian y(D2R(m_yaw));
+    Ogre::Radian p(D2R(m_pitch));
+    Ogre::Radian r(D2R(m_roll));
+
+    // build a quaternion from the euler angles
+    Ogre::Matrix3 m;
+    m.FromEulerAnglesYXZ(y, p, r);
+    Ogre::Quaternion q(m);
+
+    // update helicopter orientation and render the next frame
+    n_heli->setOrientation(q);
 }
 
 // -----------------------------------------------------------------------------
@@ -186,36 +206,6 @@ void VirtualView::paintEvent(QPaintEvent *)
 {
     if (!m_window)
         initialize();
-
-#if 0
-    // Convert Euler angles to quaternion
-    Real w = cos(-m_roll/2)*cos(m_pitch/2)*cos(-m_yaw/2) + 
-             sin(-m_roll/2)*sin(m_pitch/2)*sin(-m_yaw/2);
-
-    Real x = sin(-m_roll/2)*cos(m_pitch/2)*cos(-m_yaw/2) - 
-             cos(-m_roll/2)*sin(m_pitch/2)*sin(-m_yaw/2);
-
-    Real y = cos(-m_roll/2)*sin(m_pitch/2)*cos(-m_yaw/2) + 
-             sin(-m_roll/2)*cos(m_pitch/2)*sin(-m_yaw/2);
-
-    Real z = cos(-m_roll/2)*cos(m_pitch/2)*sin(-m_yaw/2) - 
-             sin(-m_roll/2)*sin(m_pitch/2)*cos(-m_yaw/2);
-
-    n_heli->setOrientation(w,x,y,z);
-#endif
-
-#define RAD_FACT (3.141592654 / 180.0)
-
-    Ogre::Radian yaw(m_yaw * RAD_FACT);
-    Ogre::Radian pitch(m_pitch * RAD_FACT);
-    Ogre::Radian roll(m_roll * RAD_FACT);
-
-
-    Ogre::Matrix3 m;
-    m.FromEulerAnglesYXZ(yaw, pitch, roll);
-    Ogre::Quaternion q(m);
-
-    n_heli->setOrientation(q);
 
     m_root->renderOneFrame();
 }
@@ -246,7 +236,7 @@ void VirtualView::resizeEvent(QResizeEvent *event)
         Ogre::Real aspect = Ogre::Real(m_view->getActualWidth()) / 
                             Ogre::Real(m_view->getActualHeight());
         m_camera->setAspectRatio(aspect);
-        cerr << "resize (" << width() << "," << height() << ")\n";
+//      cerr << "resize (" << width() << "," << height() << ")\n";
     }
 }
 

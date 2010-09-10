@@ -6,10 +6,10 @@
 #ifndef _HELIVIEW_VIRTUALVIEW__H_
 #define _HELIVIEW_VIRTUALVIEW__H_
 
-#include "Ogre.h"
+#include <Ogre.h>
+#include <OgreLogManager.h>
 #include <QWidget>
 #include <QTimer>
-#include <QX11Info>
 
 class VirtualView : public QWidget
 {
@@ -40,9 +40,11 @@ protected:
     Ogre::RenderWindow *m_window;
     Ogre::Camera       *m_camera;
     Ogre::Viewport     *m_view;
-    Ogre::SceneManager *m_manager;
+    Ogre::SceneManager *m_scene;
     Ogre::Entity       *e_heli;
     Ogre::SceneNode    *n_heli;
+    Ogre::LogManager   *m_logmgr;
+    Ogre::Log          *m_log;
 };
 
 #endif // _HELIVIEW_VIRTUALVIEW__H_
