@@ -145,7 +145,7 @@ void NetworkDeviceController::onSocketReadyRead()
         z = *(float *)&cmd_buffer[3];
         altitude = cmd_buffer[4];
         battery = cmd_buffer[5];
-        emit telemetryReady(z, x, y);
+        emit telemetryReady(-z, -y, x);
         fprintf(stderr, "SERVER_ACK_TELEMETRY -> (%f, %f, %f) A (%d) B (%d)\n",
                 x, y, z, altitude, battery);
         break;
