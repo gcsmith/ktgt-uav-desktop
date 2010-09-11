@@ -7,8 +7,8 @@
 #define _HELIVIEW_APPLICATIONFRAME__H_
 
 #include <QWidget>
+#include <QFile>
 #include "ui_ApplicationFrame.h"
-#include "CVWebcamView.h"
 #include "DeviceController.h"
 #include "LineGraph.h"
 #include "VirtualView.h"
@@ -40,7 +40,6 @@ public slots:
 
 protected:
     LineGraph        *m_graphs[AXIS_COUNT];
-    CVWebcamView     *m_camera;
     VirtualView      *m_virtual;
     QFile            *m_file;
     QTextStream      *m_log;

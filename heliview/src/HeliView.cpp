@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     catch (exception &e)
     {
         // some critical error occurred - print error and exit
-        cerr << "command line error\n";
+        cerr << "command line error " << "(" << e.what() << ")\n";
         show_usage = true;
     }
 

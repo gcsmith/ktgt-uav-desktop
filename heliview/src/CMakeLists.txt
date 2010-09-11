@@ -10,14 +10,12 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${HELIVIEW_PROJECT_SOURCE_DIR}/3rdparty/qext/src)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OGRE_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${OPENCV_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${Qwt5_INCLUDE_DIR})
 INCLUDE(${QT_USE_FILE})
 
 SET(heliview_deps
         qext
-        ${OPENCV_LIBRARIES}
         ${OPENGL_LIBRARIES}
         ${Boost_LIBRARIES}
         ${QT_LIBRARIES}
@@ -26,7 +24,6 @@ SET(heliview_deps
 
 SET(heliview_cpp
         ApplicationFrame.cpp
-        CVWebcamView.cpp
         DeviceController.cpp
         HeliView.cpp
         LineGraph.cpp
@@ -40,7 +37,6 @@ SET(heliview_src_qrc
 
 SET(heliview_src_moc
         ApplicationFrame.h
-        CVWebcamView.h
         DeviceController.h
         LineGraph.h
         NetworkDeviceController.h

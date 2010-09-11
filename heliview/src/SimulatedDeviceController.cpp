@@ -48,7 +48,7 @@ void SimulatedDeviceController::close()
 // -----------------------------------------------------------------------------
 void SimulatedDeviceController::onSimulateTick()
 {
-    m_time += 0.02; // 20 ms clock
+    m_time += 0.02f; // 20 ms clock
     m_yaw += 0.25;
     m_pitch = 7.0f * sin(m_time);
     m_roll = 5.0f * sin(m_time * 2.0f);

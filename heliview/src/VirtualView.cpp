@@ -91,12 +91,12 @@ void VirtualView::initialize()
 
     e_main_rotor = m_scene->createEntity("Apache_MRotor", "main_rotor.mesh");
     n_main_rotor = n_heli->createChildSceneNode("Apache_MRotor");
-    n_main_rotor->setPosition(0,0.987322, 0.573885);
+    n_main_rotor->setPosition(0.0f, 0.987322f, 0.573885f);
     n_main_rotor->attachObject(e_main_rotor);
 
     e_tail_rotor = m_scene->createEntity("Apache_TRotor", "tail_rotor.mesh");
     n_tail_rotor = n_heli->createChildSceneNode("Apache_TRotor");
-    n_tail_rotor->setPosition(0.174927, 0.173132, -3.50708);
+    n_tail_rotor->setPosition(0.174927f, 0.173132f, -3.50708f);
     n_tail_rotor->attachObject(e_tail_rotor);
 }
 
@@ -120,14 +120,17 @@ Ogre::RenderSystem* VirtualView::chooseRenderer(const Ogre::RenderSystemList &re
     return *i;
 }
 
+#ifdef PLATFORM_UNIX_GCC
 #include <X11/Xlib.h>
+#endif
 
 // -----------------------------------------------------------------------------
 void VirtualView::createRenderWindows()
 {
-    const QX11Info info = this->x11Info();
     Ogre::NameValuePairList params;
     Ogre::String win_handle;
+#ifdef PLATFORM_UNIX_GCC
+    const QX11Info info = this->x11Info();
     win_handle = Ogre::StringConverter::toString((unsigned long)(info.display()));
     win_handle += ":";
     win_handle += Ogre::StringConverter::toString((unsigned int)(info.screen()));
@@ -135,9 +138,12 @@ void VirtualView::createRenderWindows()
     win_handle += Ogre::StringConverter::toString((unsigned long)(this->winId()));
     win_handle += ":";
     win_handle += Ogre::StringConverter::toString((unsigned long)(info.visual()));
-    params["externalWindowHandle"] = win_handle;
-
     XSync(info.display(), False);
+    params["externalWindowHandle"] = win_handle;
+#else
+    win_handle = Ogre::StringConverter::toString((unsigned long)(this->winId()));
+    params["externalWindowHandle"] = win_handle;
+#endif
     m_window = m_root->createRenderWindow(
             "HeliView_RenderWindow",
             width(),
@@ -245,8 +251,8 @@ void VirtualView::onPaintTick()
 {
     assert(m_root);
 
-    n_main_rotor->rotate(Ogre::Vector3::UNIT_Y, Ogre::Radian(0.4));
-    n_tail_rotor->rotate(Ogre::Vector3::UNIT_X, Ogre::Radian(0.4));
+    n_main_rotor->rotate(Ogre::Vector3::UNIT_Y, Ogre::Radian(0.4f));
+    n_tail_rotor->rotate(Ogre::Vector3::UNIT_X, Ogre::Radian(0.4f));
 
     update();
 }

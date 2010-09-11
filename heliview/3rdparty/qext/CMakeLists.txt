@@ -13,10 +13,19 @@ INCLUDE(${QT_USE_FILE})
 
 ADD_DEFINITIONS(-DQEXTSERIALPORT_LIB)
 
+IF(WIN32)
+	SET(platform_deps
+		src/win_qextserialport.cpp
+		src/qextserialenumerator_win.cpp)
+ELSE(WIN32)
+	SET(platform_deps
+        	src/posix_qextserialport.cpp
+        	src/qextserialenumerator_unix.cpp)
+ENDIF(WIN32)
+
 SET(qext_src_cpp
-        src/qextserialport.cpp
-        src/posix_qextserialport.cpp
-        src/qextserialenumerator_unix.cpp)
+	${platform_deps}
+        src/qextserialport.cpp)
 
 SET(qext_src_moc
         src/qextserialport.h

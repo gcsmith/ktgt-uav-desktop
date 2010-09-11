@@ -6,6 +6,8 @@
 #ifndef _HELIVIEW_UTILITY__H_
 #define _HELIVIEW_UTILITY__H_
 
+#include <stdint.h>
+
 #define SafeDelete(x)       do { delete (x); (x) = NULL; } while (0)
 #define SafeDeleteArray(x)  do { delete[] (x); (x) = NULL; } while (0)
 

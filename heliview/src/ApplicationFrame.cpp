@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------------
 
 #include <QTimer>
+#include <QTextStream>
 #include <iostream>
 #include "ApplicationFrame.h"
 #include "Utility.h"
@@ -14,8 +15,8 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 ApplicationFrame::ApplicationFrame(DeviceController *controller)
-: m_camera(NULL), m_virtual(NULL), 
-  m_file(NULL), m_log(NULL), m_logging(false), m_controller(controller)
+: m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
+  m_controller(controller)
 {
     setupUi(this);
     setupCameraView();
@@ -200,7 +201,7 @@ void ApplicationFrame::onShowZUFChanged(bool flag)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onTabChanged(int index)
 {
-    if (m_camera) m_camera->setRunning(index == 0);
+    // if (m_camera) m_camera->setRunning(index == 0);
     if (m_virtual) m_virtual->setRunning(index == 2);
 }
 

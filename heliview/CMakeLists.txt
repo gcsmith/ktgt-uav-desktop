@@ -19,9 +19,8 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 # locate and include project dependencies
-FIND_PACKAGE(Boost   COMPONENTS program_options REQUIRED)
+FIND_PACKAGE(Boost   COMPONENTS program_options thread REQUIRED)
 FIND_PACKAGE(OGRE    REQUIRED)
-FIND_PACKAGE(OpenCV  REQUIRED)
 FIND_PACKAGE(OpenGL  REQUIRED)
 FIND_PACKAGE(Qt4     COMPONENTS QtCore QtGui QtNetwork QtOpenGL REQUIRED)
 FIND_PACKAGE(Qwt5    REQUIRED)
@@ -34,6 +33,8 @@ IF(WIN32)
     # put any Windows/MSVC-specific build configuration here
     ADD_DEFINITIONS(-DPLATFORM_WIN_MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE)
+    ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB) # don't auto-link
+    ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK) # don't auto-link
 
     # set unicode and pedantic error reporting on windows
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /wd4290")
