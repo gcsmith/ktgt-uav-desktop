@@ -52,7 +52,13 @@ QT4_WRAP_CPP(heliview_moc ${heliview_src_moc})
 QT4_WRAP_UI(heliview_ui ${heliview_src_ui})
 QT4_ADD_RESOURCES(heliview_qrc ${heliview_src_qrc})
 
-ADD_EXECUTABLE(heliview ${heliview_cpp} ${heliview_qrc}
-                        ${heliview_moc} ${heliview_ui})
+IF(WIN32)
+        ADD_EXECUTABLE(heliview WIN32 ${heliview_cpp} ${heliview_qrc}
+                                      ${heliview_moc} ${heliview_ui})
+ELSE(WIN32)
+        ADD_EXECUTABLE(heliview ${heliview_cpp} ${heliview_qrc}
+                                ${heliview_moc} ${heliview_ui})
+ENDIF(WIN32)
+
 TARGET_LINK_LIBRARIES(heliview ${heliview_deps})
 

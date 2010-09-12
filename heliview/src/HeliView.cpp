@@ -82,3 +82,22 @@ int main(int argc, char *argv[])
     return app.exec();
 }
 
+// -----------------------------------------------------------------------------
+#if defined(_MSC_VER) && defined(_WIN32)
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
+{
+    QStringList strlist = QString(lpCmdLine).split(" ");
+
+    vector<string> strvec;
+    strvec.push_back("heliview");
+    for (int i = 0; i < strlist.size(); ++i)
+        strvec.push_back(strlist[i].toStdString());
+
+    vector<char *> ptrvec;
+    for (size_t i = 0; i < strvec.size(); ++i)
+        ptrvec.push_back(&strvec[i][0]);
+
+    return main(ptrvec.size(), &ptrvec[0]);
+}
+#endif
+

@@ -22,6 +22,7 @@ public:
     void initialize();
     virtual void resizeEvent(QResizeEvent *);
     virtual void paintEvent(QPaintEvent *);
+    virtual QPaintEngine *paintEngine() const;
 
     void setRunning(bool flag);
     void setAngles(float yaw, float pitch, float roll);

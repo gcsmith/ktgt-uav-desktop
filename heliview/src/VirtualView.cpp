@@ -21,12 +21,12 @@ VirtualView::VirtualView(QWidget *parent)
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onPaintTick()));
 
     // create log and disable debug output
-    m_logmgr = new Ogre::LogManager();
+    m_logmgr = OGRE_NEW Ogre::LogManager();
     m_log = Ogre::LogManager::getSingleton().createLog("ogre.log");
     m_log->setDebugOutputEnabled(false);
 
     // create the Ogre root object and load the OpenGL render plugin
-    m_root = new Ogre::Root("cfg/plugins.cfg", "cfg/ogre.cfg");
+    m_root = OGRE_NEW Ogre::Root("cfg/plugins.cfg", "cfg/ogre.cfg");
     m_root->loadPlugin("RenderSystem_GL");
 
     loadConfiguration();
@@ -127,6 +127,10 @@ Ogre::RenderSystem* VirtualView::chooseRenderer(const Ogre::RenderSystemList &re
 // -----------------------------------------------------------------------------
 void VirtualView::createRenderWindows()
 {
+    setAttribute(Qt::WA_PaintOnScreen);
+    setAttribute(Qt::WA_NoBackground);
+    setAttribute(Qt::WA_NoSystemBackground);
+
     Ogre::NameValuePairList params;
     Ogre::String win_handle;
 #ifdef PLATFORM_UNIX_GCC
@@ -135,13 +139,13 @@ void VirtualView::createRenderWindows()
     win_handle += ":";
     win_handle += Ogre::StringConverter::toString((unsigned int)(info.screen()));
     win_handle += ":";
-    win_handle += Ogre::StringConverter::toString((unsigned long)(this->winId()));
+    win_handle += Ogre::StringConverter::toString((unsigned long)(winId()));
     win_handle += ":";
     win_handle += Ogre::StringConverter::toString((unsigned long)(info.visual()));
     XSync(info.display(), False);
     params["externalWindowHandle"] = win_handle;
 #else
-    win_handle = Ogre::StringConverter::toString((unsigned long)(this->winId()));
+    win_handle = Ogre::StringConverter::toString((unsigned long)(winId()));
     params["externalWindowHandle"] = win_handle;
 #endif
     m_window = m_root->createRenderWindow(
@@ -153,9 +157,6 @@ void VirtualView::createRenderWindows()
 
     m_window->setActive(true);
     m_window->setVisible(true);
-
-    setAttribute(Qt::WA_PaintOnScreen, true);
-    setAttribute(Qt::WA_NoBackground);
 }
 
 // -----------------------------------------------------------------------------
@@ -270,3 +271,8 @@ void VirtualView::resizeEvent(QResizeEvent *event)
     }
 }
 
+// -----------------------------------------------------------------------------
+QPaintEngine *VirtualView::paintEngine() const
+{
+    return NULL;
+}
