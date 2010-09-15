@@ -30,7 +30,8 @@ SET(heliview_cpp
         NetworkDeviceController.cpp
         SerialDeviceController.cpp
         SimulatedDeviceController.cpp
-        VirtualView.cpp)
+        VirtualView.cpp
+        VideoView.cpp)
 
 SET(heliview_src_qrc
         HeliView.qrc)
@@ -42,7 +43,8 @@ SET(heliview_src_moc
         NetworkDeviceController.h
         SerialDeviceController.h
         SimulatedDeviceController.h
-        VirtualView.h)
+        VirtualView.h
+        VideoView.h)
 
 SET(heliview_src_ui
         ApplicationFrame.ui)

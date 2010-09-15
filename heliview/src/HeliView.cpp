@@ -22,12 +22,15 @@ int main(int argc, char *argv[])
     string source("network"), logfile("heliview.log"), device;
 
     bool show_usage = false;
+    bool disable_virtual_view = false;
+
     po::options_description desc("Program options");
     desc.add_options()
         S_ARG("source,s", "select data source (network|serial|sim)")
         S_ARG("device,d", "specify device for network or serial communication")
         S_ARG("log,l",    "specify log file path")
-        N_ARG("help,h",   "produce this help message");
+        N_ARG("help,h",   "produce this help message")
+        N_ARG("novirtual","disable the virtual view pane");
 
     try
     {
@@ -41,6 +44,8 @@ int main(int argc, char *argv[])
         optional_arg(vm, "log", logfile);
 
         show_usage = !!vm.count("help");
+
+        disable_virtual_view = !vm.count("novirtual");
     }
     catch (exception &e)
     {
@@ -71,7 +76,7 @@ int main(int argc, char *argv[])
     }
 
     // create and show the interface
-    ApplicationFrame frame(controller);
+    ApplicationFrame frame(controller, disable_virtual_view);
     if (0 != logfile.length())
     {
         frame.openLogFile(QString::fromStdString(logfile));

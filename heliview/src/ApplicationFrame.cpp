@@ -14,14 +14,17 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-ApplicationFrame::ApplicationFrame(DeviceController *controller)
+ApplicationFrame::ApplicationFrame(DeviceController *controller, 
+        bool show_virtview)
 : m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
   m_controller(controller)
 {
     setupUi(this);
     setupCameraView();
     setupSensorView();
-    setupVirtualView();
+
+    if(show_virtview)
+        setupVirtualView();
 
     connect(m_controller, SIGNAL(telemetryReady(float, float, float)),
             this, SLOT(onTelemetryReady(float, float, float)));
@@ -41,8 +44,8 @@ ApplicationFrame::~ApplicationFrame()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::setupCameraView()
 {
-    // m_camera = new CVWebcamView(tabPaneCamera);
-    // tabPaneCameraLayout->addWidget(m_camera);
+    m_video = new VideoView(tabPaneCamera);
+    tabPaneCameraLayout->addWidget(m_video);
 }
 
 // -----------------------------------------------------------------------------

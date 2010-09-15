@@ -12,13 +12,14 @@
 #include "DeviceController.h"
 #include "LineGraph.h"
 #include "VirtualView.h"
+#include "VideoView.h"
 
 class ApplicationFrame : public QMainWindow, public Ui::ApplicationFrame
 {
     Q_OBJECT
 
 public:
-    ApplicationFrame(DeviceController *controller);
+    ApplicationFrame(DeviceController *controller, bool disable_virtual_view);
     virtual ~ApplicationFrame();
 
     void openLogFile(const QString &logfile);
@@ -41,6 +42,7 @@ public slots:
 protected:
     LineGraph        *m_graphs[AXIS_COUNT];
     VirtualView      *m_virtual;
+    VideoView        *m_video;
     QFile            *m_file;
     QTextStream      *m_log;
     bool              m_logging;
