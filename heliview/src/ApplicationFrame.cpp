@@ -26,8 +26,25 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     if(show_virtview)
         setupVirtualView();
 
-    connect(m_controller, SIGNAL(telemetryReady(float, float, float)),
-            this, SLOT(onTelemetryReady(float, float, float)));
+    m_connStat = new QLabel("No Connection");
+    m_connStat->setFrameStyle(QFrame::Box);
+    m_connStat->setMinimumWidth(300);
+    m_connStat->setMaximumWidth(300);
+    statusBar()->addPermanentWidget(m_connStat);
+
+    connectionStatusBar->setRange(0, 200);
+
+    connect(m_controller, SIGNAL(telemetryReady(float, float, float, int, int, int)),
+            this, SLOT(onTelemetryReady(float, float, float, int, int, int)));
+
+    connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
+            this, SLOT(onConnectionStatusChanged(const QString&, bool)));
+
+    // attempt to open the specified device
+    if (!m_controller->open())
+    {
+        qDebug() << "failed to open device" << m_controller->device();
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -96,10 +113,37 @@ void ApplicationFrame::enableLogging(bool enable)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onTelemetryReady(float yaw, float pitch, float roll)
+void ApplicationFrame::onTelemetryReady(
+    float yaw, float pitch, float roll, int alt, int rssi, int batt)
 {
 //  cerr << "received telemetry " << yaw << ", " << pitch << ", " << roll << endl;
     if (m_virtual) m_virtual->setAngles(yaw, pitch, roll);
+
+    connectionStatusBar->setValue(rssi);
+    connectionStatusBar->setFormat(QString("%1 dBm").arg(rssi));
+
+    batteryStatusBar->setValue(batt);
+    batteryStatusBar->setFormat(QString("%p%"));
+
+    elevationStatusBar->setValue(alt);
+    elevationStatusBar->setFormat(QString("%1 inches").arg(alt));
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool status)
+{
+    m_connStat->setText(text);
+    if (!status)
+    {
+        connectionStatusBar->setValue(0);
+        connectionStatusBar->setFormat(QString("NC"));
+
+        batteryStatusBar->setValue(0);
+        batteryStatusBar->setFormat(QString("NC"));
+
+        elevationStatusBar->setValue(0);
+        elevationStatusBar->setFormat(QString("NC"));
+    }
 }
 
 #if 0

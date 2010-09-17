@@ -5,21 +5,22 @@
 // Abstract interface for device communication.
 // -----------------------------------------------------------------------------
 
-#include <string>
 #include "NetworkDeviceController.h"
 #include "SerialDeviceController.h"
 #include "SimulatedDeviceController.h"
 
 using namespace std;
 
-DeviceController *CreateDeviceController(const string &name)
+DeviceController *CreateDeviceController(
+        const QString &name,
+        const QString &device)
 {
     if (name == "network")
-        return new NetworkDeviceController;
+        return new NetworkDeviceController(device);
     else if (name == "serial")
-        return new SerialDeviceController;
+        return new SerialDeviceController(device);
     else if (name == "sim")
-        return new SimulatedDeviceController;
+        return new SimulatedDeviceController(device);
     else
         return NULL;
 }

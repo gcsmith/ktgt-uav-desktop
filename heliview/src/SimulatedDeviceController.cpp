@@ -14,8 +14,8 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-SimulatedDeviceController::SimulatedDeviceController()
-: m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f)
+SimulatedDeviceController::SimulatedDeviceController(const QString &device)
+: m_device(device), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f)
 {
 }
 
@@ -25,13 +25,13 @@ SimulatedDeviceController::~SimulatedDeviceController()
 }
 
 // -----------------------------------------------------------------------------
-bool SimulatedDeviceController::open(const QString &device)
+bool SimulatedDeviceController::open()
 {
-    qDebug() << "creating simulated device" << device;
+    qDebug() << "creating simulated device" << m_device;
 
     // attach the specified simulation callback
     QTimer *timer = new QTimer(this);
-    if (device == "noise")
+    if (m_device == "noise")
         connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateNoiseTick()));
     else
         connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateTick()));
@@ -52,7 +52,7 @@ void SimulatedDeviceController::onSimulateTick()
     m_yaw += 0.25;
     m_pitch = 7.0f * sin(m_time);
     m_roll = 5.0f * sin(m_time * 2.0f);
-    emit telemetryReady(m_yaw, m_pitch, m_roll);
+    emit telemetryReady(m_yaw, m_pitch, m_roll, 0, 200, 100);
 }
 
 // -----------------------------------------------------------------------------

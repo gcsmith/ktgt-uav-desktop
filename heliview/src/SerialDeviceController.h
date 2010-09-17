@@ -18,11 +18,12 @@ class SerialDeviceController: public DeviceController
     Q_OBJECT
 
 public:
-    SerialDeviceController();
+    SerialDeviceController(const QString &device);
     virtual ~SerialDeviceController();
 
-    virtual bool open(const QString &device);
+    virtual bool open();
     virtual void close();
+    virtual QString device() { return m_device; }
 
 public slots:
     void onSerialDataReady();
@@ -30,6 +31,7 @@ public slots:
 protected:
     void processSingleLine(const std::string &line);
 
+    QString            m_device;
     QextSerialPort    *m_serial;
     std::vector<char>  m_buffer;
     unsigned int       m_offset;

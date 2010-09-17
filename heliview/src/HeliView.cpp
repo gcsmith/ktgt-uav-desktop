@@ -61,17 +61,12 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    DeviceController *controller = CreateDeviceController(source);
+    DeviceController *controller = CreateDeviceController(
+            QString::fromStdString(source),
+            QString::fromStdString(device));
     if (!controller)
     {
         cerr << "invalid source type '" << source << "' specified\n";
-        return EXIT_FAILURE;
-    }
-
-    // attempt to open the specified device
-    if (!controller->open(QString::fromStdString(device)))
-    {
-        cerr << "failed to open device '" << device << "'\n";
         return EXIT_FAILURE;
     }
 

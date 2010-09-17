@@ -27,7 +27,9 @@ public:
     void enableLogging(bool enable);
 
 public slots:
-    void onTelemetryReady(float yaw, float pitch, float roll);
+    void onTelemetryReady(float yaw, float pitch, float roll,
+                          int alt, int rssi, int batt);
+    void onConnectionStatusChanged(const QString &text, bool status);
 
     void onShowXFChanged(bool flag);
     void onShowXUFChanged(bool flag);
@@ -44,6 +46,7 @@ protected:
     VirtualView      *m_virtual;
     VideoView        *m_video;
     QFile            *m_file;
+    QLabel           *m_connStat;
     QTextStream      *m_log;
     bool              m_logging;
     DeviceController *m_controller;

@@ -6,7 +6,6 @@
 // -----------------------------------------------------------------------------
 
 #include <QDebug>
-#include <QTimer>
 #include <iostream>
 #include <algorithm>
 #include "NetworkDeviceController.h"
@@ -29,8 +28,11 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-NetworkDeviceController::NetworkDeviceController()
+NetworkDeviceController::NetworkDeviceController(const QString &device)
+: m_device(device), m_timer(NULL)
 {
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
 }
 
 // -----------------------------------------------------------------------------
@@ -39,17 +41,17 @@ NetworkDeviceController::~NetworkDeviceController()
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::open(const QString &device)
+bool NetworkDeviceController::open()
 {
     // set some reasonable default values
     QString address("192.168.1.100");
     int portnum = 8090;
 
     // was an address specified?
-    if (device.length())
+    if (m_device.length())
     {
         // if so, split it into ip address and port number
-        QStringList ssplit = device.split(":", QString::SkipEmptyParts);
+        QStringList ssplit = m_device.split(":", QString::SkipEmptyParts);
         if (ssplit.size() != 2)
         {
             qDebug() << "invalid address format (addr:port)";
@@ -64,16 +66,19 @@ bool NetworkDeviceController::open(const QString &device)
     // attempt to create and connect to the network socket
     m_sock = new QTcpSocket();
     connect(m_sock, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
+    connect(m_sock, SIGNAL(disconnected()), this, SLOT(onSocketDisconnected()));
     connect(m_sock, SIGNAL(error(QAbstractSocket::SocketError)), this,
             SLOT(onSocketError(QAbstractSocket::SocketError)));
 
     // attempt to connect to the specified address:port
     m_sock->connectToHost(address, portnum);
     if (!m_sock->waitForConnected()) {
+        emit connectionStatusChanged(QString("Connection failed"), false);
         qDebug() << "connection timed out";
         return false;
     }
 
+    emit connectionStatusChanged(QString("Connected to ") + m_device, true);
     return true;
 }
 
@@ -87,6 +92,7 @@ void NetworkDeviceController::close()
         m_sock->disconnectFromHost();
         m_sock->waitForDisconnected();
         SafeDelete(m_sock);
+        shutdown();
         qDebug() << "disconnected";
     }
 }
@@ -98,7 +104,7 @@ void NetworkDeviceController::onTelemetryTick()
     stream.setVersion(QDataStream::Qt_4_0);
     int cmd_buffer[1] = { CLIENT_REQ_TELEMETRY };
     stream.writeRawData((char *)cmd_buffer, sizeof(int) * 1);
-    cout << "requested telemetry" << endl;
+    cerr << "requested telemetry" << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -106,7 +112,7 @@ void NetworkDeviceController::onSocketReadyRead()
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int32_t cmd_buffer[32], altitude, battery;
+    int32_t cmd_buffer[32], rssi, altitude, battery;
     float x, y, z;
     memset((void *)cmd_buffer, 0, sizeof(int32_t) * 32);
 
@@ -117,9 +123,6 @@ void NetworkDeviceController::onSocketReadyRead()
     num_bytes = max(num_bytes, sizeof(int32_t) * 32);
     stream.readRawData((char *)cmd_buffer, num_bytes);
 
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
-
     switch (cmd_buffer[0])
     {
     case SERVER_REQ_IDENT:
@@ -128,7 +131,7 @@ void NetworkDeviceController::onSocketReadyRead()
         cmd_buffer[1] = IDENT_MAGIC;
         cmd_buffer[2] = IDENT_VERSION;
         stream.writeRawData((char *)cmd_buffer, sizeof(int32_t) * 3);
-        timer->start(50); // begin requesting telemetry
+        m_timer->start(50); // begin requesting telemetry
         break;
     case SERVER_ACK_IGNORED:
         cerr << "SERVER_ACK_IGNORED" << endl;
@@ -143,17 +146,27 @@ void NetworkDeviceController::onSocketReadyRead()
         x = *(float *)&cmd_buffer[1];
         y = *(float *)&cmd_buffer[2];
         z = *(float *)&cmd_buffer[3];
-        altitude = cmd_buffer[4];
-        battery = cmd_buffer[5];
-        emit telemetryReady(-z, -y, x);
-        fprintf(stderr, "SERVER_ACK_TELEMETRY -> (%f, %f, %f) A (%d) B (%d)\n",
-                x, y, z, altitude, battery);
+        rssi = cmd_buffer[4];
+        altitude = cmd_buffer[5];
+        battery = cmd_buffer[6];
+        emit telemetryReady(-z, -y, x, altitude, rssi, battery);
+#if 0
+        fprintf(stderr,
+                "SERVER_ACK_TELEMETRY -> (%f, %f, %f) S (%d) A (%d) B (%d)\n",
+                x, y, z, rssi, altitude, battery);
+#endif
         break;
     default:
         cerr << "unknown server command (" << cmd_buffer[0] << ")\n";
         break;
     }
 
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onSocketDisconnected()
+{
+    shutdown();
 }
 
 // -----------------------------------------------------------------------------
@@ -172,6 +185,17 @@ void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
     default:
         cerr << "unknown socket error" << endl;
         break;
+    }
+    shutdown();
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::shutdown()
+{
+    if (m_timer)
+    {
+        m_timer->stop();
+        emit connectionStatusChanged(m_device + QString(" disconnected"), false);
     }
 }
 

@@ -15,19 +15,21 @@ class SimulatedDeviceController: public DeviceController
     Q_OBJECT 
 
 public:
-    SimulatedDeviceController();
+    SimulatedDeviceController(const QString &device);
     virtual ~SimulatedDeviceController();
 
-    virtual bool open(const QString &device);
+    virtual bool open();
     virtual void close();
+    virtual QString device() { return m_device; }
 
 public slots:
     void onSimulateTick();
     void onSimulateNoiseTick();
 
 protected:
-    float m_time;
-    float m_yaw, m_pitch, m_roll;
+    QString m_device;
+    float   m_time;
+    float   m_yaw, m_pitch, m_roll;
 };
 
 #endif // _HELIVIEW_SIMULATEDDEVICECONTROLLER__H_

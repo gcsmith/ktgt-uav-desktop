@@ -13,8 +13,8 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-SerialDeviceController::SerialDeviceController()
-: m_serial(NULL), m_buffer(1024, 0), m_offset(0)
+SerialDeviceController::SerialDeviceController(const QString &device)
+: m_device(device), m_serial(NULL), m_buffer(1024, 0), m_offset(0)
 {
 }
 
@@ -25,13 +25,13 @@ SerialDeviceController::~SerialDeviceController()
 }
 
 // -----------------------------------------------------------------------------
-bool SerialDeviceController::open(const QString &device)
+bool SerialDeviceController::open()
 {
     // make sure to close if there's a device currently open
     close();
-    qDebug() << "creating serial device" << device;
+    qDebug() << "creating serial device" << m_device;
 
-    m_serial = new QextSerialPort(device, QextSerialPort::EventDriven);
+    m_serial = new QextSerialPort(m_device, QextSerialPort::EventDriven);
     m_serial->setBaudRate(BAUD57600);
     m_serial->setDataBits(DATA_8);
     m_serial->setParity(PAR_NONE);
@@ -115,6 +115,6 @@ void SerialDeviceController::processSingleLine(const string &line)
     float y = ssplit[1].toFloat();
     float z = ssplit[2].toFloat();
 
-    emit telemetryReady(z, x, y);
+    emit telemetryReady(z, x, y, 0, 200, 100);
 }
 
