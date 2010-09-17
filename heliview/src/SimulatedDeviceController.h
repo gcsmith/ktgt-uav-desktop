@@ -25,11 +25,14 @@ public:
 public slots:
     void onSimulateTick();
     void onSimulateNoiseTick();
+    void onInputReady(GamepadEvent event, int index, float value);
 
 protected:
     QString m_device;
     float   m_time;
-    float   m_yaw, m_pitch, m_roll;
+    float   m_yaw, m_pitch, m_roll, m_throttle;
+    float   m_dyaw, m_dpitch, m_droll, m_dthrottle;
+    bool    m_manual;
 };
 
 #endif // _HELIVIEW_SIMULATEDDEVICECONTROLLER__H_

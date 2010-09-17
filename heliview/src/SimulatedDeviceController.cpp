@@ -15,7 +15,8 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 SimulatedDeviceController::SimulatedDeviceController(const QString &device)
-: m_device(device), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f)
+: m_device(device), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
+  m_manual(false)
 {
 }
 
@@ -49,14 +50,48 @@ void SimulatedDeviceController::close()
 void SimulatedDeviceController::onSimulateTick()
 {
     m_time += 0.02f; // 20 ms clock
-    m_yaw += 0.25;
-    m_pitch = 7.0f * sin(m_time);
-    m_roll = 5.0f * sin(m_time * 2.0f);
+    if (m_manual)
+    {
+        m_yaw += m_dyaw;
+        m_pitch += m_dpitch;
+        m_roll += m_droll;
+        m_throttle += m_dthrottle;
+    }
+    else
+    {
+        m_yaw += 0.25;
+        m_pitch = 7.0f * sin(m_time);
+        m_roll = 5.0f * sin(m_time * 2.0f);
+    }
     emit telemetryReady(m_yaw, m_pitch, m_roll, 0, 200, 100);
 }
 
 // -----------------------------------------------------------------------------
 void SimulatedDeviceController::onSimulateNoiseTick()
 {
+}
+ 
+// -----------------------------------------------------------------------------
+void SimulatedDeviceController::onInputReady(
+        GamepadEvent event, int index, float value)
+{
+    if ((GP_EVENT_AXIS == event) && m_manual)
+    {
+        switch (index)
+        {
+        case 0: m_dyaw = -value; break;
+        case 1: m_dthrottle = value; break;
+        case 2: m_droll = value; break;
+        case 3: m_dpitch = -value; break;
+        }
+    }
+    else if (GP_EVENT_BUTTON == event)
+    {
+        if ((12 == index) && (value > 0.0))
+        {
+            cerr << "toggle\n";
+            m_manual = !m_manual;
+        }
+    }
 }
 

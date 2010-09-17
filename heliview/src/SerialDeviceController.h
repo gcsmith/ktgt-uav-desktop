@@ -27,6 +27,7 @@ public:
 
 public slots:
     void onSerialDataReady();
+    void onInputReady(GamepadEvent event, int index, float value) { }
 
 protected:
     void processSingleLine(const std::string &line);

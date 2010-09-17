@@ -190,6 +190,13 @@ void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 }
 
 // -----------------------------------------------------------------------------
+void NetworkDeviceController::onInputReady(
+        GamepadEvent event, int index, float value)
+{
+    cerr << "networkdevicecontroller receive input\n";
+}
+
+// -----------------------------------------------------------------------------
 void NetworkDeviceController::shutdown()
 {
     if (m_timer)

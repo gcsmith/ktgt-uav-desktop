@@ -26,25 +26,9 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     if(show_virtview)
         setupVirtualView();
 
-    m_connStat = new QLabel("No Connection");
-    m_connStat->setFrameStyle(QFrame::Box);
-    m_connStat->setMinimumWidth(300);
-    m_connStat->setMaximumWidth(300);
-    statusBar()->addPermanentWidget(m_connStat);
-
-    connectionStatusBar->setRange(0, 200);
-
-    connect(m_controller, SIGNAL(telemetryReady(float, float, float, int, int, int)),
-            this, SLOT(onTelemetryReady(float, float, float, int, int, int)));
-
-    connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
-            this, SLOT(onConnectionStatusChanged(const QString&, bool)));
-
-    // attempt to open the specified device
-    if (!m_controller->open())
-    {
-        qDebug() << "failed to open device" << m_controller->device();
-    }
+    setupStatusBar();
+    setupDeviceController();
+    setupGamepad();
 }
 
 // -----------------------------------------------------------------------------
@@ -83,6 +67,65 @@ void ApplicationFrame::setupVirtualView()
     m_virtual = new VirtualView(tabPaneVirtual);
     m_virtual->initialize();
     tabPaneVirtualLayout->addWidget(m_virtual);
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::setupStatusBar()
+{
+    m_connStat = new QLabel("No Connection");
+    m_connStat->setFrameStyle(QFrame::Box);
+    m_connStat->setMinimumWidth(300);
+    m_connStat->setMaximumWidth(300);
+    statusBar()->addPermanentWidget(m_connStat);
+
+    connectionStatusBar->setRange(0, 200);
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::setupDeviceController()
+{
+    connect(m_controller, SIGNAL(telemetryReady(float, float, float, int, int, int)),
+            this, SLOT(onTelemetryReady(float, float, float, int, int, int)));
+
+    connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
+            this, SLOT(onConnectionStatusChanged(const QString&, bool)));
+
+    // attempt to open the specified device
+    if (!m_controller->open())
+    {
+        qDebug() << "failed to open device" << m_controller->device();
+    }
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::setupGamepad()
+{
+    m_gamepad = CreateGamepad();
+    const QString dev = "/dev/input/js0";
+
+    if (NULL == m_gamepad)
+    {
+        qDebug() << "could not create gamepad object";
+    }
+    if (!m_gamepad->open(dev))
+    {
+        qDebug() << "failed to open /dev/input/js0";
+    }
+    else
+    {
+        qDebug() << "successfully opened" << m_gamepad->driverName();
+        qDebug() << "   version: " << m_gamepad->driverVersion();
+        qDebug() << "   buttons: " << m_gamepad->buttonCount();
+        qDebug() << "   axes:    " << m_gamepad->axisCount();
+
+        connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
+                this, SLOT(onInputReady(GamepadEvent, int, float)));
+
+        connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
+                m_controller, SLOT(onInputReady(GamepadEvent, int, float)));
+
+        m_gamepad->start();
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -146,62 +189,14 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
     }
 }
 
-#if 0
 // -----------------------------------------------------------------------------
-void ApplicationFrame::updateLine(const char *message)
+void ApplicationFrame::onInputReady(
+        GamepadEvent event, int index, float value)
 {
-    QString msg = QString(message);
-    if (msg.length() != 14)
-    {
-        printf("<bad length %d>\n", msg.length());
-        return;
-    }
-
-    bool ok;
-    qlonglong data = msg.toLongLong(&ok, 16);
-    if (!ok)
-    {
-        printf("<bad conversion>\n");
-        return;
-    }
-
-    int ax = (data >> 48) & 0xFF;
-    int ay = (data >> 40) & 0xFF;
-    int az = (data >> 32) & 0xFF;
-    int gx = (data >> 24) & 0xFF;
-    int gy = (data >> 16) & 0xFF;
-    int gz = (data >>  8) & 0xFF;
-    int us = data & 0xFF;
-
 #if 0
-    if ((ax < 0) || (ax > 255) || (ay < 0) || (ay > 255) || (az < 0) || (az > 255))
-    {
-        printf("<bad accelerometer range>\n");
-        return;
-    }
-
-    if ((gx < 0) || (gx > 255) || (gy < 0) || (gy > 255) || (gz < 0) || (gz > 255))
-    {
-        printf("<bad gyro range>\n");
-        return;
-    }
+    cerr << "got gamepad data " << event << " , " << index << " , " << value << endl;
 #endif
-
-    printf("%d %d %d %d %d %d %d\n", ax, ay, az, gx, gy, gz, us);
-
-    if (m_logging)
-    {
-        *m_log << ax << " " << ay << " " << az << " "
-               << gx << " " << gy << " " << gz << endl;
-    }
-
-    m_index += 0.5;
-
-    m_graphs[0]->addDataPoint(m_index, ax, gx);
-    m_graphs[1]->addDataPoint(m_index, ay, gy);
-    m_graphs[2]->addDataPoint(m_index, az, gz);
 }
-#endif
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)

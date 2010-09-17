@@ -29,6 +29,7 @@ public slots:
     void onSocketReadyRead();
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
+    void onInputReady(GamepadEvent event, int index, float value);
 
 protected:
     void shutdown();

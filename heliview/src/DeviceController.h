@@ -9,6 +9,7 @@
 #define _HELIVIEW_DEVICECONTROLLER__H_
 
 #include <QWidget>
+#include "Gamepad.h"
 
 class DeviceController: public QObject
 {
@@ -18,6 +19,9 @@ public:
     virtual bool open() = 0;
     virtual void close() = 0;
     virtual QString device() = 0;
+
+public slots:
+    virtual void onInputReady(GamepadEvent event, int index, float value) = 0;
 
 signals:
     void telemetryReady(float x, float y, float z, int alt, int rssi, int batt);

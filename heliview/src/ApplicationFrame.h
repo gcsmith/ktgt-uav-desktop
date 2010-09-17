@@ -13,6 +13,7 @@
 #include "LineGraph.h"
 #include "VirtualView.h"
 #include "VideoView.h"
+#include "Gamepad.h"
 
 class ApplicationFrame : public QMainWindow, public Ui::ApplicationFrame
 {
@@ -30,6 +31,7 @@ public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
                           int alt, int rssi, int batt);
     void onConnectionStatusChanged(const QString &text, bool status);
+    void onInputReady(GamepadEvent event, int index, float value);
 
     void onShowXFChanged(bool flag);
     void onShowXUFChanged(bool flag);
@@ -42,6 +44,13 @@ public slots:
     void onGraphsChanged();
 
 protected:
+    void setupCameraView();
+    void setupSensorView();
+    void setupVirtualView();
+    void setupStatusBar();
+    void setupDeviceController();
+    void setupGamepad();
+
     LineGraph        *m_graphs[AXIS_COUNT];
     VirtualView      *m_virtual;
     VideoView        *m_video;
@@ -50,10 +59,7 @@ protected:
     QTextStream      *m_log;
     bool              m_logging;
     DeviceController *m_controller;
-
-    void setupCameraView();
-    void setupSensorView();
-    void setupVirtualView();
+    Gamepad          *m_gamepad;
 };
 
 #endif // _HELIVIEW_APPLICATIONFRAME__H_
