@@ -20,9 +20,12 @@ VideoView::VideoView(QWidget *parent)
     udp_sock = new QUdpSocket(this);
     udp_sock->bind(portnum);
 
+    cerr << "bound port\n";
+
     connect(udp_sock, SIGNAL(readyRead()), this, SLOT(onSocketDataPending()));
     jpeg_image = new QImage("trees.jpg");
     repaint();
+    cerr << "connected to udp socket\n";
 }
 
 // -----------------------------------------------------------------------------
@@ -59,8 +62,11 @@ void VideoView::onSocketDataPending()
 {
     // readyRead() is not emitted recursively, so we loop just incase a 
     // readyReady() signal is emitted inside its slot (this function)
+    cerr << "entered onSocketDataPending\n";
     while (udp_sock->hasPendingDatagrams())
     {
+        cerr << "datagram pending\n";
+
         // For now the UDP packet is assummed to contain only the raw jpeg data
         // there is assummed to be no packet header right now
         QByteArray buffer(udp_sock->pendingDatagramSize(), 0);
