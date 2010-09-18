@@ -7,6 +7,7 @@
     <file>../data/kill.png</file>
     <file>../data/manual.png</file>
     <file>../data/virtual.png</file>
+    <file>../data/test_pattern.jpg</file>
 </qresource>
 </RCC>
 

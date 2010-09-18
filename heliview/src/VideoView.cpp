@@ -26,7 +26,7 @@ VideoView::VideoView(QWidget *parent)
     udp_sock->waitForConnected();
     cerr << "connected to udp socket\n";
 
-    jpeg_image = new QImage("trees.jpg");
+    jpeg_image = new QImage(":/data/test_pattern.jpg");
     repaint();
 
     m_timer = new QTimer(this);
@@ -54,6 +54,7 @@ VideoView::~VideoView()
 void VideoView::paintEvent(QPaintEvent *e)
 {
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, jpeg_image->scaled(this->width(), this->height()));
 }
 

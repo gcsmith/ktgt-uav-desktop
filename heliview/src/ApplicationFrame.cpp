@@ -78,7 +78,7 @@ void ApplicationFrame::setupStatusBar()
     m_connStat->setMaximumWidth(300);
     statusBar()->addPermanentWidget(m_connStat);
 
-    connectionStatusBar->setRange(0, 200);
+    connectionStatusBar->setRange(0, 256);
 }
 
 // -----------------------------------------------------------------------------
