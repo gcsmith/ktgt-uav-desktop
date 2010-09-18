@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <QPainter>
+#include <QTimer>
 #include "VideoView.h"
 
 using namespace std;
@@ -14,18 +15,23 @@ VideoView::VideoView(QWidget *parent)
 : QWidget(parent), jpeg_image(NULL)
 {
     // Set the port
-    int portnum = 2010;
+    int portnum = 9010;
 
     // Setup UDP socket
     udp_sock = new QUdpSocket(this);
-    udp_sock->bind(portnum);
-
+    udp_sock->connectToHost("gumstiques.rit.edu", portnum);
     cerr << "bound port\n";
 
     connect(udp_sock, SIGNAL(readyRead()), this, SLOT(onSocketDataPending()));
+    udp_sock->waitForConnected();
+    cerr << "connected to udp socket\n";
+
     jpeg_image = new QImage("trees.jpg");
     repaint();
-    cerr << "connected to udp socket\n";
+
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(onTick()));
+    m_timer->start(100);
 }
 
 // -----------------------------------------------------------------------------
@@ -107,5 +113,12 @@ void VideoView::onSocketError(QAbstractSocket::SocketError error)
         cerr << "unknown socket error" << endl;
         break;
     }
+}
+
+void VideoView::onTick()
+{
+    cerr << "requesting image\n";
+    char data[4];
+    udp_sock->write(data, 4);
 }
 

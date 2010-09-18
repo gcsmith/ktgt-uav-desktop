@@ -20,6 +20,7 @@ public:
     virtual ~VideoView();
 
 public slots:
+    void onTick();
     void onSocketDataPending();
     void onSocketError(QAbstractSocket::SocketError error);
 
@@ -27,6 +28,7 @@ protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent *e);
 
+    QTimer *m_timer;
     QImage *jpeg_image;
     QUdpSocket *udp_sock;
 };
