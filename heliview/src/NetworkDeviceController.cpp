@@ -176,8 +176,8 @@ void NetworkDeviceController::onSocketReadyRead()
 #endif
         break;
     case SERVER_ACK_MJPG_FRAME:
-        framesz = packet[PKT_LENGTH] - PKT_BASE_LENGTH;
-        emit videoFrameReady((const char *)&packet[PKT_BASE], (size_t)framesz);
+        framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;
+        emit videoFrameReady((const char *)&packet[PKT_MJPG_IMG], (size_t)framesz);
         break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
