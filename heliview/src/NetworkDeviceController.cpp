@@ -10,29 +10,19 @@
 #include <algorithm>
 #include "NetworkDeviceController.h"
 #include "Utility.h"
-
-#define IDENT_MAGIC     0x09291988  // identification number
-#define IDENT_VERSION   0x00000001  // software version
-
-#define CLIENT_ACK_IDENT        0   // identify self to server
-#define CLIENT_REQ_TAKEOFF      1   // command the helicopter to take off
-#define CLIENT_REQ_LANDING      2   // command the helicopter to land
-#define CLIENT_REQ_TELEMETRY    3   // state, orientation, altitude, battery
-
-#define SERVER_REQ_IDENT        0   // request client to identify itself
-#define SERVER_ACK_IGNORED      1   // client request ignored (invalid state)
-#define SERVER_ACK_TAKEOFF      2   // acknowledge request to take off
-#define SERVER_ACK_LANDING      3   // acknowledge request to land
-#define SERVER_ACK_TELEMETRY    4   // acknowledge request for telemetry (+data)
+#include "uav_protocol.h"
 
 using namespace std;
 
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
-: m_device(device), m_timer(NULL)
+: m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0)
 {
-    m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
+    m_telem_timer = new QTimer(this);
+    connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
+
+    m_mjpeg_timer = new QTimer(this);
+    connect(m_mjpeg_timer, SIGNAL(timeout()), this, SLOT(onVideoTick()));
 }
 
 // -----------------------------------------------------------------------------
@@ -102,9 +92,21 @@ void NetworkDeviceController::onTelemetryTick()
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int cmd_buffer[1] = { CLIENT_REQ_TELEMETRY };
-    stream.writeRawData((char *)cmd_buffer, sizeof(int) * 1);
+    int cmd_buffer[] = { CLIENT_REQ_TELEMETRY, PKT_BASE_LENGTH };
+    stream.writeRawData((char *)cmd_buffer, PKT_BASE_LENGTH);
+    m_sock->waitForBytesWritten();
     cerr << "requested telemetry" << endl;
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onVideoTick()
+{
+    QDataStream stream(m_sock);
+    stream.setVersion(QDataStream::Qt_4_0);
+    int cmd_buffer[] = { CLIENT_REQ_MJPG_FRAME, PKT_BASE_LENGTH };
+    stream.writeRawData((char *)cmd_buffer, PKT_BASE_LENGTH);
+    m_sock->waitForBytesWritten();
+    cerr << "requested mjpeg frame" << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -112,26 +114,43 @@ void NetworkDeviceController::onSocketReadyRead()
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int32_t cmd_buffer[32], rssi, altitude, battery;
+    int32_t rssi, altitude, battery, framesz;
     float x, y, z;
-    memset((void *)cmd_buffer, 0, sizeof(int32_t) * 32);
 
-    size_t num_bytes = m_sock->bytesAvailable();
-    if (num_bytes < 4)
+    if (0 == m_blocksz)
+    {
+        if ((size_t)m_sock->bytesAvailable() < PKT_BASE_LENGTH)
+            return;
+
+        uint32_t header[PKT_BASE];
+        stream.readRawData((char *)&header[0], PKT_BASE_LENGTH);
+        m_blocksz = header[PKT_LENGTH] - PKT_BASE_LENGTH;
+        fprintf(stderr, "packet cmd %d size %d\n", header[0], header[1]);
+
+        // reserve enough room for the entire message, copy the header over
+        m_buffer.reserve(header[PKT_LENGTH]);
+        memcpy(&m_buffer[0], &header[0], PKT_BASE_LENGTH);
+    }
+
+    if (m_sock->bytesAvailable() < m_blocksz)
         return;
 
-    num_bytes = max(num_bytes, sizeof(int32_t) * 32);
-    stream.readRawData((char *)cmd_buffer, num_bytes);
+    // interpret the packet
+    uint32_t *packet = (uint32_t *)&m_buffer[0];
+    stream.readRawData((char *)&packet[PKT_BASE], m_blocksz);
+    m_blocksz = 0;
 
-    switch (cmd_buffer[0])
+    switch (packet[0])
     {
     case SERVER_REQ_IDENT:
         cerr << "SERVER_REQ_IDENT: sending response...\n";
-        cmd_buffer[0] = CLIENT_ACK_IDENT;
-        cmd_buffer[1] = IDENT_MAGIC;
-        cmd_buffer[2] = IDENT_VERSION;
-        stream.writeRawData((char *)cmd_buffer, sizeof(int32_t) * 3);
-        m_timer->start(50); // begin requesting telemetry
+        packet[PKT_COMMAND]     = CLIENT_ACK_IDENT;
+        packet[PKT_LENGTH]      = PKT_RCI_LENGTH;
+        packet[PKT_RCI_MAGIC]   = IDENT_MAGIC;
+        packet[PKT_RCI_VERSION] = IDENT_VERSION;
+        stream.writeRawData((char *)&packet[0], PKT_RCI_LENGTH);
+        m_telem_timer->start(50); // begin requesting telemetry
+        m_mjpeg_timer->start(50); // begin requesting frames
         break;
     case SERVER_ACK_IGNORED:
         cerr << "SERVER_ACK_IGNORED" << endl;
@@ -143,12 +162,12 @@ void NetworkDeviceController::onSocketReadyRead()
         cerr << "SERVER_ACK_LANDING" << endl;
         break;
     case SERVER_ACK_TELEMETRY:
-        x = *(float *)&cmd_buffer[1];
-        y = *(float *)&cmd_buffer[2];
-        z = *(float *)&cmd_buffer[3];
-        rssi = cmd_buffer[4];
-        altitude = cmd_buffer[5];
-        battery = cmd_buffer[6];
+        x = *(float *)&packet[PKT_VTI_YAW];
+        y = *(float *)&packet[PKT_VTI_PITCH];
+        z = *(float *)&packet[PKT_VTI_ROLL];
+        rssi     = packet[PKT_VTI_RSSI];
+        altitude = packet[PKT_VTI_ALT];
+        battery  = packet[PKT_VTI_BATT];
         emit telemetryReady(-z, -y, x, altitude, rssi, battery);
 #if 0
         fprintf(stderr,
@@ -156,8 +175,12 @@ void NetworkDeviceController::onSocketReadyRead()
                 x, y, z, rssi, altitude, battery);
 #endif
         break;
+    case SERVER_ACK_MJPG_FRAME:
+        framesz = packet[PKT_LENGTH] - PKT_BASE_LENGTH;
+        emit videoFrameReady((const char *)&packet[PKT_BASE], (size_t)framesz);
+        break;
     default:
-        cerr << "unknown server command (" << cmd_buffer[0] << ")\n";
+        cerr << "unknown server command (" << packet[0] << ")\n";
         break;
     }
 
@@ -199,9 +222,10 @@ void NetworkDeviceController::onInputReady(
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::shutdown()
 {
-    if (m_timer)
+    if (m_telem_timer)
     {
-        m_timer->stop();
+        m_telem_timer->stop();
+        m_mjpeg_timer->stop();
         emit connectionStatusChanged(m_device + QString(" disconnected"), false);
     }
 }

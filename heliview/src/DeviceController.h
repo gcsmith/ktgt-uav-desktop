@@ -26,6 +26,7 @@ public slots:
 signals:
     void telemetryReady(float x, float y, float z, int alt, int rssi, int batt);
     void connectionStatusChanged(const QString &text, bool status);
+    void videoFrameReady(const char *data, size_t length);
 };
 
 DeviceController *CreateDeviceController(

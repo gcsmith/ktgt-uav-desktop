@@ -20,9 +20,7 @@ public:
     virtual ~VideoView();
 
 public slots:
-    void onTick();
-    void onSocketDataPending();
-    void onSocketError(QAbstractSocket::SocketError error);
+    void onImageReady(const char *data, size_t length);
 
 protected:
     void paintEvent(QPaintEvent *e);

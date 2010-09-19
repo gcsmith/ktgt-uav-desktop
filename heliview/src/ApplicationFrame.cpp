@@ -29,6 +29,9 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     setupStatusBar();
     setupDeviceController();
     setupGamepad();
+
+    connect(m_controller, SIGNAL(videoFrameReady(const char *, size_t)),
+            m_video, SLOT(onImageReady(const char *, size_t)));
 }
 
 // -----------------------------------------------------------------------------

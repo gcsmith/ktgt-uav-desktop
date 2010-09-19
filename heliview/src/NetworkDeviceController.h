@@ -10,7 +10,9 @@
 
 #include <QTcpSocket>
 #include <QTimer>
+#include <vector>
 #include "DeviceController.h"
+#include "Utility.h"
 
 class NetworkDeviceController: public DeviceController
 {
@@ -26,6 +28,7 @@ public:
 
 public slots:
     void onTelemetryTick();
+    void onVideoTick();
     void onSocketReadyRead();
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
@@ -34,9 +37,12 @@ public slots:
 protected:
     void shutdown();
 
-    QString     m_device;
-    QTcpSocket *m_sock;
-    QTimer     *m_timer;
+    QString           m_device;
+    QTcpSocket       *m_sock;
+    QTimer           *m_telem_timer;
+    QTimer           *m_mjpeg_timer;
+    uint32_t          m_blocksz;
+    std::vector<char> m_buffer;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_
