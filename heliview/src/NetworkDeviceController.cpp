@@ -16,7 +16,8 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
-: m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0)
+: m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
+  m_vcm_type(VCM_TYPE_RADIO)
 {
     m_telem_timer = new QTimer(this);
     connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
@@ -95,7 +96,7 @@ void NetworkDeviceController::onTelemetryTick()
     int cmd_buffer[] = { CLIENT_REQ_TELEMETRY, PKT_BASE_LENGTH };
     stream.writeRawData((char *)cmd_buffer, PKT_BASE_LENGTH);
     m_sock->waitForBytesWritten();
-    cerr << "requested telemetry" << endl;
+    // cerr << "requested telemetry" << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -106,7 +107,7 @@ void NetworkDeviceController::onVideoTick()
     int cmd_buffer[] = { CLIENT_REQ_MJPG_FRAME, PKT_BASE_LENGTH };
     stream.writeRawData((char *)cmd_buffer, PKT_BASE_LENGTH);
     m_sock->waitForBytesWritten();
-    cerr << "requested mjpeg frame" << endl;
+    // cerr << "requested mjpeg frame" << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -125,7 +126,7 @@ void NetworkDeviceController::onSocketReadyRead()
         uint32_t header[PKT_BASE];
         stream.readRawData((char *)&header[0], PKT_BASE_LENGTH);
         m_blocksz = header[PKT_LENGTH] - PKT_BASE_LENGTH;
-        fprintf(stderr, "packet cmd %d size %d\n", header[0], header[1]);
+        // fprintf(stderr, "packet cmd %d size %d\n", header[0], header[1]);
 
         // reserve enough room for the entire message, copy the header over
         m_buffer.reserve(header[PKT_LENGTH]);
@@ -179,6 +180,16 @@ void NetworkDeviceController::onSocketReadyRead()
         framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;
         emit videoFrameReady((const char *)&packet[PKT_MJPG_IMG], (size_t)framesz);
         break;
+    case SERVER_ACK_SET_CTL_MODE:
+        cerr << "got ACK for SET_CTL_MODE: ";
+        switch (packet[PKT_VCM_TYPE])
+        {
+        case VCM_TYPE_RADIO: cerr << "radio\n"; break;
+        case VCM_TYPE_AUTO:  cerr << "auto\n"; break;
+        case VCM_TYPE_MIXED: cerr << "mixed\n"; break;
+        default:             cerr << "!!! invalid !!!\n"; break;
+        }
+        break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
         break;
@@ -216,7 +227,35 @@ void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 void NetworkDeviceController::onInputReady(
         GamepadEvent event, int index, float value)
 {
-    cerr << "networkdevicecontroller receive input\n";
+    int cmd_buffer[32];
+
+    if (GP_EVENT_BUTTON == event)
+    {
+        if ((12 == index) && (value > 0.0))
+        {
+            QDataStream stream(m_sock);
+            stream.setVersion(QDataStream::Qt_4_0);
+
+            if (VCM_TYPE_MIXED == m_vcm_type)
+            {
+                cerr << "requesting switch to radio mode...\n";
+                m_vcm_type = VCM_TYPE_RADIO;
+            }
+            else
+            {
+                cerr << "requesting switch to mixed mode...\n";
+                m_vcm_type = VCM_TYPE_MIXED;
+            }
+
+            cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
+            cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
+            cmd_buffer[PKT_VCM_TYPE] = m_vcm_type;
+            cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
+
+            stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
+            m_sock->waitForBytesWritten();
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------

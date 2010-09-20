@@ -42,6 +42,7 @@ protected:
     QTimer           *m_telem_timer;
     QTimer           *m_mjpeg_timer;
     uint32_t          m_blocksz;
+    uint32_t          m_vcm_type;
     std::vector<char> m_buffer;
 };
 

@@ -21,6 +21,7 @@ public:
 
 public slots:
     void onImageReady(const char *data, size_t length);
+    void onStatusTick();
 
 protected:
     void paintEvent(QPaintEvent *e);
@@ -29,6 +30,7 @@ protected:
     QTimer *m_timer;
     QImage *jpeg_image;
     QUdpSocket *udp_sock;
+    int m_ticks;
 };
 
 #endif // _HELIVIEW_VIDEOVIEW__H_

@@ -13,8 +13,12 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 VideoView::VideoView(QWidget *parent)
-: QWidget(parent), jpeg_image(NULL)
+: QWidget(parent), jpeg_image(NULL), m_ticks(0)
 {
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(onStatusTick()));
+    m_timer->start(100);
+
     jpeg_image = new QImage(":/data/test_pattern.jpg");
     repaint();
 }
@@ -43,10 +47,27 @@ void VideoView::resizeEvent(QResizeEvent *e)
 void VideoView::onImageReady(const char *data, size_t length)
 {
     cerr << "loading image size " << length << endl;
-    if (!jpeg_image->loadFromData((const uchar *)data, (int)length))
+    if (jpeg_image->loadFromData((const uchar *)data, (int)length))
     {
+        m_ticks = 0;
+        repaint();
+    }
+    else
+    {
+        // uh oh
         cerr << "failed to load image data\n";
     }
-    repaint();
+}
+
+// -----------------------------------------------------------------------------
+void VideoView::onStatusTick()
+{
+    ++m_ticks;
+    if (m_ticks > 20)
+    {
+        jpeg_image->load(":/data/test_pattern.jpg");
+        repaint();
+        m_ticks = 0;
+    }
 }
 
