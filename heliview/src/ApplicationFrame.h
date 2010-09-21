@@ -33,6 +33,11 @@ public slots:
     void onConnectionStatusChanged(const QString &text, bool status);
     void onInputReady(GamepadEvent event, int index, float value);
 
+    void onTakeoffClicked();
+    void onLandingClicked();
+    void onManualOverrideClicked();
+    void onKillswitchClicked();
+
     void onShowXFChanged(bool flag);
     void onShowXUFChanged(bool flag);
     void onShowYFChanged(bool flag);

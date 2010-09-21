@@ -26,6 +26,11 @@ public:
     virtual void close();
     virtual QString device() { return m_device; }
 
+    bool requestTakeoff();
+    bool requestLanding();
+    bool requestManualOverride();
+    bool requestKillswitch();
+
 public slots:
     void onTelemetryTick();
     void onVideoTick();
@@ -35,6 +40,8 @@ public slots:
     void onInputReady(GamepadEvent event, int index, float value);
 
 protected:
+    bool sendPacket(uint32_t command);
+    bool sendPacket(uint32_t *buffer, int length);
     void shutdown();
 
     QString           m_device;

@@ -89,25 +89,70 @@ void NetworkDeviceController::close()
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onTelemetryTick()
+bool NetworkDeviceController::sendPacket(uint32_t command)
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int cmd_buffer[] = { CLIENT_REQ_TELEMETRY, PKT_BASE_LENGTH };
+    uint32_t cmd_buffer[] = { command, PKT_BASE_LENGTH };
     stream.writeRawData((char *)cmd_buffer, PKT_BASE_LENGTH);
-    m_sock->waitForBytesWritten();
-    // cerr << "requested telemetry" << endl;
+    return m_sock->waitForBytesWritten();
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::sendPacket(uint32_t *buffer, int length)
+{
+    QDataStream stream(m_sock);
+    stream.setVersion(QDataStream::Qt_4_0);
+    stream.writeRawData((char *)buffer, length);
+    return m_sock->waitForBytesWritten();
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestTakeoff()
+{
+    return sendPacket(CLIENT_REQ_TAKEOFF);
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestLanding()
+{
+    return sendPacket(CLIENT_REQ_LANDING);
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestManualOverride()
+{
+    uint32_t cmd_buffer[4];
+    cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
+    cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
+    cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_RADIO;
+    cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
+    return sendPacket(cmd_buffer, PKT_VCM_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestKillswitch()
+{
+    uint32_t cmd_buffer[4];
+    cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
+    cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
+    cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_KILL;
+    cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
+    return sendPacket(cmd_buffer, PKT_VCM_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onTelemetryTick()
+{
+    if (!sendPacket(CLIENT_REQ_TELEMETRY))
+        cerr << "failed to send telemetry request\n";
 }
 
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::onVideoTick()
 {
-    QDataStream stream(m_sock);
-    stream.setVersion(QDataStream::Qt_4_0);
-    int cmd_buffer[] = { CLIENT_REQ_MJPG_FRAME, PKT_BASE_LENGTH };
-    stream.writeRawData((char *)cmd_buffer, PKT_BASE_LENGTH);
-    m_sock->waitForBytesWritten();
-    // cerr << "requested mjpeg frame" << endl;
+    if (!sendPacket(CLIENT_REQ_MJPG_FRAME))
+        cerr << "failed to send mjpg frame request\n";
 }
 
 // -----------------------------------------------------------------------------
@@ -187,6 +232,7 @@ void NetworkDeviceController::onSocketReadyRead()
         case VCM_TYPE_RADIO: cerr << "radio\n"; break;
         case VCM_TYPE_AUTO:  cerr << "auto\n"; break;
         case VCM_TYPE_MIXED: cerr << "mixed\n"; break;
+        case VCM_TYPE_KILL:  cerr << "killed\n"; break;
         default:             cerr << "!!! invalid !!!\n"; break;
         }
         break;
@@ -227,7 +273,7 @@ void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 void NetworkDeviceController::onInputReady(
         GamepadEvent event, int index, float value)
 {
-    int cmd_buffer[32];
+    uint32_t cmd_buffer[32];
 
     if (GP_EVENT_BUTTON == event)
     {

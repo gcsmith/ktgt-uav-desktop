@@ -521,7 +521,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>419</y>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>193</x>
@@ -537,7 +537,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>419</y>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>149</x>
@@ -553,7 +553,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>419</y>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>389</x>
@@ -569,7 +569,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>419</y>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>425</x>
@@ -585,7 +585,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>419</y>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>676</x>
@@ -601,7 +601,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>119</x>
-     <y>419</y>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>646</x>
@@ -625,6 +625,70 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btnTakeoff</sender>
+   <signal>clicked()</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onTakeoffClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>728</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>623</x>
+     <y>340</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnLanding</sender>
+   <signal>clicked()</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onLandingClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>747</x>
+     <y>123</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>622</x>
+     <y>376</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnOverride</sender>
+   <signal>clicked()</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onManualOverrideClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>770</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>622</x>
+     <y>412</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnKillswitch</sender>
+   <signal>clicked()</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onKillswitchClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>798</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>621</x>
+     <y>449</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onShowXFChanged(bool)</slot>
@@ -634,5 +698,9 @@ p, li { white-space: pre-wrap; }
   <slot>onShowZFChanged(bool)</slot>
   <slot>onShowZUFChanged(bool)</slot>
   <slot>onTabChanged(int)</slot>
+  <slot>onTakeoffClicked()</slot>
+  <slot>onLandingClicked()</slot>
+  <slot>onManualOverrideClicked()</slot>
+  <slot>onKillswitchClicked()</slot>
  </slots>
 </ui>

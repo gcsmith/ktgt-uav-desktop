@@ -202,6 +202,30 @@ void ApplicationFrame::onInputReady(
 }
 
 // -----------------------------------------------------------------------------
+void ApplicationFrame::onTakeoffClicked()
+{
+    m_controller->requestTakeoff();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onLandingClicked()
+{
+    m_controller->requestLanding();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onManualOverrideClicked()
+{
+    m_controller->requestManualOverride();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onKillswitchClicked()
+{
+    m_controller->requestKillswitch();
+}
+
+// -----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)
 {
     m_graphs[0]->toggleAcceleration(flag);

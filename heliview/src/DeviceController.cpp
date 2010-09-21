@@ -11,6 +11,26 @@
 
 using namespace std;
 
+bool DeviceController::requestTakeoff()
+{
+    return true;
+}
+
+bool DeviceController::requestLanding()
+{
+    return true;
+}
+
+bool DeviceController::requestManualOverride()
+{
+    return true;
+}
+
+bool DeviceController::requestKillswitch()
+{
+    return true;
+}
+
 DeviceController *CreateDeviceController(
         const QString &name,
         const QString &device)
