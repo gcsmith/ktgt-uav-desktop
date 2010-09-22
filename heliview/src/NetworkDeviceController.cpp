@@ -236,6 +236,9 @@ void NetworkDeviceController::onSocketReadyRead()
         default:             cerr << "!!! invalid !!!\n"; break;
         }
         break;
+    case SERVER_ACK_FLIGHT_CTL:
+        cerr << "got ACK for FLIGHT_CTL:\n";
+        break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
         break;
@@ -299,6 +302,50 @@ void NetworkDeviceController::onInputReady(
             cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
 
             stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
+            m_sock->waitForBytesWritten();
+        }
+    }
+    else if (GP_EVENT_AXIS == event)
+    {
+        if (index >= 0 && index <= 3)
+        {
+            union 
+            {
+                uint32_t int_val;
+                float float_val;
+            } evt_val;
+
+            QDataStream stream(m_sock);
+            stream.setVersion(QDataStream::Qt_4_0);
+
+            cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
+            cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
+
+            if (index == 0)
+            {
+                cerr << "mixed controller: yaw\n";
+                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_YAW;
+            }
+            else if (index == 1)
+            {
+                cerr << "mixed controller: pitch\n";
+                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_PITCH;
+            }
+            else if (index == 2)
+            {
+                cerr << "mixed controller: roll\n";
+                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ROLL;
+            }
+            else 
+            {
+                cerr << "mixed controller: altitude\n";
+                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ALT;
+            }
+
+            evt_val.float_val = value;
+            cmd_buffer[PKT_MCM_VALUE] = evt_val.int_val;
+
+            stream.writeRawData((char *)cmd_buffer, PKT_MCM_LENGTH);
             m_sock->waitForBytesWritten();
         }
     }
