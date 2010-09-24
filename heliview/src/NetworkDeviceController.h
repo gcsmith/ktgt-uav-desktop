@@ -14,6 +14,11 @@
 #include "DeviceController.h"
 #include "Utility.h"
 
+typedef struct _ctrl_signals
+{
+    float alt, pitch, roll, yaw;
+} ctrl_sigs;
+
 class NetworkDeviceController: public DeviceController
 {
     Q_OBJECT
@@ -34,6 +39,7 @@ public:
 public slots:
     void onTelemetryTick();
     void onVideoTick();
+    void onControllerTick();
     void onSocketReadyRead();
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
@@ -48,9 +54,11 @@ protected:
     QTcpSocket       *m_sock;
     QTimer           *m_telem_timer;
     QTimer           *m_mjpeg_timer;
+    QTimer           *m_controller_timer;
     uint32_t          m_blocksz;
     uint32_t          m_vcm_type;
     std::vector<char> m_buffer;
+    ctrl_sigs         m_manual_sigs;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_

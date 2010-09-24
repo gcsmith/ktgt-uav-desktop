@@ -24,6 +24,10 @@ NetworkDeviceController::NetworkDeviceController(const QString &device)
 
     m_mjpeg_timer = new QTimer(this);
     connect(m_mjpeg_timer, SIGNAL(timeout()), this, SLOT(onVideoTick()));
+
+    m_controller_timer = new QTimer(this);
+    connect(m_controller_timer, SIGNAL(timeout()), this, 
+            SLOT(onControllerTick()));
 }
 
 // -----------------------------------------------------------------------------
@@ -155,6 +159,38 @@ void NetworkDeviceController::onVideoTick()
         cerr << "failed to send mjpg frame request\n";
 }
 
+void NetworkDeviceController::onControllerTick()
+{
+    cerr << "Controller tick\n";
+    if (m_vcm_type == VCM_TYPE_MIXED)
+    {
+        uint32_t cmd_buffer[24];
+        union { int i; float f; } temp;
+      
+        cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
+        cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
+      
+        temp.f = m_manual_sigs.alt;
+        cmd_buffer[PKT_MCM_AXIS_ALT] = temp.i;
+        fprintf(stderr, "Sent ALT:   %f\n", temp.f);
+      
+        temp.f = m_manual_sigs.pitch;
+        cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
+        fprintf(stderr, "Sent PITCH: %f\n", temp.f);
+      
+        temp.f = m_manual_sigs.roll;
+        cmd_buffer[PKT_MCM_AXIS_ROLL] = temp.i;
+        fprintf(stderr, "Sent ROLL:  %f\n", temp.f);
+      
+        temp.f = m_manual_sigs.yaw;
+        cmd_buffer[PKT_MCM_AXIS_YAW] = temp.i;
+        fprintf(stderr, "Sent YAW:   %f\n\n", temp.f);
+      
+        if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
+            cerr << "failed to send flight control request\n";
+    }
+}
+
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::onSocketReadyRead()
 {
@@ -197,6 +233,7 @@ void NetworkDeviceController::onSocketReadyRead()
         stream.writeRawData((char *)&packet[0], PKT_RCI_LENGTH);
         m_telem_timer->start(50); // begin requesting telemetry
         m_mjpeg_timer->start(50); // begin requesting frames
+        m_controller_timer->start(50); // begin requesting flight control
         break;
     case SERVER_ACK_IGNORED:
         cerr << "SERVER_ACK_IGNORED" << endl;
@@ -309,44 +346,51 @@ void NetworkDeviceController::onInputReady(
     {
         if (index >= 0 && index <= 3)
         {
+            /*
             union 
             {
                 uint32_t int_val;
                 float float_val;
             } evt_val;
+            
 
             QDataStream stream(m_sock);
             stream.setVersion(QDataStream::Qt_4_0);
 
             cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
             cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
+            */
 
             if (index == 0)
             {
                 cerr << "mixed controller: yaw\n";
-                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_YAW;
+                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_YAW;
+                m_manual_sigs.yaw = value;
             }
             else if (index == 1)
             {
                 cerr << "mixed controller: pitch\n";
-                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_PITCH;
+                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_PITCH;
+                m_manual_sigs.pitch= value;
             }
             else if (index == 2)
             {
                 cerr << "mixed controller: roll\n";
-                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ROLL;
+                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ROLL; 
+                m_manual_sigs.roll = value;
             }
             else 
             {
                 cerr << "mixed controller: altitude\n";
-                cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ALT;
+                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ALT;
+                m_manual_sigs.alt = value;
             }
 
-            evt_val.float_val = value;
-            cmd_buffer[PKT_MCM_VALUE] = evt_val.int_val;
+            //evt_val.float_val = value;
+            //cmd_buffer[PKT_MCM_VALUE] = evt_val.int_val;
 
-            stream.writeRawData((char *)cmd_buffer, PKT_MCM_LENGTH);
-            m_sock->waitForBytesWritten();
+            //stream.writeRawData((char *)cmd_buffer, PKT_MCM_LENGTH);
+            //m_sock->waitForBytesWritten();
         }
     }
 }
