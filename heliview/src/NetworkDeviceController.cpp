@@ -422,7 +422,7 @@ void NetworkDeviceController::onInputReady(
             {
                 cerr << "mixed controller: pitch\n";
                 //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ALT;
-                m_manual_sigs.pitch = -value;
+                m_manual_sigs.pitch = value;
             }
 
             //evt_val.float_val = value;
