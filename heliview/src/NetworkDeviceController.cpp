@@ -28,6 +28,12 @@ NetworkDeviceController::NetworkDeviceController(const QString &device)
     m_controller_timer = new QTimer(this);
     connect(m_controller_timer, SIGNAL(timeout()), this, 
             SLOT(onControllerTick()));
+
+    m_manual_sigs.alt = 0.0f;
+    m_manual_sigs.pitch = 0.0f;
+    m_manual_sigs.roll = 0.0f;
+    m_manual_sigs.yaw = 0.0f;
+
 }
 
 // -----------------------------------------------------------------------------
@@ -161,33 +167,66 @@ void NetworkDeviceController::onVideoTick()
 
 void NetworkDeviceController::onControllerTick()
 {
-    cerr << "Controller tick\n";
+    // Memory of previous mixed controller values
+    static float prev_alt = 0.0;
+    static float prev_pitch = 0.0;
+    static float prev_roll = 0.0;
+    static float prev_yaw = 0.0;
+
     if (m_vcm_type == VCM_TYPE_MIXED)
     {
         uint32_t cmd_buffer[24];
         union { int i; float f; } temp;
+        char send = 0;
       
         cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
         cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
       
+        // altitude
         temp.f = m_manual_sigs.alt;
+        if (m_manual_sigs.alt != prev_alt)
+        {
+            prev_alt = m_manual_sigs.alt;
+            send = 1;
+        }
         cmd_buffer[PKT_MCM_AXIS_ALT] = temp.i;
-        fprintf(stderr, "Sent ALT:   %f\n", temp.f);
-      
+
+        // pitch
         temp.f = m_manual_sigs.pitch;
+        if (m_manual_sigs.pitch != prev_pitch)
+        {
+            prev_pitch = m_manual_sigs.pitch;
+            send = 1;
+        }
         cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
-        fprintf(stderr, "Sent PITCH: %f\n", temp.f);
-      
+
+        // roll
         temp.f = m_manual_sigs.roll;
+        if (m_manual_sigs.roll != prev_roll)
+        {
+            prev_roll = m_manual_sigs.roll;
+            send = 1;
+        }
         cmd_buffer[PKT_MCM_AXIS_ROLL] = temp.i;
-        fprintf(stderr, "Sent ROLL:  %f\n", temp.f);
-      
+
+        // yaw
         temp.f = m_manual_sigs.yaw;
+        if (m_manual_sigs.yaw!= prev_yaw)
+        {
+            prev_yaw = m_manual_sigs.yaw;
+            send = 1;
+        }
         cmd_buffer[PKT_MCM_AXIS_YAW] = temp.i;
-        fprintf(stderr, "Sent YAW:   %f\n\n", temp.f);
-      
-        if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
+
+        if (send && !sendPacket(cmd_buffer, PKT_MCM_LENGTH))
             cerr << "failed to send flight control request\n";
+        else if (send)
+        {
+            fprintf(stderr, "Sent ALT:   %f\n", m_manual_sigs.alt);
+            fprintf(stderr, "Sent PITCH: %f\n", m_manual_sigs.pitch);
+            fprintf(stderr, "Sent ROLL:  %f\n", m_manual_sigs.roll);
+            fprintf(stderr, "Sent YAW:   %f\n\n", m_manual_sigs.yaw);
+        }
     }
 }
 
