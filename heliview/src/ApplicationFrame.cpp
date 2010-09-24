@@ -5,6 +5,7 @@
 // Wraps the main window UI script and provides the application view.
 // -----------------------------------------------------------------------------
 
+#include <QMessageBox>
 #include <QTimer>
 #include <QTextStream>
 #include <iostream>
@@ -199,6 +200,45 @@ void ApplicationFrame::onInputReady(
 #if 0
     cerr << "got gamepad data " << event << " , " << index << " , " << value << endl;
 #endif
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onFileConnectTriggered()
+{
+    QMessageBox mb(QMessageBox::Information,
+                   "Connect to Target",
+                   "TODO: connection dialog");
+    mb.exec();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onFileExitTriggered()
+{
+    qDebug() << "TODO: onFileExitTriggered()";
+    close();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onEditSettingsTriggered()
+{
+    QMessageBox mb(QMessageBox::Information,
+                   "HeliView Settings",
+                   "TODO: settings dialog");
+    mb.exec();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onHelpAboutTriggered()
+{
+    QMessageBox mb(QMessageBox::Information,
+                   "About HeliView",
+                   "HeliView: Remote Helicoptor Control Station\n\n"
+                   "Authors:"
+                   "\tGarrett Smith\n"
+                   "\tKevin Macksamie\n"
+                   "\tTyler Thierolf\n"
+                   "\tTimothy Miller");
+    mb.exec();
 }
 
 // -----------------------------------------------------------------------------

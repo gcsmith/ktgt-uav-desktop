@@ -33,11 +33,19 @@ public slots:
     void onConnectionStatusChanged(const QString &text, bool status);
     void onInputReady(GamepadEvent event, int index, float value);
 
+    // menu action triggered event callbacks
+    void onFileConnectTriggered();
+    void onFileExitTriggered();
+    void onEditSettingsTriggered();
+    void onHelpAboutTriggered();
+
+    // control panel button click event callbacks
     void onTakeoffClicked();
     void onLandingClicked();
     void onManualOverrideClicked();
     void onKillswitchClicked();
 
+    // sensor pane checkbox event callbacks
     void onShowXFChanged(bool flag);
     void onShowXUFChanged(bool flag);
     void onShowYFChanged(bool flag);
