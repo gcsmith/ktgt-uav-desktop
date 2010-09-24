@@ -232,7 +232,7 @@ void NetworkDeviceController::onSocketReadyRead()
         packet[PKT_RCI_VERSION] = IDENT_VERSION;
         stream.writeRawData((char *)&packet[0], PKT_RCI_LENGTH);
         m_telem_timer->start(50); // begin requesting telemetry
-        m_mjpeg_timer->start(50); // begin requesting frames
+        m_mjpeg_timer->start(67); // begin requesting frames
         m_controller_timer->start(50); // begin requesting flight control
         break;
     case SERVER_ACK_IGNORED:
