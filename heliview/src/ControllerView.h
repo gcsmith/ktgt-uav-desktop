@@ -31,6 +31,7 @@ protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent *e);
 
+    char           si_on;
     QTimer        *m_joystick_timer;
     ctlr_inputs_t  joystick;
 };
