@@ -38,6 +38,7 @@ ENDIF(WIN32)
 
 SET(heliview_cpp
         ApplicationFrame.cpp
+        ControllerView.cpp
         DeviceController.cpp
         HeliView.cpp
         LineGraph.cpp
@@ -50,6 +51,7 @@ SET(heliview_cpp
 
 SET(heliview_src_moc
         ApplicationFrame.h
+        ControllerView.h
         DeviceController.h
         Gamepad.h
         LineGraph.h

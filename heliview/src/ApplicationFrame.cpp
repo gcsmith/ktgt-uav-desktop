@@ -21,6 +21,7 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
   m_controller(controller)
 {
     setupUi(this);
+    setupControllerPane();
     setupCameraView();
     setupSensorView();
 
@@ -51,6 +52,13 @@ void ApplicationFrame::setupCameraView()
 {
     m_video = new VideoView(tabPaneCamera);
     tabPaneCameraLayout->addWidget(m_video);
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::setupControllerPane()
+{
+    m_ctlview = new ControllerView(controllerWidget);
+    controllerWidget->layout()->addWidget(m_ctlview);
 }
 
 // -----------------------------------------------------------------------------
@@ -123,7 +131,7 @@ void ApplicationFrame::setupGamepad()
         qDebug() << "   axes:    " << m_gamepad->axisCount();
 
         connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
-                this, SLOT(onInputReady(GamepadEvent, int, float)));
+                m_ctlview, SLOT(onInputReady(GamepadEvent, int, float)));
 
         connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
                 m_controller, SLOT(onInputReady(GamepadEvent, int, float)));
@@ -191,15 +199,6 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
         elevationStatusBar->setValue(0);
         elevationStatusBar->setFormat(QString("NC"));
     }
-}
-
-// -----------------------------------------------------------------------------
-void ApplicationFrame::onInputReady(
-        GamepadEvent event, int index, float value)
-{
-#if 0
-    cerr << "got gamepad data " << event << " , " << index << " , " << value << endl;
-#endif
 }
 
 // -----------------------------------------------------------------------------

@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QFile>
 #include "ui_ApplicationFrame.h"
+#include "ControllerView.h"
 #include "DeviceController.h"
 #include "LineGraph.h"
 #include "VirtualView.h"
@@ -31,7 +32,6 @@ public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
                           int alt, int rssi, int batt);
     void onConnectionStatusChanged(const QString &text, bool status);
-    void onInputReady(GamepadEvent event, int index, float value);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
@@ -58,6 +58,7 @@ public slots:
 
 protected:
     void setupCameraView();
+    void setupControllerPane();
     void setupSensorView();
     void setupVirtualView();
     void setupStatusBar();
@@ -73,6 +74,7 @@ protected:
     bool              m_logging;
     DeviceController *m_controller;
     Gamepad          *m_gamepad;
+    ControllerView   *m_ctlview;
 };
 
 #endif // _HELIVIEW_APPLICATIONFRAME__H_
