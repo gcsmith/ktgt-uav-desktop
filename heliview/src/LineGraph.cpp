@@ -95,11 +95,7 @@ void LineGraph::addDataPoint(float t, float acc, float vel)
     m_polyVel.push_back(QPointF(m_time, vel));
     m_curveVel->setData(m_polyVel);
 
-    if (++m_ticker > 3)
-    {
-        m_ticker = 0;
-        m_plot->replot();
-    }
+    m_plot->replot();
 }
 
 // -----------------------------------------------------------------------------

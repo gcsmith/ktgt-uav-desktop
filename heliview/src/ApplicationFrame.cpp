@@ -171,8 +171,10 @@ void ApplicationFrame::enableLogging(bool enable)
 void ApplicationFrame::onTelemetryReady(
     float yaw, float pitch, float roll, int alt, int rssi, int batt)
 {
-//  cerr << "received telemetry " << yaw << ", " << pitch << ", " << roll << endl;
-    if (m_virtual) m_virtual->setAngles(yaw, pitch, roll);
+    static float time = 0.0f;
+
+    if (m_virtual)
+        m_virtual->setAngles(yaw, pitch, roll);
 
     connectionStatusBar->setValue(rssi);
     connectionStatusBar->setFormat(QString("%1 dBm").arg(rssi));
@@ -182,6 +184,12 @@ void ApplicationFrame::onTelemetryReady(
 
     elevationStatusBar->setValue(alt);
     elevationStatusBar->setFormat(QString("%1 inches").arg(alt));
+
+    m_graphs[0]->addDataPoint(time, yaw + 180.0f, 0.0f);
+    m_graphs[1]->addDataPoint(time, pitch + 180.0f, 0.0f);
+    m_graphs[2]->addDataPoint(time, roll + 180.0f, 0.0f);
+
+    time += 0.5f;
 }
 
 // -----------------------------------------------------------------------------
@@ -318,7 +326,7 @@ void ApplicationFrame::onGraphsChanged()
 {
     bool visible = true;
 
-    /* if no graphs are displayed, place a message label indicating so */
+    // if no graphs are displayed, place a message label indicating so
     for (int i = 0; i < AXIS_COUNT; ++i)
     {
         if (m_graphs[i]->isVisible())
