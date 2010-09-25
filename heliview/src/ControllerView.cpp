@@ -77,6 +77,7 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
 void ControllerView::paintEvent(QPaintEvent *e)
 {
     float length, mul_x, mul_y;
+    QString status("Disabled");
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -86,7 +87,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     // main circles
 
     // main circles coords
-    int ml_x0 = 10, ml_y0 = 20, m_w = 74, m_h = 74;
+    int ml_x0 = 10, ml_y0 = 40, m_w = 74, m_h = 74;
     int mr_x0 = ml_x0 + m_w + 5, mr_y0 = ml_y0;
 
     painter.drawEllipse(ml_x0, ml_y0, m_w, m_h);
@@ -137,16 +138,21 @@ void ControllerView::paintEvent(QPaintEvent *e)
             jr_y0 + (mul_y * (jr_y0 - ml_y0)), j_w, j_h));
 
     // status indicator
-    int si_w = m_w * 1, si_h = si_w / 5;
-    int si_x0 = ml_x0 + (m_w / 2), si_y0 = ml_y0 + m_h + 10;
+    int si_w = m_w * 2 + 5, si_h = si_w / 10;
+    int si_x0 = ml_x0, si_y0 = ml_y0 - si_h - 15;//+ m_h + 10;
 
     // draw status indicator
-    if (si_on) 
+    if (si_on)
+    {
         painter.setBrush(QBrush(Qt::green));
+        status = "Enabled";
+    }
     else
         painter.setBrush(QBrush(Qt::red));
 
     painter.drawRect(QRectF(si_x0, si_y0, si_w, si_h));
+    painter.setPen(QPen(Qt::black, 5));
+    painter.drawText(QRectF(si_x0, si_y0 + 2, si_w, si_h), Qt::AlignHCenter | Qt::AlignVCenter, status);
 }
 
 // -----------------------------------------------------------------------------
