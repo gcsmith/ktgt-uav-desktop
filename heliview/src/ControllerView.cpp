@@ -161,6 +161,5 @@ void ControllerView::paintEvent(QPaintEvent *e)
 // -----------------------------------------------------------------------------
 void ControllerView::resizeEvent(QResizeEvent *e)
 {
-    fprintf(stderr, "repaint called\n");
     repaint();
 }
