@@ -78,6 +78,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
 {
     float length, mul_x, mul_y;
     QString status("Disabled");
+    int wid = this->width(), hgt = this->height();
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -87,9 +88,11 @@ void ControllerView::paintEvent(QPaintEvent *e)
     // main circles
 
     // main circles coords
-    int ml_x0 = 10, ml_y0 = 40, m_w = 74, m_h = 74;
+    int ml_x0 = wid * 0.0578f, ml_y0 = hgt * 0.3f;
+    int m_w = wid * 0.428f, m_h = hgt * 0.556f;
     int mr_x0 = ml_x0 + m_w + 5, mr_y0 = ml_y0;
 
+    // draw main circles
     painter.drawEllipse(ml_x0, ml_y0, m_w, m_h);
     painter.drawEllipse(mr_x0, mr_y0, m_w, m_h);
 
@@ -97,7 +100,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     painter.setBrush(QBrush(QColor(238, 232, 170, 255)));
 
     // left joystick coords
-    int j_w = 34, j_h = 34;
+    int j_w = wid * 0.197f, j_h = hgt * 0.256f;
     int jl_xc = ml_x0 + (m_w / 2), jl_yc = ml_y0 + (m_h / 2);
     int jl_x0 = jl_xc - (j_w / 2), jl_y0 = jl_yc - (j_h / 2);
 
@@ -158,5 +161,6 @@ void ControllerView::paintEvent(QPaintEvent *e)
 // -----------------------------------------------------------------------------
 void ControllerView::resizeEvent(QResizeEvent *e)
 {
+    fprintf(stderr, "repaint called\n");
     repaint();
 }
