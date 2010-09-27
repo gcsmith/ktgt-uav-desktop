@@ -7,10 +7,14 @@
 #include <math.h>
 #include <stdio.h>
 #include "ControllerView.h"
+#include "uav_protocol.h"
+
+// macro inverts the bit (y) in the number (x)
+#define FLIP_A_BIT(x,y) ((((x) & (y)) ^ (y)) | ((x) & ~(y)))
 
 // -----------------------------------------------------------------------------
 ControllerView::ControllerView(QWidget *parent)
-: QWidget(parent), si_on(0), m_joystick_timer(NULL)
+: QWidget(parent), axes_flags(0), si_on(0), m_joystick_timer(NULL)
 {
     m_joystick_timer = new QTimer(this);
     connect(m_joystick_timer, SIGNAL(timeout()), this, SLOT(onJoystickTick()));
@@ -42,6 +46,36 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
     if ((GP_EVENT_BUTTON == event) && (12 == index) && (value > 0.0))
     {
         si_on = !si_on;
+        axes_flags = 0;
+    }
+    else if ((GP_EVENT_BUTTON == event) && (index >= 4) && (index <= 7) && 
+            (value > 0.0) && si_on)
+    {
+        switch (index)
+        {
+            // A
+            case 4:
+                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_ALT);
+                break;
+            
+            // B
+            case 5:
+                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_ROLL);
+                break;
+
+            // X
+            case 6:
+                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_YAW);
+                break;
+
+            // Y
+            case 7:
+                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_PITCH);
+                break;
+
+            default:
+                fprintf(stderr, "ControllerView: unknown controller button\n");
+        }
     }
     else if ((GP_EVENT_AXIS == event) && (index >= 0) && (index <= 3))
     {
@@ -67,7 +101,7 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
                 joystick.jr_y = value;
                 break;
             default:
-                fprintf(stderr, "ControllerView: unknown controller signal\n");
+                fprintf(stderr, "ControllerView: unknown controller axis\n");
                 break;
         }
     }
@@ -90,6 +124,12 @@ void ControllerView::paintEvent(QPaintEvent *e)
     // main circles coords
     int ml_x0 = wid * 0.0578f, ml_y0 = hgt * 0.3f;
     int m_w = wid * 0.428f, m_h = hgt * 0.556f;
+    if(m_w != m_h)
+    {
+        int low = (m_w < m_h) ? m_w : m_h;
+        m_w = low;
+        m_h = low;
+    }
     int mr_x0 = ml_x0 + m_w + 5, mr_y0 = ml_y0;
 
     // draw main circles
@@ -101,6 +141,12 @@ void ControllerView::paintEvent(QPaintEvent *e)
 
     // left joystick coords
     int j_w = wid * 0.197f, j_h = hgt * 0.256f;
+    if (j_w != j_h) 
+    {
+        int low = (j_w < j_h) ? j_w : j_h;
+        j_w = low;
+        j_h = low;
+    }
     int jl_xc = ml_x0 + (m_w / 2), jl_yc = ml_y0 + (m_h / 2);
     int jl_x0 = jl_xc - (j_w / 2), jl_y0 = jl_yc - (j_h / 2);
 
@@ -112,9 +158,15 @@ void ControllerView::paintEvent(QPaintEvent *e)
     if (si_on)
     {
         length = sqrt(joystick.jl_x*joystick.jl_x + joystick.jl_y*joystick.jl_y);
-        if (length > 1.0f) { joystick.jl_x /= length; joystick.jl_y /= length; }
-        mul_x = joystick.jl_x;
-        mul_y = joystick.jl_y;
+        if (length > 1.0f) 
+        { 
+            joystick.jl_x /= length; 
+            joystick.jl_y /= length; 
+        }
+
+        // check axes flags
+        mul_x = (axes_flags & VCM_AXIS_YAW) ? joystick.jl_x : 0;
+        mul_y = (axes_flags & VCM_AXIS_ALT) ? joystick.jl_y : 0;
     }
     else
     {
@@ -123,16 +175,22 @@ void ControllerView::paintEvent(QPaintEvent *e)
     }
     
     // draw left joystick
-    painter.drawEllipse(jl_x0 + (mul_x* (jl_x0 - ml_x0)), 
+    painter.drawEllipse(jl_x0 + (mul_x * (jl_x0 - ml_x0)), 
             jl_y0 + (mul_y * (jl_y0 - ml_y0)), j_w, j_h);
 
     // normalize right joystick's vector
     if (si_on)
     {
         length = sqrt(joystick.jr_x*joystick.jr_x + joystick.jr_y*joystick.jr_y);
-        if (length > 1.0f) { joystick.jr_x /= length; joystick.jr_y /= length; }
-        mul_x = joystick.jr_x;
-        mul_y = joystick.jr_y;
+        if (length > 1.0f) 
+        { 
+            joystick.jr_x /= length; 
+            joystick.jr_y /= length; 
+        }
+
+        // check axes flags
+        mul_x = (axes_flags & VCM_AXIS_ROLL) ? joystick.jr_x : 0;
+        mul_y = (axes_flags & VCM_AXIS_PITCH) ? joystick.jr_y : 0;
     }
 
 
@@ -142,7 +200,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
 
     // status indicator
     int si_w = m_w * 2 + 5, si_h = si_w / 10;
-    int si_x0 = ml_x0, si_y0 = ml_y0 - si_h - 15;//+ m_h + 10;
+    int si_x0 = ml_x0, si_y0 = ml_y0 - si_h - 15;
 
     // draw status indicator
     if (si_on)
