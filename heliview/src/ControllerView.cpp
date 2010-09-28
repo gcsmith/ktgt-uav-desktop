@@ -120,17 +120,17 @@ void ControllerView::paintEvent(QPaintEvent *e)
     painter.setBrush(QBrush(Qt::gray));
     
     // main circles
+    int m_w = wid * 0.428f, m_h = hgt * 0.556f;
 
     // main circles coords
-    int ml_x0 = wid * 0.0578f, ml_y0 = hgt * 0.3f;
-    int m_w = wid * 0.428f, m_h = hgt * 0.556f;
-    if(m_w != m_h)
+    int ml_x0 = wid * 0.10f/*0.0578f*/, ml_y0 = hgt * 0.450f;
+    int mr_x0 = wid * 0.55f/*ml_x0 + m_w + 5*/, mr_y0 = ml_y0;
+    if (m_w != m_h)
     {
         int low = (m_w < m_h) ? m_w : m_h;
         m_w = low;
         m_h = low;
     }
-    int mr_x0 = ml_x0 + m_w + 5, mr_y0 = ml_y0;
 
     // draw main circles
     painter.drawEllipse(ml_x0, ml_y0, m_w, m_h);
@@ -197,23 +197,78 @@ void ControllerView::paintEvent(QPaintEvent *e)
     // draw right joystick
     painter.drawEllipse(QRectF(jr_x0 + (mul_x * (jr_x0 - mr_x0)), 
             jr_y0 + (mul_y * (jr_y0 - ml_y0)), j_w, j_h));
+    
+    // axes led circles
+    wid = mr_x0 + m_w - ml_x0;
+    int a_w = wid * 0.1983f, a_h = hgt * 0.128f;
 
-    // status indicator
-    int si_w = m_w * 2 + 5, si_h = si_w / 10;
-    int si_x0 = ml_x0, si_y0 = ml_y0 - si_h - 15;
+    // axes led coords
+    int thro_x0 = ml_x0;//wid * 0.2f;
+    int yaw_x0 = wid * 0.3f + ml_x0;
+    int pitch_x0 = wid * 0.6f + ml_x0;
+    int roll_x0 = wid;
 
-    // draw status indicator
-    if (si_on)
+    if (a_w != a_h)
     {
-        painter.setBrush(QBrush(Qt::green));
-        status = "Enabled";
+        int low = (a_w < a_h) ? a_w : a_h;
+        a_w = low;
+        a_h = low;
     }
-    else
-        painter.setBrush(QBrush(Qt::red));
+    
+    wid = this->width(), hgt = this->height();
 
-    painter.drawRect(QRectF(si_x0, si_y0, si_w, si_h));
-    painter.setPen(QPen(Qt::black, 5));
-    painter.drawText(QRectF(si_x0, si_y0 + 2, si_w, si_h), Qt::AlignHCenter | Qt::AlignVCenter, status);
+    painter.setBrush(QBrush(Qt::red));
+
+    // draw throttle led
+    if (axes_flags & VCM_AXIS_ALT)
+        painter.setBrush(Qt::green);
+    else
+        painter.setBrush(Qt::red);
+   
+    painter.drawEllipse(thro_x0, a_h, a_w, a_h);
+
+    // draw throttle text
+    int txt_x0 = (thro_x0 + (a_w / 2)) - (wid * 0.3f / 2);
+    int txt_y0 = 2 * a_h;
+    int txt_w = wid * 0.3f;
+    int txt_h = hgt * 0.113f;
+    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Throttle");
+    
+    // draw yaw led
+    if (axes_flags & VCM_AXIS_YAW)
+        painter.setBrush(Qt::green);
+    else
+        painter.setBrush(Qt::red);
+    
+    painter.drawEllipse(yaw_x0, a_h, a_w, a_h);
+   
+    // draw yaw text
+    txt_x0 = (yaw_x0 + (a_w / 2)) - (wid * 0.3f / 2);
+    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Yaw");
+
+    // draw pitch led
+    if (axes_flags & VCM_AXIS_PITCH)
+        painter.setBrush(Qt::green);
+    else
+        painter.setBrush(Qt::red);
+    
+    painter.drawEllipse(pitch_x0, a_h, a_w, a_h);
+    
+    // draw pitch text
+    txt_x0 = (pitch_x0 + (a_w / 2)) - (wid * 0.3f / 2);
+    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Pitch");
+
+    // draw roll led
+    if (axes_flags & VCM_AXIS_ROLL)
+        painter.setBrush(Qt::green);
+    else
+        painter.setBrush(Qt::red);
+    
+    painter.drawEllipse(roll_x0, a_h, a_w, a_h);
+
+    // draw roll text
+    txt_x0 = (roll_x0 + (a_w / 2)) - (wid * 0.3f / 2);
+    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Roll");
 }
 
 // -----------------------------------------------------------------------------
