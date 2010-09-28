@@ -116,7 +116,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     // set background color
     QPalette p = palette();
     if (si_on)
-        p.setColor(QPalette::Window, QColor(193, 255, 193, 155));
+        p.setColor(QPalette::Window, QColor(0,201,87,100));
     else
         p.setColor(QPalette::Window, Qt::gray);
     setPalette(p);
@@ -128,7 +128,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(QPen(QColor(0, 50, 155, 127), 3));
-    painter.setBrush(QBrush(Qt::gray));
+    painter.setBrush(QBrush(QColor(133,133,133)));
     
     // main circles
     int m_w = wid * 0.428f, m_h = hgt * 0.556f;
