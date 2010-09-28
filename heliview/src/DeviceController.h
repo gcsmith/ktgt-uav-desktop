@@ -29,7 +29,8 @@ public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value) = 0;
 
 signals:
-    void telemetryReady(float x, float y, float z, int alt, int rssi, int batt);
+    void telemetryReady(float x, float y, float z,
+                        int alt, int rssi, int batt, int aux);
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
     void takeoff();

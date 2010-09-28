@@ -235,7 +235,7 @@ void NetworkDeviceController::onSocketReadyRead()
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int32_t rssi, altitude, battery, framesz;
+    int32_t rssi, altitude, battery, aux, framesz;
     float x, y, z;
 
     if (0 == m_blocksz)
@@ -290,7 +290,8 @@ void NetworkDeviceController::onSocketReadyRead()
         rssi     = packet[PKT_VTI_RSSI];
         altitude = packet[PKT_VTI_ALT];
         battery  = packet[PKT_VTI_BATT];
-        emit telemetryReady(-z, -y, x, altitude, rssi, battery);
+        aux      = packet[PKT_VTI_AUX];
+        emit telemetryReady(-z, -y, x, altitude, rssi, battery, aux);
 #if 0
         fprintf(stderr,
                 "SERVER_ACK_TELEMETRY -> (%f, %f, %f) S (%d) A (%d) B (%d)\n",

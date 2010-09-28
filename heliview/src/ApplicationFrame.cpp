@@ -96,8 +96,10 @@ void ApplicationFrame::setupStatusBar()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::setupDeviceController()
 {
-    connect(m_controller, SIGNAL(telemetryReady(float, float, float, int, int, int)),
-            this, SLOT(onTelemetryReady(float, float, float, int, int, int)));
+    connect(m_controller,
+            SIGNAL(telemetryReady(float, float, float, int, int, int, int)),
+            this,
+            SLOT(onTelemetryReady(float, float, float, int, int, int, int)));
 
     connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
             this, SLOT(onConnectionStatusChanged(const QString&, bool)));
@@ -169,7 +171,7 @@ void ApplicationFrame::enableLogging(bool enable)
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onTelemetryReady(
-    float yaw, float pitch, float roll, int alt, int rssi, int batt)
+    float yaw, float pitch, float roll, int alt, int rssi, int batt, int aux)
 {
     static float time = 0.0f;
 
@@ -184,6 +186,13 @@ void ApplicationFrame::onTelemetryReady(
 
     elevationStatusBar->setValue(alt);
     elevationStatusBar->setFormat(QString("%1 inches").arg(alt));
+
+    fprintf(stderr, "aux = %d\n", aux);
+    aux = (int)(100.0f * ((aux - 900.0f) / 1150.0f));
+    aux = min(max(0, aux), 100);
+
+    auxiliaryStatusBar->setValue(aux);
+    auxiliaryStatusBar->setFormat(QString("%p%"));
 
     m_graphs[0]->addDataPoint(time, yaw + 180.0f, 0.0f);
     m_graphs[1]->addDataPoint(time, pitch + 180.0f, 0.0f);

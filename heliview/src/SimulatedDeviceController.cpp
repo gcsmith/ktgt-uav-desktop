@@ -63,7 +63,7 @@ void SimulatedDeviceController::onSimulateTick()
         m_pitch = 7.0f * sin(m_time);
         m_roll = 5.0f * sin(m_time * 2.0f);
     }
-    emit telemetryReady(m_yaw, m_pitch, m_roll, 0, 200, 100);
+    emit telemetryReady(m_yaw, m_pitch, m_roll, 0, 200, 100, 1500);
 }
 
 // -----------------------------------------------------------------------------

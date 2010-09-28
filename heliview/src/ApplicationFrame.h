@@ -30,7 +30,7 @@ public:
 
 public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
-                          int alt, int rssi, int batt);
+                          int alt, int rssi, int batt, int aux);
     void onConnectionStatusChanged(const QString &text, bool status);
 
     // menu action triggered event callbacks
