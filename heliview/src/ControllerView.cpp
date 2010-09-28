@@ -25,6 +25,9 @@ ControllerView::ControllerView(QWidget *parent)
     joystick.jr_x = 0.0f;
     joystick.jr_y = 0.0f;
 
+    setBackgroundRole(QPalette::Window);
+    setAutoFillBackground(true);
+
     repaint();
 }
 
@@ -110,6 +113,14 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
 // -----------------------------------------------------------------------------
 void ControllerView::paintEvent(QPaintEvent *e)
 {
+    // set background color
+    QPalette p = palette();
+    if (si_on)
+        p.setColor(QPalette::Window, QColor(193, 255, 193, 155));
+    else
+        p.setColor(QPalette::Window, Qt::gray);
+    setPalette(p);
+
     float length, mul_x, mul_y;
     QString status("Disabled");
     int wid = this->width(), hgt = this->height();
@@ -123,7 +134,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     int m_w = wid * 0.428f, m_h = hgt * 0.556f;
 
     // main circles coords
-    int ml_x0 = wid * 0.10f/*0.0578f*/, ml_y0 = hgt * 0.450f;
+    int ml_x0 = wid * 0.05f/*0.0578f*/, ml_y0 = hgt * 0.350f;
     int mr_x0 = wid * 0.55f/*ml_x0 + m_w + 5*/, mr_y0 = ml_y0;
     if (m_w != m_h)
     {
@@ -200,13 +211,13 @@ void ControllerView::paintEvent(QPaintEvent *e)
     
     // axes led circles
     wid = mr_x0 + m_w - ml_x0;
-    int a_w = wid * 0.1983f, a_h = hgt * 0.128f;
+    int a_w = wid * 0.1983f, a_h = hgt * 0.128f, a_y0 = hgt * 0.028f;
 
     // axes led coords
     int thro_x0 = ml_x0;//wid * 0.2f;
     int yaw_x0 = wid * 0.3f + ml_x0;
     int pitch_x0 = wid * 0.6f + ml_x0;
-    int roll_x0 = wid;
+    int roll_x0 = mr_x0 + m_w - (a_w / 2);
 
     if (a_w != a_h)
     {
@@ -225,11 +236,11 @@ void ControllerView::paintEvent(QPaintEvent *e)
     else
         painter.setBrush(Qt::red);
    
-    painter.drawEllipse(thro_x0, a_h, a_w, a_h);
+    painter.drawEllipse(thro_x0, a_y0, a_w, a_h);
 
     // draw throttle text
-    int txt_x0 = (thro_x0 + (a_w / 2)) - (wid * 0.3f / 2);
-    int txt_y0 = 2 * a_h;
+    int txt_x0 = (thro_x0 + (a_w / 2)) - (wid * 0.3f / 2) + 5;
+    int txt_y0 = a_y0 + a_h + 5;
     int txt_w = wid * 0.3f;
     int txt_h = hgt * 0.113f;
     painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Throttle");
@@ -240,7 +251,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     else
         painter.setBrush(Qt::red);
     
-    painter.drawEllipse(yaw_x0, a_h, a_w, a_h);
+    painter.drawEllipse(yaw_x0, a_y0, a_w, a_h);
    
     // draw yaw text
     txt_x0 = (yaw_x0 + (a_w / 2)) - (wid * 0.3f / 2);
@@ -252,7 +263,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     else
         painter.setBrush(Qt::red);
     
-    painter.drawEllipse(pitch_x0, a_h, a_w, a_h);
+    painter.drawEllipse(pitch_x0, a_y0, a_w, a_h);
     
     // draw pitch text
     txt_x0 = (pitch_x0 + (a_w / 2)) - (wid * 0.3f / 2);
@@ -264,7 +275,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     else
         painter.setBrush(Qt::red);
     
-    painter.drawEllipse(roll_x0, a_h, a_w, a_h);
+    painter.drawEllipse(roll_x0, a_y0, a_w, a_h);
 
     // draw roll text
     txt_x0 = (roll_x0 + (a_w / 2)) - (wid * 0.3f / 2);
