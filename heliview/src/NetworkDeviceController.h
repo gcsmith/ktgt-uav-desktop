@@ -59,6 +59,7 @@ protected:
     uint32_t          m_vcm_type;
     std::vector<char> m_buffer;
     ctrl_sigs         m_manual_sigs;
+    char              m_mcm_axes;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_

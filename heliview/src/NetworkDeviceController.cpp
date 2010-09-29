@@ -12,12 +12,15 @@
 #include "Utility.h"
 #include "uav_protocol.h"
 
+// macro inverts the bit (y) in the number (x)
+#define FLIP_A_BIT(x,y) ((((x) & (y)) ^ (y)) | ((x) & ~(y)))
+
 using namespace std;
 
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_vcm_type(VCM_TYPE_RADIO)
+  m_vcm_type(VCM_TYPE_RADIO), m_mcm_axes(0)
 {
     m_telem_timer = new QTimer(this);
     connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
@@ -313,8 +316,8 @@ void NetworkDeviceController::onSocketReadyRead()
         default:             cerr << "!!! invalid !!!\n"; break;
         }
         break;
-    case SERVER_ACK_FLIGHT_CTL:
-        cerr << "got ACK for FLIGHT_CTL:\n";
+    case SERVER_ACK_SET_MCM_AXES:
+        cerr << "got ACK for SET_MCM_AXES:\n";
         break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
@@ -373,10 +376,55 @@ void NetworkDeviceController::onInputReady(
                 m_vcm_type = VCM_TYPE_MIXED;
             }
 
+            m_mcm_axes = 0;
+
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = m_vcm_type;
-            cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
+            cmd_buffer[PKT_VCM_AXES] = m_mcm_axes;
+
+            stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
+            m_sock->waitForBytesWritten();
+        }
+        else if ((m_vcm_type == VCM_TYPE_MIXED) && (value > 0.0) && 
+                (index >= 4) && (index <= 7))
+        {
+            QDataStream stream(m_sock);
+            stream.setVersion(QDataStream::Qt_4_0);
+
+            // update the mixed mode controlled axes
+            switch (index)
+            {
+                // A
+                case 4:
+                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_ALT);
+                    break;
+
+                // B
+                case 5:
+                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_ROLL);
+                    break;
+
+                // X
+                case 6:
+                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_YAW);
+                    break;
+
+                // Y
+                case 7:
+                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_PITCH);
+                    break;
+
+                default:
+                    fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
+                    break;
+            }
+
+            // tell server about which axes are controlled by the mixed mode controller
+            cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_MCM_AXES;
+            cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
+            cmd_buffer[PKT_VCM_TYPE] = m_vcm_type;
+            cmd_buffer[PKT_VCM_AXES] = m_mcm_axes;
 
             stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
             m_sock->waitForBytesWritten();
@@ -386,51 +434,28 @@ void NetworkDeviceController::onInputReady(
     {
         if (index >= 0 && index <= 3)
         {
-            /*
-            union 
+            switch (index)
             {
-                uint32_t int_val;
-                float float_val;
-            } evt_val;
-            
+                case 0:
+                    m_manual_sigs.yaw = value;
+                    break;
+                    
+                case 1:
+                    m_manual_sigs.alt = -value;
+                    break;
 
-            QDataStream stream(m_sock);
-            stream.setVersion(QDataStream::Qt_4_0);
+                case 2:
+                    m_manual_sigs.roll = value;
+                    break;
 
-            cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
-            cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
-            */
+                case 3:
+                    m_manual_sigs.pitch = value;
+                    break;
 
-            if (index == 0)
-            {
-                cerr << "mixed controller: yaw\n";
-                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_YAW;
-                m_manual_sigs.yaw = value;
+                default:
+                    fprintf(stderr, "NetworkDeviceController: unknown controller axis");
+                    break;
             }
-            else if (index == 1)
-            {
-                cerr << "mixed controller: altitude\n";
-                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_PITCH;
-                m_manual_sigs.alt = -value;
-            }
-            else if (index == 2)
-            {
-                cerr << "mixed controller: roll\n";
-                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ROLL; 
-                m_manual_sigs.roll = value;
-            }
-            else 
-            {
-                cerr << "mixed controller: pitch\n";
-                //cmd_buffer[PKT_MCM_AXIS] = VCM_AXIS_ALT;
-                m_manual_sigs.pitch = value;
-            }
-
-            //evt_val.float_val = value;
-            //cmd_buffer[PKT_MCM_VALUE] = evt_val.int_val;
-
-            //stream.writeRawData((char *)cmd_buffer, PKT_MCM_LENGTH);
-            //m_sock->waitForBytesWritten();
         }
     }
 }
@@ -442,6 +467,7 @@ void NetworkDeviceController::shutdown()
     {
         m_telem_timer->stop();
         m_mjpeg_timer->stop();
+        m_controller_timer->stop();
         emit connectionStatusChanged(m_device + QString(" disconnected"), false);
     }
 }
