@@ -421,9 +421,9 @@ void NetworkDeviceController::onInputReady(
             }
 
             // tell server about which axes are controlled by the mixed mode controller
-            cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_MCM_AXES;
+            cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
-            cmd_buffer[PKT_VCM_TYPE] = m_vcm_type;
+            cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_MIXED;
             cmd_buffer[PKT_VCM_AXES] = m_mcm_axes;
 
             stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
