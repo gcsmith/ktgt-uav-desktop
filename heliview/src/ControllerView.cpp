@@ -134,16 +134,37 @@ void ControllerView::paintEvent(QPaintEvent *e)
     int m_w = wid * 0.428f, m_h = hgt * 0.556f;
 
     // main circles coords
-    int ml_x0 = wid * 0.05f/*0.0578f*/, ml_y0 = hgt * 0.350f;
-    int mr_x0 = wid * 0.55f/*ml_x0 + m_w + 5*/, mr_y0 = ml_y0;
     if (m_w != m_h)
     {
         int low = (m_w < m_h) ? m_w : m_h;
         m_w = low;
         m_h = low;
     }
-
+    
+    int ml_x0 = wid * 0.35f - (m_w / 2)/*0.0578f*/, ml_y0 = hgt * 0.350f;
+    int mr_x0 = wid * 0.65f - (m_w / 2)/*ml_x0 + m_w + 5*/, mr_y0 = ml_y0;
+    fprintf(stderr, "1) ml_x0 = %d, wid = %d\n", ml_x0, wid);
+    
+    while (mr_x0 <= (ml_x0 + m_w))
+    {
+        
+        ml_x0 = ml_x0 - ((ml_x0 + m_w - mr_x0) / 2) - 1;
+        mr_x0 = mr_x0 + ((ml_x0 + m_w - mr_x0) / 2) + 5;
+    }
+    while ((mr_x0 - ml_x0 - m_w) < 10)
+    {
+        ml_x0--;
+        mr_x0++;
+    }
+    /*
+    while ((mr_x0 + m_w) >= wid)
+    {
+        mr_x0 -= 10;
+        ml_x0 -= 10;
+    }
+    */
     // draw main circles
+    fprintf(stderr, "2) ml_x0 = %d, wid = %d\n", ml_x0, wid);
     painter.drawEllipse(ml_x0, ml_y0, m_w, m_h);
     painter.drawEllipse(mr_x0, mr_y0, m_w, m_h);
 
