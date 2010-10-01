@@ -143,7 +143,6 @@ void ControllerView::paintEvent(QPaintEvent *e)
     
     int ml_x0 = wid * 0.35f - (m_w / 2)/*0.0578f*/, ml_y0 = hgt * 0.350f;
     int mr_x0 = wid * 0.65f - (m_w / 2)/*ml_x0 + m_w + 5*/, mr_y0 = ml_y0;
-    fprintf(stderr, "1) ml_x0 = %d, wid = %d\n", ml_x0, wid);
     
     while (mr_x0 <= (ml_x0 + m_w))
     {
@@ -163,8 +162,8 @@ void ControllerView::paintEvent(QPaintEvent *e)
         ml_x0 -= 10;
     }
     */
+
     // draw main circles
-    fprintf(stderr, "2) ml_x0 = %d, wid = %d\n", ml_x0, wid);
     painter.drawEllipse(ml_x0, ml_y0, m_w, m_h);
     painter.drawEllipse(mr_x0, mr_y0, m_w, m_h);
 
@@ -260,7 +259,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
     painter.drawEllipse(thro_x0, a_y0, a_w, a_h);
 
     // draw throttle text
-    int txt_x0 = (thro_x0 + (a_w / 2)) - (wid * 0.3f / 2) + 5;
+    int txt_x0 = (thro_x0 + (a_w / 2)) - (wid * 0.3f / 2) + 1;
     int txt_y0 = a_y0 + a_h + 5;
     int txt_w = wid * 0.3f;
     int txt_h = hgt * 0.113f;
