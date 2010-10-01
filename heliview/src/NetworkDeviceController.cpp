@@ -20,7 +20,7 @@ using namespace std;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_vcm_type(VCM_TYPE_RADIO), m_mcm_axes(0)
+  m_vcm_type(VCM_TYPE_RADIO), m_vcm_axes(0)
 {
     m_telem_timer = new QTimer(this);
     connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
@@ -316,9 +316,6 @@ void NetworkDeviceController::onSocketReadyRead()
         default:             cerr << "!!! invalid !!!\n"; break;
         }
         break;
-    case SERVER_ACK_SET_MCM_AXES:
-        cerr << "got ACK for SET_MCM_AXES:\n";
-        break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
         break;
@@ -376,12 +373,12 @@ void NetworkDeviceController::onInputReady(
                 m_vcm_type = VCM_TYPE_MIXED;
             }
 
-            m_mcm_axes = 0;
+            m_vcm_axes = 0;
 
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = m_vcm_type;
-            cmd_buffer[PKT_VCM_AXES] = m_mcm_axes;
+            cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
 
             stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
             m_sock->waitForBytesWritten();
@@ -397,22 +394,22 @@ void NetworkDeviceController::onInputReady(
             {
                 // A
                 case 4:
-                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_ALT);
+                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ALT);
                     break;
 
                 // B
                 case 5:
-                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_ROLL);
+                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ROLL);
                     break;
 
                 // X
                 case 6:
-                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_YAW);
+                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_YAW);
                     break;
 
                 // Y
                 case 7:
-                    m_mcm_axes = FLIP_A_BIT(m_mcm_axes, VCM_AXIS_PITCH);
+                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_PITCH);
                     break;
 
                 default:
@@ -424,7 +421,7 @@ void NetworkDeviceController::onInputReady(
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_MIXED;
-            cmd_buffer[PKT_VCM_AXES] = m_mcm_axes;
+            cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
 
             stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
             m_sock->waitForBytesWritten();

@@ -187,7 +187,6 @@ void ApplicationFrame::onTelemetryReady(
     elevationStatusBar->setValue(alt);
     elevationStatusBar->setFormat(QString("%1 inches").arg(alt));
 
-    fprintf(stderr, "aux = %d\n", aux);
     aux = (int)(100.0f * ((aux - 900.0f) / 1150.0f));
     aux = min(max(0, aux), 100);
 
