@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>956</width>
-    <height>727</height>
+    <height>758</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -216,6 +216,9 @@
     </property>
     <addaction name="actionFileConnect"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_Log"/>
+    <addaction name="actionSave_Screenshot"/>
+    <addaction name="separator"/>
     <addaction name="actionFileExit"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
@@ -317,6 +320,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidget_4">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
    <property name="windowTitle">
     <string>Status Indicators</string>
    </property>
@@ -555,6 +561,9 @@
      <height>125</height>
     </size>
    </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
    <property name="windowTitle">
     <string>Command Log</string>
    </property>
@@ -602,6 +611,9 @@ p, li { white-space: pre-wrap; }
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidget_6">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
    <property name="windowTitle">
     <string>Remote Control</string>
    </property>
@@ -645,6 +657,16 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_Log">
+   <property name="text">
+    <string>Save &amp;Log</string>
+   </property>
+  </action>
+  <action name="actionSave_Screenshot">
+   <property name="text">
+    <string>Save &amp;Frame</string>
    </property>
   </action>
  </widget>
