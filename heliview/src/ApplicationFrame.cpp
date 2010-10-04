@@ -10,6 +10,7 @@
 #include <QTextStream>
 #include <iostream>
 #include "ApplicationFrame.h"
+#include "ConnectionDialog.h"
 #include "Utility.h"
 
 using namespace std;
@@ -220,10 +221,8 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onFileConnectTriggered()
 {
-    QMessageBox mb(QMessageBox::Information,
-                   "Connect to Target",
-                   "TODO: connection dialog");
-    mb.exec();
+    ConnectionDialog dialog(this);
+    dialog.exec();
 }
 
 // -----------------------------------------------------------------------------

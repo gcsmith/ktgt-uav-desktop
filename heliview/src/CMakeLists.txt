@@ -38,6 +38,7 @@ ENDIF(WIN32)
 
 SET(heliview_cpp
         ApplicationFrame.cpp
+        ConnectionDialog.cpp
         ControllerView.cpp
         DeviceController.cpp
         HeliView.cpp
@@ -51,6 +52,7 @@ SET(heliview_cpp
 
 SET(heliview_src_moc
         ApplicationFrame.h
+        ConnectionDialog.h
         ControllerView.h
         DeviceController.h
         Gamepad.h
@@ -66,7 +68,8 @@ SET(heliview_src_qrc
         HeliView.qrc)
 
 SET(heliview_src_ui
-        ApplicationFrame.ui)
+        ApplicationFrame.ui
+        ConnectionDialog.ui)
 
 QT4_AUTOMOC(${heliview_src_moc})
 QT4_WRAP_CPP(heliview_moc ${heliview_src_moc})
