@@ -11,6 +11,7 @@
 #include <iostream>
 #include "ApplicationFrame.h"
 #include "ConnectionDialog.h"
+#include "SettingsDialog.h"
 #include "Utility.h"
 
 using namespace std;
@@ -221,8 +222,8 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onFileConnectTriggered()
 {
-    ConnectionDialog dialog(this);
-    dialog.exec();
+    ConnectionDialog cd(this);
+    cd.exec();
 }
 
 // -----------------------------------------------------------------------------
@@ -235,10 +236,8 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    QMessageBox mb(QMessageBox::Information,
-                   "HeliView Settings",
-                   "TODO: settings dialog");
-    mb.exec();
+    SettingsDialog sd(this);
+    sd.exec();
 }
 
 // -----------------------------------------------------------------------------

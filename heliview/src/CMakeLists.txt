@@ -45,6 +45,7 @@ SET(heliview_cpp
         LineGraph.cpp
         NetworkDeviceController.cpp
         SerialDeviceController.cpp
+        SettingsDialog.cpp
         SimulatedDeviceController.cpp
         VirtualView.cpp
         VideoView.cpp
@@ -59,6 +60,7 @@ SET(heliview_src_moc
         LineGraph.h
         NetworkDeviceController.h
         SerialDeviceController.h
+        SettingsDialog.h
         SimulatedDeviceController.h
         VirtualView.h
         VideoView.h
@@ -69,7 +71,8 @@ SET(heliview_src_qrc
 
 SET(heliview_src_ui
         ApplicationFrame.ui
-        ConnectionDialog.ui)
+        ConnectionDialog.ui
+        SettingsDialog.ui)
 
 QT4_AUTOMOC(${heliview_src_moc})
 QT4_WRAP_CPP(heliview_moc ${heliview_src_moc})
