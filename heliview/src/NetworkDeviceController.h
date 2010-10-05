@@ -40,10 +40,16 @@ public slots:
     void onTelemetryTick();
     void onVideoTick();
     void onControllerTick();
+    void onSendThroEvent(float val);
     void onSocketReadyRead();
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
+
+signals:
+    void updateThrottleValue(float val);
+    void updateAxesToThrottleThread(int vcm_axes);
+    void exitThrottleThread();
 
 protected:
     bool sendPacket(uint32_t command);

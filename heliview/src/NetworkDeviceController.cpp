@@ -9,6 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include "NetworkDeviceController.h"
+#include "ThrottleThread.h"
 #include "Utility.h"
 #include "uav_protocol.h"
 
@@ -16,6 +17,8 @@
 #define FLIP_A_BIT(x,y) ((((x) & (y)) ^ (y)) | ((x) & ~(y)))
 
 using namespace std;
+
+ThrottleThread *m_thro_thrd;
 
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
@@ -36,7 +39,6 @@ NetworkDeviceController::NetworkDeviceController(const QString &device)
     m_manual_sigs.pitch = 0.0f;
     m_manual_sigs.roll = 0.0f;
     m_manual_sigs.yaw = 0.0f;
-
 }
 
 // -----------------------------------------------------------------------------
@@ -83,12 +85,18 @@ bool NetworkDeviceController::open()
     }
 
     emit connectionStatusChanged(QString("Connected to ") + m_device, true);
+
+    // create throttle thread
+    m_thro_thrd = new ThrottleThread(this, m_sock, 0);
+    connect(m_thro_thrd, SIGNAL(sendThrottleEvent(float)), this, SLOT(onSendThroEvent(float)));
+
     return true;
 }
 
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::close()
 {
+    emit exitThrottleThread();
     if (m_sock)
     {
         // disconnect the socket, wait for completion
@@ -171,10 +179,10 @@ void NetworkDeviceController::onVideoTick()
 void NetworkDeviceController::onControllerTick()
 {
     // Memory of previous mixed controller values
-    static float prev_alt = 0.0;
-    static float prev_pitch = 0.0;
-    static float prev_roll = 0.0;
-    static float prev_yaw = 0.0;
+    static float prev_alt = 0.0f;
+    static float prev_pitch = 0.0f;
+    static float prev_roll = 0.0f;
+    static float prev_yaw = 0.0f;
 
     if (m_vcm_type == VCM_TYPE_MIXED)
     {
@@ -187,16 +195,17 @@ void NetworkDeviceController::onControllerTick()
       
         // altitude
         temp.f = m_manual_sigs.alt;
-        if (m_manual_sigs.alt != prev_alt)
+        if ((m_vcm_axes & VCM_AXIS_ALT) && (temp.f != prev_alt))
         {
+            emit updateThrottleValue(temp.f);
             prev_alt = m_manual_sigs.alt;
-            send = 1;
+            //send = 1;
         }
         cmd_buffer[PKT_MCM_AXIS_ALT] = temp.i;
 
         // pitch
         temp.f = m_manual_sigs.pitch;
-        if (m_manual_sigs.pitch != prev_pitch)
+        if ((m_vcm_axes & VCM_AXIS_PITCH) && (temp.f != prev_pitch))
         {
             prev_pitch = m_manual_sigs.pitch;
             send = 1;
@@ -205,7 +214,7 @@ void NetworkDeviceController::onControllerTick()
 
         // roll
         temp.f = m_manual_sigs.roll;
-        if (m_manual_sigs.roll != prev_roll)
+        if ((m_vcm_axes & VCM_AXIS_ROLL) && (temp.f != prev_roll))
         {
             prev_roll = m_manual_sigs.roll;
             send = 1;
@@ -214,7 +223,7 @@ void NetworkDeviceController::onControllerTick()
 
         // yaw
         temp.f = m_manual_sigs.yaw;
-        if (m_manual_sigs.yaw!= prev_yaw)
+        if ((m_vcm_axes & VCM_AXIS_YAW) && (temp.f != prev_yaw))
         {
             prev_yaw = m_manual_sigs.yaw;
             send = 1;
@@ -231,6 +240,22 @@ void NetworkDeviceController::onControllerTick()
             fprintf(stderr, "Sent YAW:   %f\n\n", m_manual_sigs.yaw);
         }
     }
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onSendThroEvent(float val)
+{
+    uint32_t cmd_buffer[12];
+    union { int i; float f; } temp;
+
+    temp.f = val;
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_THRO_EVT;
+    cmd_buffer[PKT_LENGTH]  = PKT_THRO_EVT_LENGTH;
+    cmd_buffer[PKT_THRO_EVT_VALUE] = temp.i;
+
+    fprintf(stderr, "acting on throttle event signal %f\n", temp.f);
+    if (!sendPacket(cmd_buffer, PKT_THRO_EVT_LENGTH))
+        cerr << "failed to send throttle event\n";
 }
 
 // -----------------------------------------------------------------------------
@@ -366,6 +391,7 @@ void NetworkDeviceController::onInputReady(
             {
                 cerr << "requesting switch to radio mode...\n";
                 m_vcm_type = VCM_TYPE_RADIO;
+                emit exitThrottleThread();
             }
             else
             {
@@ -395,6 +421,11 @@ void NetworkDeviceController::onInputReady(
                 // A
                 case 4:
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ALT);
+                    if (m_vcm_axes & VCM_AXIS_ALT)
+                        m_thro_thrd->start();
+                    else
+                        emit exitThrottleThread();
+
                     break;
 
                 // B
@@ -416,6 +447,8 @@ void NetworkDeviceController::onInputReady(
                     fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
                     break;
             }
+
+            emit updateAxesToThrottleThread(m_vcm_axes);
 
             // tell server about which axes are controlled by the mixed mode controller
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;

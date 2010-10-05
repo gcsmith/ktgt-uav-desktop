@@ -47,6 +47,7 @@ SET(heliview_cpp
         SerialDeviceController.cpp
         SettingsDialog.cpp
         SimulatedDeviceController.cpp
+        ThrottleThread.cpp
         VirtualView.cpp
         VideoView.cpp
         ${heliview_plat_cpp})
@@ -62,6 +63,7 @@ SET(heliview_src_moc
         SerialDeviceController.h
         SettingsDialog.h
         SimulatedDeviceController.h
+        ThrottleThread.h
         VirtualView.h
         VideoView.h
         ${heliview_plat_moc})
