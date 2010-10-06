@@ -448,8 +448,6 @@ void NetworkDeviceController::onInputReady(
                     break;
             }
 
-            emit updateAxesToThrottleThread(m_vcm_axes);
-
             // tell server about which axes are controlled by the mixed mode controller
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;

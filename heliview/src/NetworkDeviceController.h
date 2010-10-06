@@ -48,7 +48,6 @@ public slots:
 
 signals:
     void updateThrottleValue(float val);
-    void updateAxesToThrottleThread(int vcm_axes);
     void exitThrottleThread();
 
 protected:

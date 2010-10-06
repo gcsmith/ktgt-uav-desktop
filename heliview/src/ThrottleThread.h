@@ -17,7 +17,6 @@ public:
 public slots:
     void onPollThrottleValue();
     void onUpdateThrottleValue(float val);
-    void onUpdateAxes(int vcm_axes);
     void onExitRun();
 
 signals:
@@ -29,7 +28,6 @@ protected:
     NetworkDeviceController  *ndc;
     QTcpSocket               *qsock;
     QTimer                   *qtimer_poll_value;
-    int                       vcm_flags;
     int                       alive;
     float                     value;
     float                     prev_value;

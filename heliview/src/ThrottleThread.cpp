@@ -2,13 +2,12 @@
 #include "uav_protocol.h"
 
 ThrottleThread::ThrottleThread(NetworkDeviceController *ctlr, QTcpSocket *sock, int vcm_axes)
-: ndc(ctlr), qsock(NULL), qtimer_poll_value(NULL), vcm_flags(vcm_axes)
+: ndc(ctlr), qsock(NULL), qtimer_poll_value(NULL)
 {
     qtimer_poll_value = new QTimer();
     connect(qtimer_poll_value, SIGNAL(timeout()), this, SLOT(onPollThrottleValue()));
 
     connect(ndc, SIGNAL(updateThrottleValue(float)), this, SLOT(onUpdateThrottleValue(float)));
-    connect(ndc, SIGNAL(updateAxesToThrottleThread(int)), this, SLOT(onUpdateAxes(int)));
     connect(ndc, SIGNAL(exitThrottleThread()), this, SLOT(onExitRun()));
 
     alive = 0;
@@ -51,12 +50,6 @@ void ThrottleThread::onUpdateThrottleValue(float val)
     prev_value = value;
     value = val;
     fprintf(stderr, "ThrottleThread: updating throttle value to %f\n", value);
-}
-
-void ThrottleThread::onUpdateAxes(int vcm_axes)
-{
-    fprintf(stderr, "ThrottleThread: updating axes\n");
-    vcm_flags = vcm_axes;
 }
 
 void ThrottleThread::onExitRun()
