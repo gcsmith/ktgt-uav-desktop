@@ -53,12 +53,6 @@ bool LinuxGamepad::open(const QString &device)
     ioctl(m_fd, JSIOCGNAME(MAX_NAME_LEN), &driver_name);
 
     m_name = QString(driver_name);
-
-#if 0
-    qDebug() << "detected" << m_name << "version" << m_version << "("
-             << m_axes << "axes" << m_buttons << "buttons )";
-#endif
-
     return true;
 }
 
@@ -67,6 +61,8 @@ void LinuxGamepad::close()
 {
     if (m_fd >= 0)
     {
+        // terminate the polling thread and close the js* file handle
+        stop();
         ::close(m_fd);
         m_fd = -1;
     }
@@ -118,11 +114,6 @@ void LinuxGamepadThread::run()
             fprintf(stderr, "failed to read from joystick\n");
             continue;
         }
-
-#if 0
-        fprintf(stderr, "ts %d type %d id %d val %d\n",
-                event.time, event.type, event.number, event.value);
-#endif
 
         GamepadEvent gpe;
         float val;
