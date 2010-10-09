@@ -35,6 +35,7 @@ void VideoView::paintEvent(QPaintEvent *e)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, jpeg_image->scaled(this->width(), this->height()));
+    painter.drawRect(x1,y1,(x2-x1),(y2-y1));
 }
 
 // -----------------------------------------------------------------------------
@@ -60,9 +61,23 @@ void VideoView::onImageReady(const char *data, size_t length)
 }
 
 // -----------------------------------------------------------------------------
+void VideoView::onCoordinatesReady(int _x1, int _y1, int _x2, int _y2)
+{
+    if (m_ticks < 20)
+    {
+        x1 = _x1;
+        y1 = _y1;
+        x2 = _x2;
+        y2 = _y2;;
+        repaint();
+    }
+}
+
+// -----------------------------------------------------------------------------
 void VideoView::onStatusTick()
 {
     ++m_ticks;
+
     if (m_ticks > 20)
     {
         jpeg_image->load(":/data/test_pattern.jpg");

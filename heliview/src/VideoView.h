@@ -21,6 +21,7 @@ public:
 
 public slots:
     void onImageReady(const char *data, size_t length);
+    void onCoordinatesReady(int x1, int y1, int x2, int y2);
     void onStatusTick();
 
 protected:
@@ -30,7 +31,7 @@ protected:
     QTimer *m_timer;
     QImage *jpeg_image;
     QUdpSocket *udp_sock;
-    int m_ticks;
+    int m_ticks, x1, x2, y1, y2;
 };
 
 #endif // _HELIVIEW_VIDEOVIEW__H_
