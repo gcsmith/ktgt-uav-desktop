@@ -6,6 +6,7 @@
 // -----------------------------------------------------------------------------
 
 #include <iostream>
+#include <QMessageBox>
 #include <QApplication>
 #include <QDebug>
 #include "ApplicationFrame.h"
@@ -61,25 +62,39 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    DeviceController *controller = CreateDeviceController(
-            QString::fromStdString(source),
-            QString::fromStdString(device));
-    if (!controller)
+    try
     {
-        cerr << "invalid source type '" << source << "' specified\n";
+        DeviceController *controller = CreateDeviceController(
+                QString::fromStdString(source),
+                QString::fromStdString(device));
+        if (!controller)
+        {
+            cerr << "invalid source type '" << source << "' specified\n";
+            return EXIT_FAILURE;
+        }
+
+        // create and show the interface
+        ApplicationFrame frame(controller, disable_virtual_view);
+        if (0 != logfile.length())
+        {
+            frame.openLogFile(QString::fromStdString(logfile));
+            frame.enableLogging(true);
+        }
+
+        frame.show();
+        return app.exec();
+    }
+    catch (exception &e)
+    {
+        QString msg(e.what());
+        msg.append("\n===================================================\n");
+        msg.append("Make sure 'cfg' and 'media' exist in the ");
+        msg.append("directory as the HeliView executable.");
+
+        QMessageBox mb(QMessageBox::Critical, "Fatal Error", msg);
+        mb.exec();
         return EXIT_FAILURE;
     }
-
-    // create and show the interface
-    ApplicationFrame frame(controller, disable_virtual_view);
-    if (0 != logfile.length())
-    {
-        frame.openLogFile(QString::fromStdString(logfile));
-        frame.enableLogging(true);
-    }
-
-    frame.show();
-    return app.exec();
 }
 
 // -----------------------------------------------------------------------------
