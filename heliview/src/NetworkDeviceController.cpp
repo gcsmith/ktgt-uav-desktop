@@ -344,7 +344,6 @@ void NetworkDeviceController::onSocketReadyRead()
     case SERVER_UPDATE_TRACKING:
         emit coordinatesReady((int)packet[PKT_CTS_X1], (int)packet[PKT_CTS_Y1], 
             (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
-        printf("GIANT COCKS EVERYWHERE!!!!!\n");
         break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
