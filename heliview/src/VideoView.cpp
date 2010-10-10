@@ -13,7 +13,7 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 VideoView::VideoView(QWidget *parent)
-: QWidget(parent), jpeg_image(NULL), m_ticks(0)
+: QWidget(parent), jpeg_image(NULL), m_ticks(0), m_showBox(false)
 {
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onStatusTick()));
@@ -36,14 +36,17 @@ void VideoView::paintEvent(QPaintEvent *e)
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, jpeg_image->scaled(width(), height()));
 
-    float xscale = width() / 320.0f;    // TODO: don't hard code this
-    float yscale = height() / 240.0f;   // TODO: don't hard code this
+    if (m_showBox)
+    {
+        float xscale = width() / 320.0f;    // TODO: don't hard code this
+        float yscale = height() / 240.0f;   // TODO: don't hard code this
 
-    int x1_s = (int)(x1 * xscale), y1_s = (int)(y1 * yscale);
-    int x2_s = (int)(x2 * xscale), y2_s = (int)(y2 * yscale);
+        int x1_s = (int)(m_x1 * xscale), y1_s = (int)(m_y1 * yscale);
+        int x2_s = (int)(m_x2 * xscale), y2_s = (int)(m_y2 * yscale);
 
-    painter.setPen(QPen(QColor(255, 0, 0, 255), 3));
-    painter.drawRect(x1_s, y1_s, (x2_s - x1_s), (y2_s - y1_s));
+        painter.setPen(QPen(QColor(255, 0, 0, 255), 3));
+        painter.drawRect(x1_s, y1_s, (x2_s - x1_s), (y2_s - y1_s));
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -69,12 +72,13 @@ void VideoView::onImageReady(const char *data, size_t length)
 }
 
 // -----------------------------------------------------------------------------
-void VideoView::onCoordinatesReady(int _x1, int _y1, int _x2, int _y2)
+void VideoView::onTrackStatusUpdate(bool track, int x1, int y1, int x2, int y2)
 {
-    x1 = _x1;
-    y1 = _y1;
-    x2 = _x2;
-    y2 = _y2;;
+    m_showBox = track;
+    m_x1 = x1;
+    m_y1 = y1;
+    m_x2 = x2;
+    m_y2 = y2;;
 }
 
 // -----------------------------------------------------------------------------

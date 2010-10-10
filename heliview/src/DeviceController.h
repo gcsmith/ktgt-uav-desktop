@@ -33,7 +33,7 @@ signals:
                         int alt, int rssi, int batt, int aux);
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
-    void coordinatesReady(int x1, int y1, int x2, int y2);
+    void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
     void takeoff();
     void landing();
 };

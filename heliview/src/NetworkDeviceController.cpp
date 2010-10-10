@@ -342,8 +342,10 @@ void NetworkDeviceController::onSocketReadyRead()
         }
         break;
     case SERVER_UPDATE_TRACKING:
-        emit coordinatesReady((int)packet[PKT_CTS_X1], (int)packet[PKT_CTS_Y1], 
-            (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
+        emit trackStatusUpdate(
+                packet[PKT_CTS_STATE] == CTS_STATE_DETECTED,
+                (int)packet[PKT_CTS_X1], (int)packet[PKT_CTS_Y1], 
+                (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
         break;
     default:
         cerr << "unknown server command (" << packet[0] << ")\n";
