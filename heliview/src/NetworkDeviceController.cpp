@@ -495,6 +495,26 @@ void NetworkDeviceController::onInputReady(
 }
 
 // -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b)
+{
+    uint32_t cmd_buffer[16];
+
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_TRACK_COLOR;
+    cmd_buffer[PKT_LENGTH]  = PKT_TC_LENGTH;
+
+    cmd_buffer[PKT_TC_COLOR_FMT] = TC_COLOR_FMT_RGB;
+    cmd_buffer[PKT_TC_CHANNEL_0] = r;
+    cmd_buffer[PKT_TC_CHANNEL_1] = g;
+    cmd_buffer[PKT_TC_CHANNEL_2] = b;
+
+    cmd_buffer[PKT_TC_THRESH_0] = 15;
+    cmd_buffer[PKT_TC_THRESH_1] = 15;
+    cmd_buffer[PKT_TC_THRESH_2] = 15;
+
+    sendPacket(cmd_buffer, PKT_TC_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
 void NetworkDeviceController::shutdown()
 {
     if (m_telem_timer)

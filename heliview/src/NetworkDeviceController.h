@@ -45,6 +45,7 @@ public slots:
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
+    void onUpdateTrackColor(int r, int g, int b);
 
 signals:
     void updateThrottleValue(float val);
