@@ -13,14 +13,23 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 VideoView::VideoView(QWidget *parent)
-: QWidget(parent), m_image(NULL), m_ticks(0),
-  m_showBox(false), m_dragging(false), m_bbox(0, 0, 0, 0), m_dp(0, 0, 0, 0)
+: QWidget(parent), m_ticks(0), m_maxTicks(25), m_showBox(false),
+  m_dragging(false), m_bbox(0, 0, 0, 0), m_dp(0, 0, 0, 0)
 {
+    // set default image at startup to test pattern
+    m_image = new QImage(":/data/test_pattern.jpg");
+
+    // create a timer to serve as a simple video feed heartbeat check
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onStatusTick()));
     m_timer->start(100);
 
-    m_image = new QImage(":/data/test_pattern.jpg");
+    m_dragBrush.setStyle(Qt::SolidPattern);
+    m_bboxBrush.setStyle(Qt::SolidPattern);
+
+    setDragBoxColor(255, 0, 0, 25);
+    setBoundingBoxColor(255, 0, 0, 0);
+
     repaint();
 }
 
@@ -28,11 +37,34 @@ VideoView::VideoView(QWidget *parent)
 VideoView::~VideoView()
 {
     SafeDelete(m_image);
+    SafeDelete(m_timer);
+}
+
+// -----------------------------------------------------------------------------
+void VideoView::setDragBoxColor(int r, int g, int b, int a)
+{
+    m_dragPen.setColor(QColor(r, g, b, 255));
+    m_dragBrush.setColor(QColor(r, g, b, a));
+}
+
+// -----------------------------------------------------------------------------
+void VideoView::setBoundingBoxColor(int r, int g, int b, int a)
+{
+    m_bboxPen.setColor(QColor(r, g, b, 255));
+    m_bboxBrush.setColor(QColor(r, g, b, a));
+}
+
+// -----------------------------------------------------------------------------
+void VideoView::setTimeoutTicks(int ticks)
+{
+    m_ticks = 0;
+    m_maxTicks = ticks;
 }
 
 // -----------------------------------------------------------------------------
 void VideoView::paintEvent(QPaintEvent *e)
 {
+    // first render the video feed (or test image) into the client area
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, m_image->scaled(width(), height()));
@@ -42,18 +74,23 @@ void VideoView::paintEvent(QPaintEvent *e)
         float xscale = width() / 320.0f;    // TODO: don't hard code this
         float yscale = height() / 240.0f;   // TODO: don't hard code this
 
+        // scale coordinates from client to jpeg image dimensions
         int x_s = (int)(m_bbox.x() * xscale);
         int y_s = (int)(m_bbox.y() * yscale);
         int w_s = (int)(m_bbox.width() * xscale);
         int h_s = (int)(m_bbox.height() * yscale);
 
-        painter.setPen(QPen(QColor(255, 0, 0, 255), 3));
+        // render a wireframe rectangle around the region of interest
+        painter.setPen(m_bboxPen);
+        painter.setBrush(m_bboxBrush);
         painter.drawRect(x_s, y_s, w_s, h_s);
     }
 
     if (m_dragging)
     {
-        painter.setPen(QPen(QColor(255, 0, 0, 255), 3));
+        // render a filled rectangle around the drag zone
+        painter.setPen(m_dragPen);
+        painter.setBrush(m_dragBrush);
         painter.drawRect(m_dp.x(), m_dp.y(), m_dp.width(), m_dp.height());
     }
 }
@@ -69,10 +106,11 @@ void VideoView::mouseMoveEvent(QMouseEvent *e)
 {
     if (m_dragging)
     {
+        // repaint only the union of the old and new drag rectangles
         QRect old_rect = m_dp;
         m_dp.setRight(e->x());
         m_dp.setBottom(e->y());
-        repaint();
+        repaint(old_rect.united(m_dp).adjusted(-1, -1, 1, 1));
     }
 }
 
@@ -97,10 +135,10 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
         float yscale = 240.0f / height();   // TODO: don't hard code this
 
         QRect coord = m_dp.normalized();
-        int x1 = (int)(coord.left() * xscale);
-        int y1 = (int)(coord.top() * yscale);
-        int x2 = (int)(coord.right() * xscale);
-        int y2 = (int)(coord.bottom() * yscale);
+        int x1 = (int)(xscale * coord.left());
+        int y1 = (int)(yscale * coord.top());
+        int x2 = (int)(xscale * coord.right());
+        int y2 = (int)(yscale * coord.bottom());
         float inv_pixels = 1.0f / ((y2 - y1 + 1) * (x2 - x1 + 1));
 
         for (int y = y1; y <= y2; ++y)
@@ -120,9 +158,9 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
         avg_b = (int)(avg_b * inv_pixels);
         emit updateTrackColor(avg_r, avg_g, avg_b);
 
+        // disable the dragging rectangle and force an update of the widget
         m_dragging = false;
-        m_dp.setCoords(0, 0, 0, 0);
-        repaint();
+        repaint(m_dp.normalized().adjusted(-1, -1, 1, 1));
     }
 }
 
@@ -132,6 +170,7 @@ void VideoView::onImageReady(const char *data, size_t length)
     cerr << "loading image size " << length << endl;
     if (m_image->loadFromData((const uchar *)data, (int)length))
     {
+        // reset the heartbeat timeout and force a redraw of the client area
         m_ticks = 0;
         repaint();
     }
@@ -154,7 +193,9 @@ void VideoView::onStatusTick()
 {
     ++m_ticks;
 
-    if (m_ticks > 20)
+    // if we exceed the max tick count without receiving a new image from the
+    // device, display a test image to bring attention to the operator
+    if (m_ticks > m_maxTicks)
     {
         m_image->load(":/data/test_pattern.jpg");
         repaint();
