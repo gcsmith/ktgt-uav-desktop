@@ -31,10 +31,11 @@ protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent *e);
 
-    char           axes_flags;
-    char           si_on;
-    QTimer        *m_joystick_timer;
+    char           m_axes;
+    QTimer        *m_timer;
     ctlr_inputs_t  m_ctl;
+    bool           m_enabled;
+    bool           m_stale;
 };
 
 #endif // _CONTROLLERVIEW__H_

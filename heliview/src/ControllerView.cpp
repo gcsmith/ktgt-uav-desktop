@@ -9,25 +9,20 @@
 #include <algorithm>
 #include "ControllerView.h"
 #include "uav_protocol.h"
-
-// macro inverts the bit (y) in the number (x)
-#define FLIP_A_BIT(x,y) ((((x) & (y)) ^ (y)) | ((x) & ~(y)))
+#include "Utility.h"
 
 // -----------------------------------------------------------------------------
 ControllerView::ControllerView(QWidget *parent)
-: QWidget(parent), axes_flags(0), si_on(0), m_joystick_timer(NULL)
+: QWidget(parent), m_axes(0), m_timer(NULL), m_enabled(false), m_stale(false)
 {
-    m_joystick_timer = new QTimer(this);
-    connect(m_joystick_timer, SIGNAL(timeout()), this, SLOT(onJoystickTick()));
-    m_joystick_timer->start(50);
+    m_timer = new QTimer(this);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(onJoystickTick()));
+    m_timer->start(50);
 
     m_ctl.jl_x = 0.0f;
     m_ctl.jl_y = 0.0f;
     m_ctl.jr_x = 0.0f;
     m_ctl.jr_y = 0.0f;
-
-    setBackgroundRole(QPalette::Window);
-    setAutoFillBackground(true);
 
     repaint();
 }
@@ -35,81 +30,71 @@ ControllerView::ControllerView(QWidget *parent)
 // -----------------------------------------------------------------------------
 ControllerView::~ControllerView()
 {
-    delete m_joystick_timer;
+    SafeDelete(m_timer);
 }
 
 // -----------------------------------------------------------------------------
 void ControllerView::onJoystickTick()
 {
-    repaint();
+    if (m_stale)
+    {
+        repaint();
+        m_stale = false;
+    }
 }
 
 // -----------------------------------------------------------------------------
 void ControllerView::onInputReady(GamepadEvent event, int index, float value)
 {
+    m_stale = true;
     if ((GP_EVENT_BUTTON == event) && (12 == index) && (value > 0.0))
     {
-        si_on = !si_on;
-        if (si_on)
-            axes_flags = VCM_AXIS_ALL;
+        m_enabled = !m_enabled;
+        if (m_enabled)
+            m_axes = VCM_AXIS_ALL;
         else
-            axes_flags = 0;
+            m_axes = 0;
     }
     else if ((GP_EVENT_BUTTON == event) && (index >= 4) && (index <= 7) && 
-            (value > 0.0) && si_on)
+            (value > 0.0) && m_enabled)
     {
         switch (index)
         {
-            // A
-            case 4:
-                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_ALT);
-                break;
-            
-            // B
-            case 5:
-                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_ROLL);
-                break;
-
-            // X
-            case 6:
-                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_YAW);
-                break;
-
-            // Y
-            case 7:
-                axes_flags = FLIP_A_BIT(axes_flags, VCM_AXIS_PITCH);
-                break;
-
-            default:
-                fprintf(stderr, "ControllerView: unknown controller button\n");
+        case 4: // A
+            m_axes = BIT_INV(m_axes, VCM_AXIS_ALT);
+            break;
+        case 5: // B
+            m_axes = BIT_INV(m_axes, VCM_AXIS_ROLL);
+            break;
+        case 6: // X
+            m_axes = BIT_INV(m_axes, VCM_AXIS_YAW);
+            break;
+        case 7: // Y
+            m_axes = BIT_INV(m_axes, VCM_AXIS_PITCH);
+            break;
+        default:
+            fprintf(stderr, "ControllerView: unknown controller button\n");
         }
     }
     else if ((GP_EVENT_AXIS == event) && (index >= 0) && (index <= 3))
     {
         switch (index)
         {
-            // yaw
-            case 0:
-                m_ctl.jl_x = value;
-                break;
-
-            // altitude
-            case 1:
-                m_ctl.jl_y = value;
-                break;
-
-            // roll
-            case 2:
-                m_ctl.jr_x = value;
-                break;
-
-            // pitch
-            case 3:
-                m_ctl.jr_y = value;
-                break;
-            default:
-                fprintf(stderr, "ControllerView: unknown controller axis\n");
-                break;
+        case 0: // yaw
+            m_ctl.jl_x = value;
+            break;
+        case 1: // altitude
+            m_ctl.jl_y = value;
+            break;
+        case 2: // roll
+            m_ctl.jr_x = value;
+            break;
+        case 3: // pitch
+            m_ctl.jr_y = value;
+            break;
+        default:
+            fprintf(stderr, "ControllerView: unknown controller axis\n");
+            break;
         }
     }
 }
@@ -122,7 +107,7 @@ void ControllerView::paintEvent(QPaintEvent *e)
 
     // render the background color
     int xr = width(), yr = height();
-    if (si_on)
+    if (m_enabled)
     {
         painter.setBrush(QBrush(QColor(0,201,87,100)));
         painter.drawRect(0, 0, xr, yr);
@@ -142,19 +127,19 @@ void ControllerView::paintEvent(QPaintEvent *e)
     float n1_dx = 0.0f, n1_dy = 0.0f;
     float n2_dx = 0.0f, n2_dy = 0.0f;
 
-    if (si_on)
+    if (m_enabled)
     {
         // offset the nub positions if mixed mode controls are enabled
         float l_len = sqrt(m_ctl.jl_x * m_ctl.jl_x + m_ctl.jl_y * m_ctl.jl_y);
         float r_len = sqrt(m_ctl.jr_x * m_ctl.jr_x + m_ctl.jr_y * m_ctl.jr_y);
 
-        if (axes_flags & VCM_AXIS_YAW)
+        if (m_axes & VCM_AXIS_YAW)
             n1_dx = n_2 * ((l_len > 1.0f) ? m_ctl.jl_x / l_len : m_ctl.jl_x);
-        if (axes_flags & VCM_AXIS_ALT)
+        if (m_axes & VCM_AXIS_ALT)
             n1_dy = n_2 * ((l_len > 1.0f) ? m_ctl.jl_y / l_len : m_ctl.jl_y);
-        if (axes_flags & VCM_AXIS_ROLL)
+        if (m_axes & VCM_AXIS_ROLL)
             n2_dx = n_2 * ((r_len > 1.0f) ? m_ctl.jr_x / r_len : m_ctl.jr_x);
-        if (axes_flags & VCM_AXIS_PITCH)
+        if (m_axes & VCM_AXIS_PITCH)
             n2_dy = n_2 * ((r_len > 1.0f) ? m_ctl.jr_y / r_len : m_ctl.jr_y);
     }
 
@@ -168,10 +153,10 @@ void ControllerView::paintEvent(QPaintEvent *e)
     float led_m = std::min(led_w, led_h);
     static const char *labels[] = { "alt", "yaw", "pitch", "roll" };
     int led_en[] = {
-        axes_flags & VCM_AXIS_ALT,
-        axes_flags & VCM_AXIS_YAW,
-        axes_flags & VCM_AXIS_PITCH,
-        axes_flags & VCM_AXIS_ROLL
+        m_axes & VCM_AXIS_ALT,
+        m_axes & VCM_AXIS_YAW,
+        m_axes & VCM_AXIS_PITCH,
+        m_axes & VCM_AXIS_ROLL
     };
 
     for (int i = 0; i < 4; ++i) {
