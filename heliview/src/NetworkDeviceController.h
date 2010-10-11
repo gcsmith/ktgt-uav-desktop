@@ -34,6 +34,7 @@ public:
     bool requestTakeoff();
     bool requestLanding();
     bool requestManualOverride();
+    bool requestAutonomous();
     bool requestKillswitch();
 
 public slots:

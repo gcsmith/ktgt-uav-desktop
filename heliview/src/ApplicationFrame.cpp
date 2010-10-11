@@ -20,7 +20,7 @@ using namespace std;
 ApplicationFrame::ApplicationFrame(DeviceController *controller, 
         bool show_virtview)
 : m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
-  m_controller(controller)
+  m_controller(controller), m_state(STATE_AUTONOMOUS)
 {
     setupUi(this);
     setupControllerPane();
@@ -231,12 +231,14 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onStateChanged(int state)
 {
-    switch ((DeviceState)state)
+    m_state = (DeviceState)state;
+    switch (m_state)
     {
     case STATE_RADIO_CONTROL:
         btnLanding->setEnabled(false);
         btnTakeoff->setEnabled(false);
         btnOverride->setEnabled(true);
+        btnOverride->setText("Release Manual");
         btnKillswitch->setEnabled(true);
         break;
     case STATE_MIXED_CONTROL:
@@ -249,6 +251,7 @@ void ApplicationFrame::onStateChanged(int state)
         btnLanding->setEnabled(true);
         btnTakeoff->setEnabled(true);
         btnOverride->setEnabled(true);
+        btnOverride->setText("Manual Override");
         btnKillswitch->setEnabled(true);
         break;
     case STATE_KILLED:
@@ -311,7 +314,19 @@ void ApplicationFrame::onLandingClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onManualOverrideClicked()
 {
-    m_controller->requestManualOverride();
+    switch (m_state)
+    {
+    case STATE_AUTONOMOUS:
+        m_controller->requestManualOverride();
+        break;
+    case STATE_RADIO_CONTROL:
+    case STATE_MIXED_CONTROL:
+        m_controller->requestAutonomous();
+        break;
+    default:
+        // do nothing
+        break;
+    }
 }
 
 // -----------------------------------------------------------------------------

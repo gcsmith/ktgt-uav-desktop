@@ -152,6 +152,17 @@ bool NetworkDeviceController::requestManualOverride()
 }
 
 // -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestAutonomous()
+{
+    uint32_t cmd_buffer[4];
+    cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
+    cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
+    cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_AUTO;
+    cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
+    return sendPacket(cmd_buffer, PKT_VCM_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestKillswitch()
 {
     uint32_t cmd_buffer[4];

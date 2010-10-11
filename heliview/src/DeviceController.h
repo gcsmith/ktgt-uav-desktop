@@ -32,6 +32,7 @@ public:
     virtual bool requestTakeoff();
     virtual bool requestLanding();
     virtual bool requestManualOverride();
+    virtual bool requestAutonomous();
     virtual bool requestKillswitch();
 
 public slots:

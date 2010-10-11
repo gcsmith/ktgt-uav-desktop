@@ -26,6 +26,11 @@ bool DeviceController::requestManualOverride()
     return true;
 }
 
+bool DeviceController::requestAutonomous()
+{
+    return true;
+}
+
 bool DeviceController::requestKillswitch()
 {
     return true;
