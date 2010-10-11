@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <math.h>
 #include <stdio.h>
+#include <algorithm>
 #include "ControllerView.h"
 #include "uav_protocol.h"
 
@@ -20,10 +21,10 @@ ControllerView::ControllerView(QWidget *parent)
     connect(m_joystick_timer, SIGNAL(timeout()), this, SLOT(onJoystickTick()));
     m_joystick_timer->start(50);
 
-    joystick.jl_x = 0.0f;
-    joystick.jl_y = 0.0f;
-    joystick.jr_x = 0.0f;
-    joystick.jr_y = 0.0f;
+    m_ctl.jl_x = 0.0f;
+    m_ctl.jl_y = 0.0f;
+    m_ctl.jr_x = 0.0f;
+    m_ctl.jr_y = 0.0f;
 
     setBackgroundRole(QPalette::Window);
     setAutoFillBackground(true);
@@ -89,22 +90,22 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
         {
             // yaw
             case 0:
-                joystick.jl_x = value;
+                m_ctl.jl_x = value;
                 break;
 
             // altitude
             case 1:
-                joystick.jl_y = value;
+                m_ctl.jl_y = value;
                 break;
 
             // roll
             case 2:
-                joystick.jr_x = value;
+                m_ctl.jr_x = value;
                 break;
 
             // pitch
             case 3:
-                joystick.jr_y = value;
+                m_ctl.jr_y = value;
                 break;
             default:
                 fprintf(stderr, "ControllerView: unknown controller axis\n");
@@ -116,193 +117,76 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
 // -----------------------------------------------------------------------------
 void ControllerView::paintEvent(QPaintEvent *e)
 {
-    // set background color
-    QPalette p = palette();
-    if (si_on)
-        p.setColor(QPalette::Window, QColor(0,201,87,100));
-    else
-        p.setColor(QPalette::Window, Qt::gray);
-    setPalette(p);
-
-    float length, mul_x, mul_y;
-    QString status("Disabled");
-    int wid = this->width(), hgt = this->height();
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(QPen(QColor(0, 50, 155, 127), 3));
-    painter.setBrush(QBrush(QColor(133,133,133)));
-    
-    // main circles
-    int m_w = wid * 0.428f, m_h = hgt * 0.556f;
 
-    // main circles coords
-    if (m_w != m_h)
+    // render the background color
+    int xr = width(), yr = height();
+    if (si_on)
     {
-        int low = (m_w < m_h) ? m_w : m_h;
-        m_w = low;
-        m_h = low;
+        painter.setBrush(QBrush(QColor(0,201,87,100)));
+        painter.drawRect(0, 0, xr, yr);
     }
-    
-    int ml_x0 = wid * 0.35f - (m_w / 2)/*0.0578f*/, ml_y0 = hgt * 0.350f;
-    int mr_x0 = wid * 0.65f - (m_w / 2)/*ml_x0 + m_w + 5*/, mr_y0 = ml_y0;
-    
-    while (mr_x0 <= (ml_x0 + m_w))
-    {
-        
-        ml_x0 = ml_x0 - ((ml_x0 + m_w - mr_x0) / 2) - 1;
-        mr_x0 = mr_x0 + ((ml_x0 + m_w - mr_x0) / 2) + 5;
-    }
-    while ((mr_x0 - ml_x0 - m_w) < 10)
-    {
-        ml_x0--;
-        mr_x0++;
-    }
-    /*
-    while ((mr_x0 + m_w) >= wid)
-    {
-        mr_x0 -= 10;
-        ml_x0 -= 10;
-    }
-    */
 
-    // draw main circles
-    painter.drawEllipse(ml_x0, ml_y0, m_w, m_h);
-    painter.drawEllipse(mr_x0, mr_y0, m_w, m_h);
+    float j_w = 0.9f * xr / 2.0f, j_h = 0.9f * (2.0f / 3.0f) * yr;
+    float j_m = std::min(j_w, j_h); // maintain aspect ratio
+    float j1_x = xr / 4.0f, j1_y = yr - yr / 3.0;
 
-    // joysticks
+    // render the out circles for the two analog sticks
+    painter.setBrush(QBrush(QColor(133, 133, 133)));
+    painter.drawEllipse(j1_x - j_m / 2, j1_y - j_m / 2, j_m, j_m);
+    painter.drawEllipse(xr - j1_x - j_m / 2, j1_y - j_m / 2, j_m, j_m);
+
+    float n_w = 0.9f * 0.5f * xr / 2.0f, n_h = 0.9f * 0.5f * (2 / 3.0f) * yr;
+    float n_m = std::min(n_w, n_h), n_2 = n_m / 2; // maintain aspect ratio
+    float n1_dx = 0.0f, n1_dy = 0.0f;
+    float n2_dx = 0.0f, n2_dy = 0.0f;
+
+    if (si_on)
+    {
+        // offset the nub positions if mixed mode controls are enabled
+        float l_len = sqrt(m_ctl.jl_x * m_ctl.jl_x + m_ctl.jl_y * m_ctl.jl_y);
+        float r_len = sqrt(m_ctl.jr_x * m_ctl.jr_x + m_ctl.jr_y * m_ctl.jr_y);
+
+        if (axes_flags & VCM_AXIS_YAW)
+            n1_dx = n_2 * ((l_len > 1.0f) ? m_ctl.jl_x / l_len : m_ctl.jl_x);
+        if (axes_flags & VCM_AXIS_ALT)
+            n1_dy = n_2 * ((l_len > 1.0f) ? m_ctl.jl_y / l_len : m_ctl.jl_y);
+        if (axes_flags & VCM_AXIS_ROLL)
+            n2_dx = n_2 * ((r_len > 1.0f) ? m_ctl.jr_x / r_len : m_ctl.jr_x);
+        if (axes_flags & VCM_AXIS_PITCH)
+            n2_dy = n_2 * ((r_len > 1.0f) ? m_ctl.jr_y / r_len : m_ctl.jr_y);
+    }
+
+    // render the inner circle for each analog stick's nub
     painter.setBrush(QBrush(QColor(238, 232, 170, 255)));
+    painter.drawEllipse(j1_x - n_2 + n1_dx, j1_y - n_2 + n1_dy, n_m, n_m);
+    painter.drawEllipse(xr - j1_x - n_2 + n2_dx, j1_y - n_2 + n2_dy, n_m, n_m);
 
-    // left joystick coords
-    int j_w = wid * 0.197f, j_h = hgt * 0.256f;
-    if (j_w != j_h) 
-    {
-        int low = (j_w < j_h) ? j_w : j_h;
-        j_w = low;
-        j_h = low;
+    float led_dx = xr / 5.0f, led_y = yr / 6.0f;
+    float led_w = 0.5f * xr / 4.0f, led_h = 0.5f * yr / 3.0f;
+    float led_m = std::min(led_w, led_h);
+    static const char *labels[] = { "alt", "yaw", "pitch", "roll" };
+    int led_en[] = {
+        axes_flags & VCM_AXIS_ALT,
+        axes_flags & VCM_AXIS_YAW,
+        axes_flags & VCM_AXIS_PITCH,
+        axes_flags & VCM_AXIS_ROLL
+    };
+
+    for (int i = 0; i < 4; ++i) {
+        float led_x = (i + 1) * led_dx;
+        QRadialGradient gradient(led_x, led_y - led_m/2, led_m,
+                led_x - led_m / 2, led_y - led_m / 2);
+        gradient.setColorAt(0.2, Qt::white);
+        gradient.setColorAt(0.8, led_en[i] ? Qt::green : Qt::red);
+        gradient.setColorAt(1, Qt::black);
+
+        painter.setBrush(gradient);
+        painter.drawEllipse(led_x - led_m / 2, led_y - led_m / 1.5f, led_m, led_m);
+        painter.drawText(QRectF((i + 1) * led_dx - xr / 8, led_y + led_m / 2,
+                xr / 4, yr / 10), Qt::AlignCenter, labels[i]);
     }
-    int jl_xc = ml_x0 + (m_w / 2), jl_yc = ml_y0 + (m_h / 2);
-    int jl_x0 = jl_xc - (j_w / 2), jl_y0 = jl_yc - (j_h / 2);
-
-    // right joystick coords
-    int jr_xc = mr_x0 + (m_w / 2), jr_yc = mr_y0 + (m_h / 2);
-    int jr_x0 = jr_xc - (j_w / 2), jr_y0 = jr_yc - (j_h / 2);
-    
-    // normalize left joystick's vector
-    if (si_on)
-    {
-        length = sqrt(joystick.jl_x*joystick.jl_x + joystick.jl_y*joystick.jl_y);
-        if (length > 1.0f) 
-        { 
-            joystick.jl_x /= length; 
-            joystick.jl_y /= length; 
-        }
-
-        // check axes flags
-        mul_x = (axes_flags & VCM_AXIS_YAW) ? joystick.jl_x : 0;
-        mul_y = (axes_flags & VCM_AXIS_ALT) ? joystick.jl_y : 0;
-    }
-    else
-    {
-        mul_x = 0;
-        mul_y = 0;
-    }
-    
-    // draw left joystick
-    painter.drawEllipse(jl_x0 + (mul_x * (jl_x0 - ml_x0)), 
-            jl_y0 + (mul_y * (jl_y0 - ml_y0)), j_w, j_h);
-
-    // normalize right joystick's vector
-    if (si_on)
-    {
-        length = sqrt(joystick.jr_x*joystick.jr_x + joystick.jr_y*joystick.jr_y);
-        if (length > 1.0f) 
-        { 
-            joystick.jr_x /= length; 
-            joystick.jr_y /= length; 
-        }
-
-        // check axes flags
-        mul_x = (axes_flags & VCM_AXIS_ROLL) ? joystick.jr_x : 0;
-        mul_y = (axes_flags & VCM_AXIS_PITCH) ? joystick.jr_y : 0;
-    }
-
-
-    // draw right joystick
-    painter.drawEllipse(QRectF(jr_x0 + (mul_x * (jr_x0 - mr_x0)), 
-            jr_y0 + (mul_y * (jr_y0 - ml_y0)), j_w, j_h));
-    
-    // axes led circles
-    wid = mr_x0 + m_w - ml_x0;
-    int a_w = wid * 0.1983f, a_h = hgt * 0.128f, a_y0 = hgt * 0.028f;
-
-    // axes led coords
-    int thro_x0 = ml_x0;//wid * 0.2f;
-    int yaw_x0 = wid * 0.3f + ml_x0;
-    int pitch_x0 = wid * 0.6f + ml_x0;
-    int roll_x0 = mr_x0 + m_w - (a_w / 2);
-
-    if (a_w != a_h)
-    {
-        int low = (a_w < a_h) ? a_w : a_h;
-        a_w = low;
-        a_h = low;
-    }
-    
-    wid = this->width(), hgt = this->height();
-
-    painter.setBrush(QBrush(Qt::red));
-
-    // draw throttle led
-    if (axes_flags & VCM_AXIS_ALT)
-        painter.setBrush(Qt::green);
-    else
-        painter.setBrush(Qt::red);
-   
-    painter.drawEllipse(thro_x0, a_y0, a_w, a_h);
-
-    // draw throttle text
-    int txt_x0 = (thro_x0 + (a_w / 2)) - (wid * 0.3f / 2) + 1;
-    int txt_y0 = a_y0 + a_h + 5;
-    int txt_w = wid * 0.3f;
-    int txt_h = hgt * 0.113f;
-    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Throttle");
-    
-    // draw yaw led
-    if (axes_flags & VCM_AXIS_YAW)
-        painter.setBrush(Qt::green);
-    else
-        painter.setBrush(Qt::red);
-    
-    painter.drawEllipse(yaw_x0, a_y0, a_w, a_h);
-   
-    // draw yaw text
-    txt_x0 = (yaw_x0 + (a_w / 2)) - (wid * 0.3f / 2);
-    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Yaw");
-
-    // draw pitch led
-    if (axes_flags & VCM_AXIS_PITCH)
-        painter.setBrush(Qt::green);
-    else
-        painter.setBrush(Qt::red);
-    
-    painter.drawEllipse(pitch_x0, a_y0, a_w, a_h);
-    
-    // draw pitch text
-    txt_x0 = (pitch_x0 + (a_w / 2)) - (wid * 0.3f / 2);
-    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Pitch");
-
-    // draw roll led
-    if (axes_flags & VCM_AXIS_ROLL)
-        painter.setBrush(Qt::green);
-    else
-        painter.setBrush(Qt::red);
-    
-    painter.drawEllipse(roll_x0, a_y0, a_w, a_h);
-
-    // draw roll text
-    txt_x0 = (roll_x0 + (a_w / 2)) - (wid * 0.3f / 2);
-    painter.drawText(QRectF(txt_x0, txt_y0, txt_w, txt_h), Qt::AlignCenter, "Roll");
 }
 
 // -----------------------------------------------------------------------------
@@ -310,3 +194,4 @@ void ControllerView::resizeEvent(QResizeEvent *e)
 {
     repaint();
 }
+

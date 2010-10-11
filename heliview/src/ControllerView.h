@@ -34,7 +34,7 @@ protected:
     char           axes_flags;
     char           si_on;
     QTimer        *m_joystick_timer;
-    ctlr_inputs_t  joystick;
+    ctlr_inputs_t  m_ctl;
 };
 
 #endif // _CONTROLLERVIEW__H_
