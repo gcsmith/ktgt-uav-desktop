@@ -330,10 +330,12 @@ void NetworkDeviceController::onSocketReadyRead()
         x = *(float *)&packet[PKT_VTI_YAW];
         y = *(float *)&packet[PKT_VTI_PITCH];
         z = *(float *)&packet[PKT_VTI_ROLL];
-        
+       
+#if 0
         fprintf(stderr, "Yaw   angle = %f, %f\n", x, x * 180 / 3.14159);
         fprintf(stderr, "Pitch angle = %f, %f\n", y, y * 180 / 3.14159);
         fprintf(stderr, "Roll  angle = %f, %f\n", z, z * 180 / 3.14159);
+#endif
 
         rssi     = packet[PKT_VTI_RSSI];
         altitude = packet[PKT_VTI_ALT];
