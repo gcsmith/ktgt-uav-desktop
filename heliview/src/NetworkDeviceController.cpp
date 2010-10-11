@@ -23,7 +23,7 @@ ThrottleThread *m_thro_thrd;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_vcm_type(VCM_TYPE_RADIO), m_vcm_axes(0)
+  m_vcm_axes(0), m_state(STATE_AUTONOMOUS)
 {
     m_telem_timer = new QTimer(this);
     connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
@@ -195,7 +195,7 @@ void NetworkDeviceController::onControllerTick()
     static float prev_roll = 0.0f;
     static float prev_yaw = 0.0f;
 
-    if (m_vcm_type == VCM_TYPE_MIXED)
+    if (STATE_MIXED_CONTROL == m_state)
     {
         uint32_t cmd_buffer[24];
         union { int i; float f; } temp;
@@ -351,28 +351,30 @@ void NetworkDeviceController::onSocketReadyRead()
         {
         case VCM_TYPE_RADIO:
             cerr << "radio\n";
-            emit stateChanged((int)STATE_RADIO_CONTROL);
+            m_state = STATE_RADIO_CONTROL;
             break;
         case VCM_TYPE_AUTO:
             cerr << "auto\n";
-            emit stateChanged((int)STATE_AUTONOMOUS);
+            m_state = STATE_AUTONOMOUS;
             break;
         case VCM_TYPE_MIXED:
             cerr << "mixed\n";
-            emit stateChanged((int)STATE_MIXED_CONTROL);
+            m_state = STATE_MIXED_CONTROL;
             break;
         case VCM_TYPE_KILL: 
             cerr << "killed\n";
-            emit stateChanged((int)STATE_KILLED);
+            m_state = STATE_KILLED;
             break;
         case VCM_TYPE_LOCKOUT:
             cerr << "lockout\n";
-            emit stateChanged((int)STATE_LOCKOUT);
+            m_state = STATE_LOCKOUT;
             break;
         default:
             cerr << "!!! invalid !!!\n";
+            m_state = STATE_KILLED;
             break;
         }
+        emit stateChanged((int)m_state);
         break;
     case SERVER_UPDATE_TRACKING:
         emit trackStatusUpdate(
@@ -426,29 +428,30 @@ void NetworkDeviceController::onInputReady(
             QDataStream stream(m_sock);
             stream.setVersion(QDataStream::Qt_4_0);
 
-            if (VCM_TYPE_MIXED == m_vcm_type)
+            int vcm_type;
+            if (STATE_MIXED_CONTROL == m_state)
             {
-                cerr << "requesting switch to radio mode...\n";
-                m_vcm_type = VCM_TYPE_RADIO;
+                cerr << "requesting switch to autonomous...\n";
+                vcm_type = VCM_TYPE_AUTO;
                 emit exitThrottleThread();
             }
             else
             {
                 cerr << "requesting switch to mixed mode...\n";
-                m_vcm_type = VCM_TYPE_MIXED;
+                vcm_type = VCM_TYPE_MIXED;
             }
 
             m_vcm_axes = VCM_AXIS_ALL;
 
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
-            cmd_buffer[PKT_VCM_TYPE] = m_vcm_type;
+            cmd_buffer[PKT_VCM_TYPE] = vcm_type;
             cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
 
             stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
             m_sock->waitForBytesWritten();
         }
-        else if ((m_vcm_type == VCM_TYPE_MIXED) && (value > 0.0) && 
+        else if ((STATE_MIXED_CONTROL == m_state) && (value > 0.0) && 
                 (index >= 4) && (index <= 7))
         {
             QDataStream stream(m_sock);
@@ -457,31 +460,22 @@ void NetworkDeviceController::onInputReady(
             // update the mixed mode controlled axes
             switch (index)
             {
-                // A
-                case 4:
+                case 4: // A
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ALT);
                     if (m_vcm_axes & VCM_AXIS_ALT)
                         m_thro_thrd->start();
                     else
                         emit exitThrottleThread();
-
                     break;
-
-                // B
-                case 5:
+                case 5: // B
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ROLL);
                     break;
-
-                // X
-                case 6:
+                case 6: // X
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_YAW);
                     break;
-
-                // Y
-                case 7:
+                case 7: // Y
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_PITCH);
                     break;
-
                 default:
                     fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
                     break;
@@ -503,25 +497,21 @@ void NetworkDeviceController::onInputReady(
         {
             switch (index)
             {
-                case 0:
-                    m_manual_sigs.yaw = value;
-                    break;
-                    
-                case 1:
-                    m_manual_sigs.alt = -value;
-                    break;
-
-                case 2:
-                    m_manual_sigs.roll = value;
-                    break;
-
-                case 3:
-                    m_manual_sigs.pitch = value;
-                    break;
-
-                default:
-                    fprintf(stderr, "NetworkDeviceController: unknown controller axis");
-                    break;
+            case 0:
+                m_manual_sigs.yaw = value;
+                break;
+            case 1:
+                m_manual_sigs.alt = -value;
+                break;
+            case 2:
+                m_manual_sigs.roll = value;
+                break;
+            case 3:
+                m_manual_sigs.pitch = value;
+                break;
+            default:
+                fprintf(stderr, "NetworkDeviceController: unknown axis");
+                break;
             }
         }
     }

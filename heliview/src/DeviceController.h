@@ -28,6 +28,7 @@ public:
     virtual bool open() = 0;
     virtual void close() = 0;
     virtual QString device() = 0;
+    virtual DeviceState currentState();
 
     virtual bool requestTakeoff();
     virtual bool requestLanding();

@@ -76,7 +76,6 @@ protected:
     DeviceController *m_controller;
     Gamepad          *m_gamepad;
     ControllerView   *m_ctlview;
-    DeviceState       m_state;
 };
 
 #endif // _HELIVIEW_APPLICATIONFRAME__H_

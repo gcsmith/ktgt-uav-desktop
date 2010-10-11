@@ -20,7 +20,7 @@ using namespace std;
 ApplicationFrame::ApplicationFrame(DeviceController *controller, 
         bool show_virtview)
 : m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
-  m_controller(controller), m_state(STATE_AUTONOMOUS)
+  m_controller(controller)
 {
     setupUi(this);
     setupControllerPane();
@@ -231,8 +231,7 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onStateChanged(int state)
 {
-    m_state = (DeviceState)state;
-    switch (m_state)
+    switch ((DeviceState)state)
     {
     case STATE_RADIO_CONTROL:
         btnLanding->setEnabled(false);
@@ -314,7 +313,7 @@ void ApplicationFrame::onLandingClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onManualOverrideClicked()
 {
-    switch (m_state)
+    switch (m_controller->currentState())
     {
     case STATE_AUTONOMOUS:
         m_controller->requestManualOverride();

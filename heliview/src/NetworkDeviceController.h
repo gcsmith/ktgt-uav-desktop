@@ -30,6 +30,7 @@ public:
     virtual bool open();
     virtual void close();
     virtual QString device() { return m_device; }
+    virtual DeviceState currentState() { return m_state; }
 
     bool requestTakeoff();
     bool requestLanding();
@@ -63,10 +64,11 @@ protected:
     QTimer           *m_mjpeg_timer;
     QTimer           *m_controller_timer;
     uint32_t          m_blocksz;
-    uint32_t          m_vcm_type;
     std::vector<char> m_buffer;
     ctrl_sigs         m_manual_sigs;
     char              m_vcm_axes;
+    DeviceState       m_state;
+    DeviceState       m_saveState;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_

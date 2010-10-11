@@ -11,6 +11,11 @@
 
 using namespace std;
 
+DeviceState DeviceController::currentState()
+{
+    return STATE_AUTONOMOUS;
+}
+
 bool DeviceController::requestTakeoff()
 {
     return true;
