@@ -9,7 +9,6 @@
 #include <iostream>
 #include <algorithm>
 #include "NetworkDeviceController.h"
-#include "ThrottleThread.h"
 #include "Utility.h"
 #include "uav_protocol.h"
 
@@ -18,7 +17,8 @@
 
 using namespace std;
 
-ThrottleThread *m_thro_thrd;
+// memory of alt axis value from joystick
+static float prev_alt = 0.0f;
 
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
@@ -34,6 +34,9 @@ NetworkDeviceController::NetworkDeviceController(const QString &device)
     m_controller_timer = new QTimer(this);
     connect(m_controller_timer, SIGNAL(timeout()), this, 
             SLOT(onControllerTick()));
+
+    m_throttle_timer = new QTimer(this);
+    connect(m_throttle_timer, SIGNAL(timeout()), this, SLOT(onThrottleTick()));
 
     m_manual_sigs.alt = 0.0f;
     m_manual_sigs.pitch = 0.0f;
@@ -86,17 +89,12 @@ bool NetworkDeviceController::open()
 
     emit connectionStatusChanged(QString("Connected to ") + m_device, true);
 
-    // create throttle thread
-    m_thro_thrd = new ThrottleThread(this, m_sock, 0);
-    connect(m_thro_thrd, SIGNAL(sendThrottleEvent(float)), this, SLOT(onSendThroEvent(float)));
-
     return true;
 }
 
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::close()
 {
-    emit exitThrottleThread();
     if (m_sock)
     {
         // disconnect the socket, wait for completion
@@ -190,7 +188,6 @@ void NetworkDeviceController::onVideoTick()
 void NetworkDeviceController::onControllerTick()
 {
     // Memory of previous mixed controller values
-    static float prev_alt = 0.0f;
     static float prev_pitch = 0.0f;
     static float prev_roll = 0.0f;
     static float prev_yaw = 0.0f;
@@ -208,7 +205,6 @@ void NetworkDeviceController::onControllerTick()
         temp.f = m_manual_sigs.alt;
         if ((m_vcm_axes & VCM_AXIS_ALT) && (temp.f != prev_alt))
         {
-            emit updateThrottleValue(temp.f);
             prev_alt = m_manual_sigs.alt;
             //send = 1;
         }
@@ -254,29 +250,47 @@ void NetworkDeviceController::onControllerTick()
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onSendThroEvent(float val)
+void NetworkDeviceController::onThrottleTick()
 {
-    uint32_t cmd_buffer[32];
-    union { int i; float f; } temp;
+    float value = m_manual_sigs.alt;
 
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
-    cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
+    if ((value < prev_alt) && (prev_alt > 0.0f) && (value > 0.0f))
+    {
+        // joystick is going from postive to zero
+        // do nothing
+    }
+    else if ((value > prev_alt) && (prev_alt < 0.0f) && (value < 0.0f))
+    {
+        // joystick is going from negative to zero
+        // do nothing
+    }
+    else if ((value >= 0.1f) || (value <= -0.1f))
+    {
+        // prev_alt == value
+        // the user hasn't moved the joystick since the last poll, so tell
+        // the server to keep incrementing the throttle pwm
+        uint32_t cmd_buffer[32];
+        union { int i; float f; } temp;
 
-    temp.f = val;
-    cmd_buffer[PKT_MCM_AXIS_ALT]   = temp.i;
+        cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
+        cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
 
-    temp.f = m_manual_sigs.pitch;
-    cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
+        temp.f = m_manual_sigs.alt;
+        cmd_buffer[PKT_MCM_AXIS_ALT]   = temp.i;
 
-    temp.f = m_manual_sigs.roll;
-    cmd_buffer[PKT_MCM_AXIS_ROLL]  = temp.i;
+        temp.f = m_manual_sigs.pitch;
+        cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
 
-    temp.f = m_manual_sigs.yaw;
-    cmd_buffer[PKT_MCM_AXIS_YAW]   = temp.i;
+        temp.f = m_manual_sigs.roll;
+        cmd_buffer[PKT_MCM_AXIS_ROLL]  = temp.i;
 
-    fprintf(stderr, "acting on throttle event signal %f\n", temp.f);
-    if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
-        cerr << "failed to send throttle event\n";
+        temp.f = m_manual_sigs.yaw;
+        cmd_buffer[PKT_MCM_AXIS_YAW]   = temp.i;
+
+        fprintf(stderr, "acting on throttle event signal %f\n", temp.f);
+        if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
+            cerr << "failed to send throttle event\n";
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -441,13 +455,14 @@ void NetworkDeviceController::onInputReady(
             {
                 cerr << "requesting switch to autonomous...\n";
                 vcm_type = VCM_TYPE_AUTO;
-                emit exitThrottleThread();
+                m_throttle_timer->stop();
             }
             else
             {
                 cerr << "requesting switch to mixed mode...\n";
                 vcm_type = VCM_TYPE_MIXED;
-                m_thro_thrd->start();
+                m_throttle_timer->start(50);
+                prev_alt = 0.0f;
             }
 
             m_vcm_axes = VCM_AXIS_ALL;
@@ -472,9 +487,12 @@ void NetworkDeviceController::onInputReady(
                 case 4: // A
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ALT);
                     if (m_vcm_axes & VCM_AXIS_ALT)
-                        m_thro_thrd->start();
+                    {
+                        m_throttle_timer->start(50);
+                        prev_alt = 0.0f;
+                    }
                     else
-                        emit exitThrottleThread();
+                        m_throttle_timer->stop();
                     break;
                 case 5: // B
                     m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ROLL);

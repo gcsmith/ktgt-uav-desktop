@@ -42,16 +42,12 @@ public slots:
     void onTelemetryTick();
     void onVideoTick();
     void onControllerTick();
-    void onSendThroEvent(float val);
+    void onThrottleTick();
     void onSocketReadyRead();
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
     void onUpdateTrackColor(int r, int g, int b);
-
-signals:
-    void updateThrottleValue(float val);
-    void exitThrottleThread();
 
 protected:
     bool sendPacket(uint32_t command);
@@ -63,6 +59,7 @@ protected:
     QTimer           *m_telem_timer;
     QTimer           *m_mjpeg_timer;
     QTimer           *m_controller_timer;
+    QTimer           *m_throttle_timer;
     uint32_t          m_blocksz;
     std::vector<char> m_buffer;
     ctrl_sigs         m_manual_sigs;
