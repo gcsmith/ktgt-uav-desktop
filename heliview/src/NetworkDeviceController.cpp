@@ -245,16 +245,20 @@ void NetworkDeviceController::onControllerTick()
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::onSendThroEvent(float val)
 {
-    uint32_t cmd_buffer[12];
+    uint32_t cmd_buffer[32];
     union { int i; float f; } temp;
 
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
+    cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
+
     temp.f = val;
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_THRO_EVT;
-    cmd_buffer[PKT_LENGTH]  = PKT_THRO_EVT_LENGTH;
-    cmd_buffer[PKT_THRO_EVT_VALUE] = temp.i;
+    cmd_buffer[PKT_MCM_AXIS_ALT]   = temp.i;
+    cmd_buffer[PKT_MCM_AXIS_PITCH] = 0;
+    cmd_buffer[PKT_MCM_AXIS_ROLL]  = 0;
+    cmd_buffer[PKT_MCM_AXIS_YAW]   = 0;
 
     fprintf(stderr, "acting on throttle event signal %f\n", temp.f);
-    if (!sendPacket(cmd_buffer, PKT_THRO_EVT_LENGTH))
+    if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         cerr << "failed to send throttle event\n";
 }
 
@@ -315,6 +319,11 @@ void NetworkDeviceController::onSocketReadyRead()
         x = *(float *)&packet[PKT_VTI_YAW];
         y = *(float *)&packet[PKT_VTI_PITCH];
         z = *(float *)&packet[PKT_VTI_ROLL];
+        
+        fprintf(stderr, "Yaw   angle = %f, %f\n", x, x * 180 / 3.14159);
+        fprintf(stderr, "Pitch angle = %f, %f\n", y, y * 180 / 3.14159);
+        fprintf(stderr, "Roll  angle = %f, %f\n", z, z * 180 / 3.14159);
+
         rssi     = packet[PKT_VTI_RSSI];
         altitude = packet[PKT_VTI_ALT];
         battery  = packet[PKT_VTI_BATT];
@@ -418,7 +427,7 @@ void NetworkDeviceController::onInputReady(
                 m_vcm_type = VCM_TYPE_MIXED;
             }
 
-            m_vcm_axes = 0;
+            m_vcm_axes = VCM_AXIS_ALL;
 
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
