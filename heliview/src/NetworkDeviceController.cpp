@@ -447,6 +447,7 @@ void NetworkDeviceController::onInputReady(
             {
                 cerr << "requesting switch to mixed mode...\n";
                 vcm_type = VCM_TYPE_MIXED;
+                m_thro_thrd->start();
             }
 
             m_vcm_axes = VCM_AXIS_ALL;
