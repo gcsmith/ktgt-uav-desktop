@@ -112,6 +112,9 @@ void ApplicationFrame::setupDeviceController()
     connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
             this, SLOT(onConnectionStatusChanged(const QString&, bool)));
 
+    connect(m_controller, SIGNAL(stateChanged(int)),
+            this, SLOT(onStateChanged(int)));
+
     // attempt to open the specified device
     if (!m_controller->open())
     {
@@ -222,6 +225,39 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
 
         elevationStatusBar->setValue(0);
         elevationStatusBar->setFormat(QString("NC"));
+    }
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onStateChanged(int state)
+{
+    switch ((DeviceState)state)
+    {
+    case STATE_RADIO_CONTROL:
+        btnLanding->setEnabled(false);
+        btnTakeoff->setEnabled(false);
+        btnOverride->setEnabled(true);
+        btnKillswitch->setEnabled(true);
+        break;
+    case STATE_MIXED_CONTROL:
+        btnLanding->setEnabled(false);
+        btnTakeoff->setEnabled(false);
+        btnOverride->setEnabled(true);
+        btnKillswitch->setEnabled(true);
+        break;
+    case STATE_AUTONOMOUS:
+        btnLanding->setEnabled(true);
+        btnTakeoff->setEnabled(true);
+        btnOverride->setEnabled(true);
+        btnKillswitch->setEnabled(true);
+        break;
+    case STATE_KILLED:
+    case STATE_LOCKOUT:
+        btnLanding->setEnabled(false);
+        btnTakeoff->setEnabled(false);
+        btnOverride->setEnabled(false);
+        btnKillswitch->setEnabled(false);
+        break;
     }
 }
 

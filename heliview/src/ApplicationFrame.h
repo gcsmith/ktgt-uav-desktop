@@ -32,6 +32,7 @@ public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
                           int alt, int rssi, int batt, int aux);
     void onConnectionStatusChanged(const QString &text, bool status);
+    void onStateChanged(int state);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();

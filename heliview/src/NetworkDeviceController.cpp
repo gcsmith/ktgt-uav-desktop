@@ -320,25 +320,38 @@ void NetworkDeviceController::onSocketReadyRead()
         battery  = packet[PKT_VTI_BATT];
         aux      = packet[PKT_VTI_AUX];
         emit telemetryReady(-z, -y, x, altitude, rssi, battery, aux);
-#if 0
-        fprintf(stderr,
-                "SERVER_ACK_TELEMETRY -> (%f, %f, %f) S (%d) A (%d) B (%d)\n",
-                x, y, z, rssi, altitude, battery);
-#endif
         break;
     case SERVER_ACK_MJPG_FRAME:
         framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;
         emit videoFrameReady((const char *)&packet[PKT_MJPG_IMG], (size_t)framesz);
         break;
-    case SERVER_ACK_SET_CTL_MODE:
-        cerr << "got ACK for SET_CTL_MODE: ";
+    case SERVER_UPDATE_CTL_MODE:
+        cerr << "got UPDATE_CTL_MODE: ";
         switch (packet[PKT_VCM_TYPE])
         {
-        case VCM_TYPE_RADIO: cerr << "radio\n"; break;
-        case VCM_TYPE_AUTO:  cerr << "auto\n"; break;
-        case VCM_TYPE_MIXED: cerr << "mixed\n"; break;
-        case VCM_TYPE_KILL:  cerr << "killed\n"; break;
-        default:             cerr << "!!! invalid !!!\n"; break;
+        case VCM_TYPE_RADIO:
+            cerr << "radio\n";
+            emit stateChanged((int)STATE_RADIO_CONTROL);
+            break;
+        case VCM_TYPE_AUTO:
+            cerr << "auto\n";
+            emit stateChanged((int)STATE_AUTONOMOUS);
+            break;
+        case VCM_TYPE_MIXED:
+            cerr << "mixed\n";
+            emit stateChanged((int)STATE_MIXED_CONTROL);
+            break;
+        case VCM_TYPE_KILL: 
+            cerr << "killed\n";
+            emit stateChanged((int)STATE_KILLED);
+            break;
+        case VCM_TYPE_LOCKOUT:
+            cerr << "lockout\n";
+            emit stateChanged((int)STATE_LOCKOUT);
+            break;
+        default:
+            cerr << "!!! invalid !!!\n";
+            break;
         }
         break;
     case SERVER_UPDATE_TRACKING:

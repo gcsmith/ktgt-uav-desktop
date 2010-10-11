@@ -11,6 +11,15 @@
 #include <QWidget>
 #include "Gamepad.h"
 
+enum DeviceState
+{
+    STATE_RADIO_CONTROL,
+    STATE_MIXED_CONTROL,
+    STATE_AUTONOMOUS,
+    STATE_KILLED,
+    STATE_LOCKOUT
+};
+
 class DeviceController: public QObject
 {
     Q_OBJECT
@@ -35,6 +44,7 @@ signals:
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
     void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
+    void stateChanged(int state);
     void takeoff();
     void landing();
 };
