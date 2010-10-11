@@ -264,9 +264,15 @@ void NetworkDeviceController::onSendThroEvent(float val)
 
     temp.f = val;
     cmd_buffer[PKT_MCM_AXIS_ALT]   = temp.i;
-    cmd_buffer[PKT_MCM_AXIS_PITCH] = 0;
-    cmd_buffer[PKT_MCM_AXIS_ROLL]  = 0;
-    cmd_buffer[PKT_MCM_AXIS_YAW]   = 0;
+
+    temp.f = m_manual_sigs.pitch;
+    cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
+
+    temp.f = m_manual_sigs.roll;
+    cmd_buffer[PKT_MCM_AXIS_ROLL]  = temp.i;
+
+    temp.f = m_manual_sigs.yaw;
+    cmd_buffer[PKT_MCM_AXIS_YAW]   = temp.i;
 
     fprintf(stderr, "acting on throttle event signal %f\n", temp.f);
     if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
