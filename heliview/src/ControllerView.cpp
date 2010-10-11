@@ -49,7 +49,10 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
     if ((GP_EVENT_BUTTON == event) && (12 == index) && (value > 0.0))
     {
         si_on = !si_on;
-        axes_flags = 0;
+        if (si_on)
+            axes_flags = VCM_AXIS_ALL;
+        else
+            axes_flags = 0;
     }
     else if ((GP_EVENT_BUTTON == event) && (index >= 4) && (index <= 7) && 
             (value > 0.0) && si_on)
