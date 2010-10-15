@@ -15,7 +15,13 @@ class ConnectionDialog : public QDialog, public Ui::ConnectionDialog
 
 public:
     ConnectionDialog(QWidget *parent);
+
     virtual ~ConnectionDialog();
+
+public slots:
+    void s_cancelButton();
+    void s_connectButton();
+    void s_cbChange(int index);
 };
 
 #endif // _HELIVIEW_CONNECTIONDIALOG__H_

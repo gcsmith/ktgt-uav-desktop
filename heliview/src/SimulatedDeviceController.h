@@ -21,6 +21,9 @@ public:
     virtual bool open();
     virtual void close();
     virtual QString device() { return m_device; }
+    
+    static const char * m_description;
+    static const bool m_takesDevice;
 
 public slots:
     void onSimulateTick();

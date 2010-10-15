@@ -20,6 +20,9 @@ using namespace std;
 // memory of alt axis value from joystick
 static float prev_alt = 0.0f;
 
+const char * NetworkDeviceController::m_description = "Network description";
+const bool NetworkDeviceController::m_takesDevice = true;
+
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),

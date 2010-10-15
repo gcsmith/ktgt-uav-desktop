@@ -37,6 +37,9 @@ public:
     bool requestManualOverride();
     bool requestAutonomous();
     bool requestKillswitch();
+    
+    static const char * m_description;
+    static const bool m_takesDevice;
 
 public slots:
     void onTelemetryTick();

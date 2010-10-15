@@ -12,6 +12,9 @@
 
 using namespace std;
 
+const char * SerialDeviceController::m_description = "Serial description";
+const bool SerialDeviceController::m_takesDevice = true;
+
 // -----------------------------------------------------------------------------
 SerialDeviceController::SerialDeviceController(const QString &device)
 : m_device(device), m_serial(NULL), m_buffer(1024, 0), m_offset(0)
