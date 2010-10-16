@@ -266,15 +266,8 @@ void ApplicationFrame::onStateChanged(int state)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onFileConnectTriggered()
 {
-    ConnectionDialog cd(this);
+    ConnectionDialog cd(this, m_controller);
     cd.exec();
-    if(cd.result() == QDialog::Accepted)
-    {
-        qDebug() << "Connect Dialog was Accepted" << endl;
-        m_controller->close();
-        delete m_controller;
-        m_controller = cd.getDeviceController();
-    }
 }
 
 // -----------------------------------------------------------------------------

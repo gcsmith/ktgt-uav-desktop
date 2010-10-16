@@ -8,8 +8,8 @@
 #include <QComboBox>
 #include <QString>
 #include <QMessageBox>
-ConnectionDialog::ConnectionDialog(QWidget *parent)
-: QDialog(parent)
+ConnectionDialog::ConnectionDialog(QWidget *parent, DeviceController *controller)
+: QDialog(parent), m_controller(controller)
 {
     setupUi(this);
     connect(btnCancel, SIGNAL(released()), this, SLOT(s_cancelButton()));
@@ -34,35 +34,23 @@ void ConnectionDialog::s_cancelButton(){
 }
 
 void ConnectionDialog::s_connectButton(){
-    
-    int index = 0;
-    QString source;
-    index = cbType->currentIndex(); 
-    switch (index){
+    m_controller->close();
+    delete m_controller;
+    switch (cbType->currentIndex()){
     case 0: //Network
-    source = QString("network");
+    m_controller = new NetworkDeviceController(editDevice->text());
     break;
     
     case 1: //Serial
-    source = QString("serial");
+    m_controller = new SerialDeviceController(editDevice->text());
     break;
     
     case 2: //Simulated
-    source = QString("sim");
+    m_controller = new SimulatedDeviceController(editDevice->text());
     break;
     }
-    
-    
-    controller = CreateDeviceController(
-                source,
-                editDevice->text());
-    if (!controller)
-    {
-        //cerr << "invalid source type '" << source << "' specified\n";
-        printf("Controller failed\n");
-        //return EXIT_FAILURE;
-    }
-    if(controller->open()){
+
+    if(m_controller->open()){
         accept();
     } else {
         QMessageBox mb(QMessageBox::Warning,
@@ -93,8 +81,4 @@ void ConnectionDialog::s_cbChange(int index){
     break;
     }
     
-}
-
-DeviceController * ConnectionDialog::getDeviceController(){
-    return controller;
 }
