@@ -20,6 +20,8 @@ public:
     VideoView(QWidget *parent);
     virtual ~VideoView();
 
+    bool saveFrame();
+
 signals:
     void updateTrackColor(int r, int g, int b);
 

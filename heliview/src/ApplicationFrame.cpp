@@ -304,6 +304,17 @@ void ApplicationFrame::onHelpAboutTriggered()
 }
 
 // -----------------------------------------------------------------------------
+void ApplicationFrame::onSaveFrameTriggered()
+{
+    bool saved = m_video->saveFrame();
+
+    if (saved)
+        qDebug() << "Frame saved";
+    else
+        qDebug() << "Frame not saved";
+}
+
+// -----------------------------------------------------------------------------
 void ApplicationFrame::onTakeoffClicked()
 {
     m_controller->requestTakeoff();

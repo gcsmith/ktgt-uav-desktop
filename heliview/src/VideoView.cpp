@@ -4,6 +4,7 @@
 // -----------------------------------------------------------------------------
 
 #include <iostream>
+#include <QDateTime>
 #include <QPainter>
 #include <QTimer>
 #include "Utility.h"
@@ -99,6 +100,21 @@ void VideoView::paintEvent(QPaintEvent *e)
 void VideoView::resizeEvent(QResizeEvent *e)
 {
     repaint();
+}
+
+// -----------------------------------------------------------------------------
+bool VideoView::saveFrame()
+{
+    QDateTime datetime;
+    datetime = QDateTime::currentDateTime();
+
+    const char *format = "hh-mm-ss-zzz";
+    const char *tstamp = datetime.toString(format).toAscii().constData();
+
+    char filename[64];
+    sprintf(filename, "heliview_%s.jpg", tstamp);
+
+    return (m_image->save(QString(filename)));
 }
 
 // -----------------------------------------------------------------------------

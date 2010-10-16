@@ -39,6 +39,7 @@ public slots:
     void onFileExitTriggered();
     void onEditSettingsTriggered();
     void onHelpAboutTriggered();
+    void onSaveFrameTriggered();
 
     // control panel button click event callbacks
     void onTakeoffClicked();
