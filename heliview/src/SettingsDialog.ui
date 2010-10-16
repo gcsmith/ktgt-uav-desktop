@@ -61,7 +61,7 @@
         <widget class="QLineEdit" name="leLogFileName"/>
        </item>
        <item row="0" column="4">
-        <widget class="QPushButton" name="pbLogFile">
+        <widget class="QPushButton" name="btnLogFile">
          <property name="text">
           <string>Browse</string>
          </property>
@@ -134,7 +134,7 @@
         </layout>
        </item>
        <item row="2" column="4">
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="btnNewColor">
          <property name="text">
           <string>Select New Color</string>
          </property>

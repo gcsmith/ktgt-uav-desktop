@@ -16,6 +16,15 @@ class SettingsDialog : public QDialog, public Ui::SettingsDialog
 public:
     SettingsDialog(QWidget *parent);
     virtual ~SettingsDialog();
+    
+public slots:
+    void s_cancelButton();
+    void s_okButton();
+    void s_applyButton();
+    
+    void s_newColorButton();
+    
+    
 };
 
 #endif // _HELIVIEW_SETTINGSDIALOG__H_
