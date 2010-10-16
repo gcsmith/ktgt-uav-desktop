@@ -8,13 +8,14 @@
 
 #include <QWidget>
 #include "ui_SettingsDialog.h"
+#include "DeviceController.h"
 
 class SettingsDialog : public QDialog, public Ui::SettingsDialog
 {
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent);
+    SettingsDialog(QWidget *parent, DeviceController * controller);
     virtual ~SettingsDialog();
     
 public slots:
@@ -23,7 +24,9 @@ public slots:
     void s_applyButton();
     
     void s_newColorButton();
-    
+
+private:
+    DeviceController * m_controller;    
     
 };
 

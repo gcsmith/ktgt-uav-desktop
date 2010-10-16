@@ -1,8 +1,9 @@
 #include "SettingsDialog.h"
 #include <QColorDialog>
+#include "DeviceController.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent)
-: QDialog(parent)
+SettingsDialog::SettingsDialog(QWidget *parent,DeviceController * controller)
+: QDialog(parent), m_controller(controller)
 {
     setupUi(this);
     //Primary Buttons
@@ -34,17 +35,15 @@ void SettingsDialog::s_okButton(){
 }
 void SettingsDialog::s_applyButton(){
      //printf("Apply Button\n");
-
     
+    m_controller->onUpdateTrackColor(sbR->value(), sbG->value(), sbB->value());
 }
 
 void SettingsDialog::s_newColorButton(){
      //printf("NewColor Button\n");
-    //QColorDialog cd = QColorDialog(
-    //    QColor(sbR->value(), sbG->value(), sbB->value(),0), this);
-    //cd.setOption(QColorDialog::ShowAlphaChannel,false);
-    //cd.open();
-    QColor color = QColorDialog::getColor(QColor(sbR->value(), sbG->value(), sbB->value(),0), this);
+    
+    QColor color = QColorDialog::getColor(
+        QColor(sbR->value(), sbG->value(), sbB->value(),0), this);
     
     sbR->setValue(color.red());
     sbG->setValue(color.blue());

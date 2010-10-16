@@ -287,7 +287,7 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    SettingsDialog sd(this);
+    SettingsDialog sd(this,m_controller);
     sd.exec();
 }
 
