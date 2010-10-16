@@ -15,7 +15,7 @@ class ConnectionDialog : public QDialog, public Ui::ConnectionDialog
 
 public:
     ConnectionDialog(QWidget *parent);
-
+    int connectionType;
     virtual ~ConnectionDialog();
 
 public slots:

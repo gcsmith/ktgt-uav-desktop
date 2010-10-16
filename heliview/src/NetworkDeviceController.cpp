@@ -560,8 +560,8 @@ void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b)
     cmd_buffer[PKT_TC_CHANNEL_1] = g;
     cmd_buffer[PKT_TC_CHANNEL_2] = b;
 
-    cmd_buffer[PKT_TC_THRESH_0] = 15;
-    cmd_buffer[PKT_TC_THRESH_1] = 15;
+    cmd_buffer[PKT_TC_THRESH_0] = 10;
+    cmd_buffer[PKT_TC_THRESH_1] = 30;
     cmd_buffer[PKT_TC_THRESH_2] = 15;
 
     sendPacket(cmd_buffer, PKT_TC_LENGTH);
