@@ -8,6 +8,7 @@
 
 #include <QWidget>
 #include "ui_ConnectionDialog.h"
+#include "DeviceController.h"
 
 class ConnectionDialog : public QDialog, public Ui::ConnectionDialog
 {
@@ -15,13 +16,19 @@ class ConnectionDialog : public QDialog, public Ui::ConnectionDialog
 
 public:
     ConnectionDialog(QWidget *parent);
-    int connectionType;
+    DeviceController * getDeviceController();
     virtual ~ConnectionDialog();
+    
+    
 
 public slots:
     void s_cancelButton();
     void s_connectButton();
     void s_cbChange(int index);
+    
+private:
+    DeviceController *controller;
+    
 };
 
 #endif // _HELIVIEW_CONNECTIONDIALOG__H_

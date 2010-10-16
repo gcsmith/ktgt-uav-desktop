@@ -271,7 +271,9 @@ void ApplicationFrame::onFileConnectTriggered()
     if(cd.result() == QDialog::Accepted)
     {
         qDebug() << "Connect Dialog was Accepted" << endl;
-        qDebug() << cd.cbType->itemText(cd.cbType->currentIndex()) << endl;
+        m_controller->close();
+        delete m_controller;
+        m_controller = cd.getDeviceController();
     }
 }
 
