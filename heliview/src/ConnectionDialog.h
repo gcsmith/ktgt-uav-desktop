@@ -15,7 +15,7 @@ class ConnectionDialog : public QDialog, public Ui::ConnectionDialog
     Q_OBJECT
 
 public:
-    ConnectionDialog(QWidget *parent, DeviceController *controller);
+    ConnectionDialog(QWidget *parent, DeviceController **controller);
     virtual ~ConnectionDialog();
     
     
@@ -26,7 +26,7 @@ public slots:
     void s_cbChange(int index);
     
 private:
-    DeviceController *m_controller;
+    DeviceController **m_controller;
     
 };
 

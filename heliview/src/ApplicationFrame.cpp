@@ -123,6 +123,7 @@ void ApplicationFrame::setupDeviceController()
 
     connect(m_video, SIGNAL(updateTrackColor(int, int, int)),
             m_controller, SLOT(onUpdateTrackColor(int, int, int)));
+
 }
 
 // -----------------------------------------------------------------------------
@@ -269,7 +270,7 @@ void ApplicationFrame::onStateChanged(int state)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onFileConnectTriggered()
 {
-    ConnectionDialog cd(this, m_controller);
+    ConnectionDialog cd(this, &m_controller);
     cd.exec();
     
     if( cd.result() == QDialog::Accepted){
