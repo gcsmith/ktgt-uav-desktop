@@ -158,6 +158,15 @@ void ApplicationFrame::setupGamepad()
 }
 
 // -----------------------------------------------------------------------------
+void ApplicationFrame::setEnabledButtons(int buttons)
+{
+    btnLanding->setEnabled(buttons & BUTTON_LANDING);
+    btnTakeoff->setEnabled(buttons & BUTTON_TAKEOFF);
+    btnOverride->setEnabled(buttons & BUTTON_OVERRIDE);
+    btnKillswitch->setEnabled(buttons & BUTTON_KILLSWITCH);
+}
+  
+// -----------------------------------------------------------------------------
 void ApplicationFrame::openLogFile(const QString &logfile)
 {
     m_file = new QFile(logfile);
@@ -238,31 +247,23 @@ void ApplicationFrame::onStateChanged(int state)
     switch ((DeviceState)state)
     {
     case STATE_RADIO_CONTROL:
-        btnLanding->setEnabled(false);
-        btnTakeoff->setEnabled(false);
-        btnOverride->setEnabled(true);
+        setEnabledButtons(BUTTON_OVERRIDE | BUTTON_KILLSWITCH);
         btnOverride->setText("Release Manual");
-        btnKillswitch->setEnabled(true);
+        m_ctlview->setEnabled(false);
         break;
     case STATE_MIXED_CONTROL:
-        btnLanding->setEnabled(false);
-        btnTakeoff->setEnabled(false);
-        btnOverride->setEnabled(true);
-        btnKillswitch->setEnabled(true);
+        setEnabledButtons(BUTTON_OVERRIDE | BUTTON_KILLSWITCH);
+        m_ctlview->setEnabled(true);
         break;
     case STATE_AUTONOMOUS:
-        btnLanding->setEnabled(true);
-        btnTakeoff->setEnabled(true);
-        btnOverride->setEnabled(true);
+        setEnabledButtons(BUTTON_ALL);
         btnOverride->setText("Manual Override");
-        btnKillswitch->setEnabled(true);
+        m_ctlview->setEnabled(false);
         break;
     case STATE_KILLED:
     case STATE_LOCKOUT:
-        btnLanding->setEnabled(false);
-        btnTakeoff->setEnabled(false);
-        btnOverride->setEnabled(false);
-        btnKillswitch->setEnabled(false);
+        setEnabledButtons(BUTTON_NONE);
+        m_ctlview->setEnabled(false);
         break;
     }
 }
@@ -273,8 +274,9 @@ void ApplicationFrame::onFileConnectTriggered()
     ConnectionDialog cd(this, &m_controller);
     cd.exec();
     
-    if( cd.result() == QDialog::Accepted){
+    if( cd.result() == QDialog::Accepted) {
         setupDeviceController();
+        setupGamepad();
     }
 }
 

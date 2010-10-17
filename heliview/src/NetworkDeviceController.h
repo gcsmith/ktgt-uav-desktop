@@ -66,10 +66,11 @@ protected:
     QTimer           *m_throttle_timer;
     uint32_t          m_blocksz;
     std::vector<char> m_buffer;
-    ctrl_sigs         m_manual_sigs;
+    ctrl_sigs         m_ctl;
     char              m_vcm_axes;
     DeviceState       m_state;
     DeviceState       m_saveState;
+    float             m_prev_alt;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_

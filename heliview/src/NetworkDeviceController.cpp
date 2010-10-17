@@ -12,13 +12,7 @@
 #include "Utility.h"
 #include "uav_protocol.h"
 
-// macro inverts the bit (y) in the number (x)
-#define FLIP_A_BIT(x,y) ((((x) & (y)) ^ (y)) | ((x) & ~(y)))
-
 using namespace std;
-
-// memory of alt axis value from joystick
-static float prev_alt = 0.0f;
 
 const char * NetworkDeviceController::m_description = "Network description";
 const bool NetworkDeviceController::m_takesDevice = true;
@@ -41,10 +35,10 @@ NetworkDeviceController::NetworkDeviceController(const QString &device)
     m_throttle_timer = new QTimer(this);
     connect(m_throttle_timer, SIGNAL(timeout()), this, SLOT(onThrottleTick()));
 
-    m_manual_sigs.alt = 0.0f;
-    m_manual_sigs.pitch = 0.0f;
-    m_manual_sigs.roll = 0.0f;
-    m_manual_sigs.yaw = 0.0f;
+    m_ctl.alt = 0.0f;
+    m_ctl.pitch = 0.0f;
+    m_ctl.roll = 0.0f;
+    m_ctl.yaw = 0.0f;
 }
 
 // -----------------------------------------------------------------------------
@@ -205,37 +199,37 @@ void NetworkDeviceController::onControllerTick()
         cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
       
         // altitude
-        temp.f = m_manual_sigs.alt;
-        if ((m_vcm_axes & VCM_AXIS_ALT) && (temp.f != prev_alt))
+        temp.f = m_ctl.alt;
+        if ((m_vcm_axes & VCM_AXIS_ALT) && (temp.f != m_prev_alt))
         {
-            prev_alt = m_manual_sigs.alt;
+            m_prev_alt = m_ctl.alt;
             //send = 1;
         }
         cmd_buffer[PKT_MCM_AXIS_ALT] = temp.i;
 
         // pitch
-        temp.f = m_manual_sigs.pitch;
+        temp.f = m_ctl.pitch;
         if ((m_vcm_axes & VCM_AXIS_PITCH) && (temp.f != prev_pitch))
         {
-            prev_pitch = m_manual_sigs.pitch;
+            prev_pitch = m_ctl.pitch;
             send = 1;
         }
         cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
 
         // roll
-        temp.f = m_manual_sigs.roll;
+        temp.f = m_ctl.roll;
         if ((m_vcm_axes & VCM_AXIS_ROLL) && (temp.f != prev_roll))
         {
-            prev_roll = m_manual_sigs.roll;
+            prev_roll = m_ctl.roll;
             send = 1;
         }
         cmd_buffer[PKT_MCM_AXIS_ROLL] = temp.i;
 
         // yaw
-        temp.f = m_manual_sigs.yaw;
+        temp.f = m_ctl.yaw;
         if ((m_vcm_axes & VCM_AXIS_YAW) && (temp.f != prev_yaw))
         {
-            prev_yaw = m_manual_sigs.yaw;
+            prev_yaw = m_ctl.yaw;
             send = 1;
         }
         cmd_buffer[PKT_MCM_AXIS_YAW] = temp.i;
@@ -244,10 +238,10 @@ void NetworkDeviceController::onControllerTick()
             cerr << "failed to send flight control request\n";
         else if (send)
         {
-            fprintf(stderr, "Sent ALT:   %f\n", m_manual_sigs.alt);
-            fprintf(stderr, "Sent PITCH: %f\n", m_manual_sigs.pitch);
-            fprintf(stderr, "Sent ROLL:  %f\n", m_manual_sigs.roll);
-            fprintf(stderr, "Sent YAW:   %f\n\n", m_manual_sigs.yaw);
+            fprintf(stderr, "Sent ALT:   %f\n", m_ctl.alt);
+            fprintf(stderr, "Sent PITCH: %f\n", m_ctl.pitch);
+            fprintf(stderr, "Sent ROLL:  %f\n", m_ctl.roll);
+            fprintf(stderr, "Sent YAW:   %f\n\n", m_ctl.yaw);
         }
     }
 }
@@ -255,42 +249,33 @@ void NetworkDeviceController::onControllerTick()
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::onThrottleTick()
 {
-    float value = m_manual_sigs.alt;
+    float value = m_ctl.alt;
 
-    if ((value < prev_alt) && (prev_alt > 0.0f) && (value > 0.0f))
+    if ((value < m_prev_alt) && (m_prev_alt > 0.0f) && (value > 0.0f))
     {
         // joystick is going from postive to zero
         // do nothing
     }
-    else if ((value > prev_alt) && (prev_alt < 0.0f) && (value < 0.0f))
+    else if ((value > m_prev_alt) && (m_prev_alt < 0.0f) && (value < 0.0f))
     {
         // joystick is going from negative to zero
         // do nothing
     }
     else if ((value >= 0.1f) || (value <= -0.1f))
     {
-        // prev_alt == value
+        // m_prev_alt == value
         // the user hasn't moved the joystick since the last poll, so tell
         // the server to keep incrementing the throttle pwm
         uint32_t cmd_buffer[32];
-        union { int i; float f; } temp;
 
         cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
         cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
+        cmd_buffer[PKT_MCM_AXIS_ALT]   = *(uint32_t *)&m_ctl.alt;
+        cmd_buffer[PKT_MCM_AXIS_PITCH] = *(uint32_t *)&m_ctl.pitch;
+        cmd_buffer[PKT_MCM_AXIS_ROLL]  = *(uint32_t *)&m_ctl.roll;
+        cmd_buffer[PKT_MCM_AXIS_YAW]   = *(uint32_t *)&m_ctl.yaw;
 
-        temp.f = m_manual_sigs.alt;
-        cmd_buffer[PKT_MCM_AXIS_ALT]   = temp.i;
-
-        temp.f = m_manual_sigs.pitch;
-        cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
-
-        temp.f = m_manual_sigs.roll;
-        cmd_buffer[PKT_MCM_AXIS_ROLL]  = temp.i;
-
-        temp.f = m_manual_sigs.yaw;
-        cmd_buffer[PKT_MCM_AXIS_YAW]   = temp.i;
-
-        fprintf(stderr, "acting on throttle event signal %f\n", temp.f);
+        fprintf(stderr, "acting on throttle event signal %f\n", m_ctl.alt);
         if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
             cerr << "failed to send throttle event\n";
     }
@@ -371,6 +356,10 @@ void NetworkDeviceController::onSocketReadyRead()
         emit videoFrameReady((const char *)&packet[PKT_MJPG_IMG], (size_t)framesz);
         break;
     case SERVER_UPDATE_CTL_MODE:
+        // if current control mode was mixed, stop the throttle timer
+        if (m_state == STATE_MIXED_CONTROL)
+            m_throttle_timer->stop();
+
         cerr << "got UPDATE_CTL_MODE: ";
         switch (packet[PKT_VCM_TYPE])
         {
@@ -385,6 +374,8 @@ void NetworkDeviceController::onSocketReadyRead()
         case VCM_TYPE_MIXED:
             cerr << "mixed\n";
             m_state = STATE_MIXED_CONTROL;
+            m_prev_alt = 0.0f;
+            m_throttle_timer->start(50);
             break;
         case VCM_TYPE_KILL: 
             cerr << "killed\n";
@@ -450,61 +441,48 @@ void NetworkDeviceController::onInputReady(
     {
         if ((12 == index) && (value > 0.0))
         {
-            QDataStream stream(m_sock);
-            stream.setVersion(QDataStream::Qt_4_0);
-
             int vcm_type;
             if (STATE_MIXED_CONTROL == m_state)
             {
                 cerr << "requesting switch to autonomous...\n";
                 vcm_type = VCM_TYPE_AUTO;
-                m_throttle_timer->stop();
             }
             else
             {
                 cerr << "requesting switch to mixed mode...\n";
                 vcm_type = VCM_TYPE_MIXED;
-                m_throttle_timer->start(50);
-                prev_alt = 0.0f;
             }
 
+            // request server to set new control mode
             m_vcm_axes = VCM_AXIS_ALL;
-
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = vcm_type;
             cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
-
-            stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
-            m_sock->waitForBytesWritten();
+            sendPacket(cmd_buffer, PKT_VCM_LENGTH);
         }
         else if ((STATE_MIXED_CONTROL == m_state) && (value > 0.0) && 
                 (index >= 4) && (index <= 7))
         {
-            QDataStream stream(m_sock);
-            stream.setVersion(QDataStream::Qt_4_0);
-
             // update the mixed mode controlled axes
             switch (index)
             {
                 case 4: // A
-                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ALT);
+                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_ALT);
+                    m_prev_alt = 0.0f;
                     if (m_vcm_axes & VCM_AXIS_ALT)
-                    {
                         m_throttle_timer->start(50);
-                        prev_alt = 0.0f;
-                    }
                     else
                         m_throttle_timer->stop();
                     break;
                 case 5: // B
-                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_ROLL);
+                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_ROLL);
                     break;
                 case 6: // X
-                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_YAW);
+                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_YAW);
                     break;
                 case 7: // Y
-                    m_vcm_axes = FLIP_A_BIT(m_vcm_axes, VCM_AXIS_PITCH);
+                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_PITCH);
                     break;
                 default:
                     fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
@@ -516,9 +494,7 @@ void NetworkDeviceController::onInputReady(
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_MIXED;
             cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
-
-            stream.writeRawData((char *)cmd_buffer, PKT_VCM_LENGTH);
-            m_sock->waitForBytesWritten();
+            sendPacket(cmd_buffer, PKT_VCM_LENGTH);
         }
     }
     else if (GP_EVENT_AXIS == event)
@@ -528,16 +504,16 @@ void NetworkDeviceController::onInputReady(
             switch (index)
             {
             case 0:
-                m_manual_sigs.yaw = value;
+                m_ctl.yaw = value;
                 break;
             case 1:
-                m_manual_sigs.alt = -value;
+                m_ctl.alt = -value;
                 break;
             case 2:
-                m_manual_sigs.roll = value;
+                m_ctl.roll = value;
                 break;
             case 3:
-                m_manual_sigs.pitch = value;
+                m_ctl.pitch = value;
                 break;
             default:
                 fprintf(stderr, "NetworkDeviceController: unknown axis");

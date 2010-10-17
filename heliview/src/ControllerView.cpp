@@ -13,16 +13,12 @@
 
 // -----------------------------------------------------------------------------
 ControllerView::ControllerView(QWidget *parent)
-: QWidget(parent), m_axes(0), m_timer(NULL), m_enabled(false), m_stale(false)
+: QWidget(parent), m_timer(NULL), m_enabled(false), m_stale(false),
+  m_lx(0.0f), m_ly(0.0f), m_rx(0.0f), m_ry(0.0f), m_axes(0)
 {
     m_timer = new QTimer(this);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(onJoystickTick()));
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(onRepaintTick()));
     m_timer->start(50);
-
-    m_ctl.jl_x = 0.0f;
-    m_ctl.jl_y = 0.0f;
-    m_ctl.jr_x = 0.0f;
-    m_ctl.jr_y = 0.0f;
 
     repaint();
 }
@@ -34,7 +30,20 @@ ControllerView::~ControllerView()
 }
 
 // -----------------------------------------------------------------------------
-void ControllerView::onJoystickTick()
+void ControllerView::setEnabled(bool enabled)
+{
+    m_stale = (enabled != m_enabled);
+    m_enabled = enabled;
+}
+
+// -----------------------------------------------------------------------------
+bool ControllerView::enabled()
+{
+    return m_enabled;
+}
+
+// -----------------------------------------------------------------------------
+void ControllerView::onRepaintTick()
 {
     if (m_stale)
     {
@@ -47,16 +56,8 @@ void ControllerView::onJoystickTick()
 void ControllerView::onInputReady(GamepadEvent event, int index, float value)
 {
     m_stale = true;
-    if ((GP_EVENT_BUTTON == event) && (12 == index) && (value > 0.0))
-    {
-        m_enabled = !m_enabled;
-        if (m_enabled)
-            m_axes = VCM_AXIS_ALL;
-        else
-            m_axes = 0;
-    }
-    else if ((GP_EVENT_BUTTON == event) && (index >= 4) && (index <= 7) && 
-            (value > 0.0) && m_enabled)
+    if ((GP_EVENT_BUTTON == event) && (index >= 4) && (index <= 7) && 
+        (value > 0.0) && m_enabled)
     {
         switch (index)
         {
@@ -81,16 +82,16 @@ void ControllerView::onInputReady(GamepadEvent event, int index, float value)
         switch (index)
         {
         case 0: // yaw
-            m_ctl.jl_x = value;
+            m_lx = value;
             break;
         case 1: // altitude
-            m_ctl.jl_y = value;
+            m_ly = value;
             break;
         case 2: // roll
-            m_ctl.jr_x = value;
+            m_rx = value;
             break;
         case 3: // pitch
-            m_ctl.jr_y = value;
+            m_ry = value;
             break;
         default:
             fprintf(stderr, "ControllerView: unknown controller axis\n");
@@ -130,17 +131,17 @@ void ControllerView::paintEvent(QPaintEvent *e)
     if (m_enabled)
     {
         // offset the nub positions if mixed mode controls are enabled
-        float l_len = sqrt(m_ctl.jl_x * m_ctl.jl_x + m_ctl.jl_y * m_ctl.jl_y);
-        float r_len = sqrt(m_ctl.jr_x * m_ctl.jr_x + m_ctl.jr_y * m_ctl.jr_y);
+        float l_len = sqrt(m_lx * m_lx + m_ly * m_ly);
+        float r_len = sqrt(m_rx * m_rx + m_ry * m_ry);
 
         if (m_axes & VCM_AXIS_YAW)
-            n1_dx = n_2 * ((l_len > 1.0f) ? m_ctl.jl_x / l_len : m_ctl.jl_x);
+            n1_dx = n_2 * ((l_len > 1.0f) ? m_lx / l_len : m_lx);
         if (m_axes & VCM_AXIS_ALT)
-            n1_dy = n_2 * ((l_len > 1.0f) ? m_ctl.jl_y / l_len : m_ctl.jl_y);
+            n1_dy = n_2 * ((l_len > 1.0f) ? m_ly / l_len : m_ly);
         if (m_axes & VCM_AXIS_ROLL)
-            n2_dx = n_2 * ((r_len > 1.0f) ? m_ctl.jr_x / r_len : m_ctl.jr_x);
+            n2_dx = n_2 * ((r_len > 1.0f) ? m_rx / r_len : m_rx);
         if (m_axes & VCM_AXIS_PITCH)
-            n2_dy = n_2 * ((r_len > 1.0f) ? m_ctl.jr_y / r_len : m_ctl.jr_y);
+            n2_dy = n_2 * ((r_len > 1.0f) ? m_ry / r_len : m_ry);
     }
 
     // render the inner circle for each analog stick's nub

@@ -172,6 +172,9 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
         avg_r = (int)(avg_r * inv_pixels);
         avg_g = (int)(avg_g * inv_pixels);
         avg_b = (int)(avg_b * inv_pixels);
+
+        fprintf(stderr, "shipping rgb triplet (%ld, %ld, %ld) to control\n",
+                avg_r, avg_g, avg_b);
         emit updateTrackColor(avg_r, avg_g, avg_b);
 
         // disable the dragging rectangle and force an update of the widget

@@ -23,19 +23,22 @@ public:
     ControllerView(QWidget *parent);
     virtual ~ControllerView();
 
+    void setEnabled(bool enabled);
+    bool enabled();
+
 public slots:
-    void onJoystickTick();
+    void onRepaintTick();
     void onInputReady(GamepadEvent event, int index, float value);
 
 protected:
     void paintEvent(QPaintEvent *e);
     void resizeEvent(QResizeEvent *e);
 
-    char           m_axes;
-    QTimer        *m_timer;
-    ctlr_inputs_t  m_ctl;
-    bool           m_enabled;
-    bool           m_stale;
+    QTimer *m_timer;
+    bool    m_enabled;
+    bool    m_stale;
+    float   m_lx, m_ly, m_rx, m_ry;
+    char    m_axes;
 };
 
 #endif // _CONTROLLERVIEW__H_

@@ -16,6 +16,13 @@
 #include "VideoView.h"
 #include "Gamepad.h"
 
+#define BUTTON_LANDING    0x01
+#define BUTTON_TAKEOFF    0x02
+#define BUTTON_OVERRIDE   0x04
+#define BUTTON_KILLSWITCH 0x08
+#define BUTTON_NONE       0x00
+#define BUTTON_ALL        0xFF
+
 class ApplicationFrame : public QMainWindow, public Ui::ApplicationFrame
 {
     Q_OBJECT
@@ -67,6 +74,8 @@ protected:
     void setupDeviceController();
     void setupGamepad();
     void setupSignalsSlots();
+
+    void setEnabledButtons(int buttons);
 
     LineGraph        *m_graphs[AXIS_COUNT];
     VirtualView      *m_virtual;
