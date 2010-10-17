@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "ControllerView.h"
 #include "uav_protocol.h"
+#include "DeviceController.h"
 #include "Utility.h"
 
 // -----------------------------------------------------------------------------
@@ -34,7 +35,7 @@ void ControllerView::setEnabled(bool enabled)
 {
     m_stale = (enabled != m_enabled);
     m_enabled = enabled;
-    m_axes = m_enabled ? VCM_AXIS_ALL : 0;
+    m_axes = m_enabled ? AXIS_ALL : 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -126,13 +127,13 @@ void ControllerView::paintEvent(QPaintEvent *e)
         float l_len = sqrt(m_lx * m_lx + m_ly * m_ly);
         float r_len = sqrt(m_rx * m_rx + m_ry * m_ry);
 
-        if (m_axes & VCM_AXIS_YAW)
+        if (m_axes & AXIS_YAW)
             n1_dx = n_2 * ((l_len > 1.0f) ? m_lx / l_len : m_lx);
-        if (m_axes & VCM_AXIS_ALT)
+        if (m_axes & AXIS_ALT)
             n1_dy = n_2 * ((l_len > 1.0f) ? m_ly / l_len : m_ly);
-        if (m_axes & VCM_AXIS_ROLL)
+        if (m_axes & AXIS_ROLL)
             n2_dx = n_2 * ((r_len > 1.0f) ? m_rx / r_len : m_rx);
-        if (m_axes & VCM_AXIS_PITCH)
+        if (m_axes & AXIS_PITCH)
             n2_dy = n_2 * ((r_len > 1.0f) ? m_ry / r_len : m_ry);
     }
 
@@ -146,10 +147,10 @@ void ControllerView::paintEvent(QPaintEvent *e)
     float led_m = std::min(led_w, led_h);
     static const char *labels[] = { "alt", "yaw", "pitch", "roll" };
     int led_en[] = {
-        m_axes & VCM_AXIS_ALT,
-        m_axes & VCM_AXIS_YAW,
-        m_axes & VCM_AXIS_PITCH,
-        m_axes & VCM_AXIS_ROLL
+        m_axes & AXIS_ALT,
+        m_axes & AXIS_YAW,
+        m_axes & AXIS_PITCH,
+        m_axes & AXIS_ROLL
     };
 
     for (int i = 0; i < 4; ++i) {

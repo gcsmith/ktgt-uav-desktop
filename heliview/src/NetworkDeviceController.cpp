@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// File:    NetworkDeviceController.pp
+// File:    NetworkDeviceController.cpp
 // Authors: Garrett Smith
 //
 // Network device interface implementation.
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-const char * NetworkDeviceController::m_description = "Network description";
+const char *NetworkDeviceController::m_description = "Network description";
 const bool NetworkDeviceController::m_takesDevice = true;
 
 // -----------------------------------------------------------------------------
@@ -182,6 +182,7 @@ void NetworkDeviceController::onVideoTick()
         cerr << "failed to send mjpg frame request\n";
 }
 
+// -----------------------------------------------------------------------------
 void NetworkDeviceController::onControllerTick()
 {
     // Memory of previous mixed controller values
@@ -478,6 +479,7 @@ void NetworkDeviceController::onInputReady(
             switch (index)
             {
                 case 4: // A
+                    cerr << "button alt\n";
                     vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ALT);
                     m_prev_alt = 0.0f;
                     if (vcm_axes & VCM_AXIS_ALT)
@@ -486,12 +488,15 @@ void NetworkDeviceController::onInputReady(
                         m_throttle_timer->stop();
                     break;
                 case 5: // B
+                    cerr << "button roll\n";
                     vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ROLL);
                     break;
                 case 6: // X
+                    cerr << "button yaw\n";
                     vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_YAW);
                     break;
                 case 7: // Y
+                    cerr << "button pitch\n";
                     vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
                     break;
                 default:
