@@ -12,6 +12,7 @@ ConnectionDialog::ConnectionDialog(QWidget *parent, DeviceController *controller
 : QDialog(parent), m_controller(controller)
 {
     setupUi(this);
+    
     connect(btnCancel, SIGNAL(released()), this, SLOT(s_cancelButton()));
     connect(btnConnect, SIGNAL(released()), this, SLOT(s_connectButton()));
     connect(cbType, SIGNAL(currentIndexChanged(int)), this, SLOT(s_cbChange(int)));
@@ -19,6 +20,7 @@ ConnectionDialog::ConnectionDialog(QWidget *parent, DeviceController *controller
     
     //Set Default description
     editDevice->setText(m_controller->device());
+    
     
     if(QString::compare(QString("network"),m_controller->controllerType()) == 0){
         cbType->setCurrentIndex(0);
@@ -30,6 +32,7 @@ ConnectionDialog::ConnectionDialog(QWidget *parent, DeviceController *controller
         cbType->setCurrentIndex(2);
         lblDescription->setText(QString(SimulatedDeviceController::m_description));
     }
+    
        
 }
 
@@ -44,7 +47,10 @@ void ConnectionDialog::s_cancelButton(){
 }
 
 void ConnectionDialog::s_connectButton(){
+    //if(!m_controller
+    
     m_controller->close();
+    
     delete m_controller;
     switch (cbType->currentIndex()){
     case 0: //Network
@@ -59,7 +65,7 @@ void ConnectionDialog::s_connectButton(){
     m_controller = new SimulatedDeviceController(editDevice->text());
     break;
     }
-/*
+
     if(m_controller->open()){
         accept();
     } else {
@@ -68,7 +74,7 @@ void ConnectionDialog::s_connectButton(){
                    "Connection Failed to Open - Please check your device string");
         mb.exec();    
     } 
-    */   
+    
 }
 
 void ConnectionDialog::s_cbChange(int index){

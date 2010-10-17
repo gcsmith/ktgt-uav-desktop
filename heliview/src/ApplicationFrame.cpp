@@ -32,6 +32,14 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
 
     setupStatusBar();
     setupDeviceController();
+    
+    // attempt to open the specified device
+    if (!m_controller->open())
+    {
+        qDebug() << "failed to open device" << m_controller->device();
+    }
+    
+    
     setupGamepad();
     
 }
@@ -107,12 +115,6 @@ void ApplicationFrame::setupDeviceController()
     connect(m_controller, SIGNAL(stateChanged(int)),
             this, SLOT(onStateChanged(int)));
 
-    // attempt to open the specified device
-    if (!m_controller->open())
-    {
-        qDebug() << "failed to open device" << m_controller->device();
-    }
-    
     connect(m_controller, SIGNAL(videoFrameReady(const char *, size_t)),
             m_video, SLOT(onImageReady(const char *, size_t)));
 
