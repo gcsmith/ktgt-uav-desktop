@@ -26,6 +26,9 @@ public:
     void setEnabled(bool enabled);
     bool enabled();
 
+    void setAxes(int axes);
+    int axes();
+
 public slots:
     void onRepaintTick();
     void onInputReady(GamepadEvent event, int index, float value);

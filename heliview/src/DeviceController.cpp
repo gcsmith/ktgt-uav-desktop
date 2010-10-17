@@ -16,6 +16,11 @@ DeviceState DeviceController::currentState()
     return STATE_AUTONOMOUS;
 }
 
+int DeviceController::currentAxes()
+{
+    return AXIS_ALL;
+}
+
 bool DeviceController::requestTakeoff()
 {
     return true;

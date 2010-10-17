@@ -20,6 +20,12 @@ enum DeviceState
     STATE_LOCKOUT
 };
 
+#define AXIS_ALT    0x01
+#define AXIS_YAW    0x02
+#define AXIS_PITCH  0x04
+#define AXIS_ROLL   0x08
+#define AXIS_ALL    0xFF
+
 class DeviceController: public QObject
 {
     Q_OBJECT
@@ -30,6 +36,7 @@ public:
     virtual QString device() = 0;
     virtual QString controllerType() = 0;
     virtual DeviceState currentState();
+    virtual int currentAxes();
 
     virtual bool requestTakeoff();
     virtual bool requestLanding();

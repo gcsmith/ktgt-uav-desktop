@@ -254,6 +254,7 @@ void ApplicationFrame::onStateChanged(int state)
     case STATE_MIXED_CONTROL:
         setEnabledButtons(BUTTON_OVERRIDE | BUTTON_KILLSWITCH);
         m_ctlview->setEnabled(true);
+        m_ctlview->setAxes(m_controller->currentAxes());
         break;
     case STATE_AUTONOMOUS:
         setEnabledButtons(BUTTON_ALL);
@@ -290,7 +291,7 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    SettingsDialog sd(this,m_controller);
+    SettingsDialog sd(this, m_controller);
     sd.exec();
 }
 

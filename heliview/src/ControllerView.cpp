@@ -34,12 +34,25 @@ void ControllerView::setEnabled(bool enabled)
 {
     m_stale = (enabled != m_enabled);
     m_enabled = enabled;
+    m_axes = m_enabled ? VCM_AXIS_ALL : 0;
 }
 
 // -----------------------------------------------------------------------------
 bool ControllerView::enabled()
 {
     return m_enabled;
+}
+
+// -----------------------------------------------------------------------------
+void ControllerView::setAxes(int axes)
+{
+    m_axes = axes;
+}
+
+// -----------------------------------------------------------------------------
+int ControllerView::axes()
+{
+    return m_axes;
 }
 
 // -----------------------------------------------------------------------------
@@ -56,28 +69,7 @@ void ControllerView::onRepaintTick()
 void ControllerView::onInputReady(GamepadEvent event, int index, float value)
 {
     m_stale = true;
-    if ((GP_EVENT_BUTTON == event) && (index >= 4) && (index <= 7) && 
-        (value > 0.0) && m_enabled)
-    {
-        switch (index)
-        {
-        case 4: // A
-            m_axes = BIT_INV(m_axes, VCM_AXIS_ALT);
-            break;
-        case 5: // B
-            m_axes = BIT_INV(m_axes, VCM_AXIS_ROLL);
-            break;
-        case 6: // X
-            m_axes = BIT_INV(m_axes, VCM_AXIS_YAW);
-            break;
-        case 7: // Y
-            m_axes = BIT_INV(m_axes, VCM_AXIS_PITCH);
-            break;
-        default:
-            fprintf(stderr, "ControllerView: unknown controller button\n");
-        }
-    }
-    else if ((GP_EVENT_AXIS == event) && (index >= 0) && (index <= 3))
+    if ((GP_EVENT_AXIS == event) && (index >= 0) && (index <= 3))
     {
         switch (index)
         {

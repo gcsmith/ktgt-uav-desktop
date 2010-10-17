@@ -32,6 +32,7 @@ public:
     virtual QString device() { return m_device; }
     virtual QString controllerType() { return QString("network"); }
     virtual DeviceState currentState() { return m_state; }
+    virtual int currentAxes() { return m_axes; }
 
     bool requestTakeoff();
     bool requestLanding();
@@ -39,7 +40,7 @@ public:
     bool requestAutonomous();
     bool requestKillswitch();
     
-    static const char * m_description;
+    static const char *m_description;
     static const bool m_takesDevice;
 
 public slots:
@@ -67,9 +68,8 @@ protected:
     uint32_t          m_blocksz;
     std::vector<char> m_buffer;
     ctrl_sigs         m_ctl;
-    char              m_vcm_axes;
     DeviceState       m_state;
-    DeviceState       m_saveState;
+    int               m_axes;
     float             m_prev_alt;
 };
 

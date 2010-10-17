@@ -20,7 +20,7 @@ const bool NetworkDeviceController::m_takesDevice = true;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_vcm_axes(0), m_state(STATE_AUTONOMOUS)
+  m_state(STATE_AUTONOMOUS)
 {
     m_telem_timer = new QTimer(this);
     connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
@@ -200,7 +200,7 @@ void NetworkDeviceController::onControllerTick()
       
         // altitude
         temp.f = m_ctl.alt;
-        if ((m_vcm_axes & VCM_AXIS_ALT) && (temp.f != m_prev_alt))
+        if ((m_axes & AXIS_ALT) && (temp.f != m_prev_alt))
         {
             m_prev_alt = m_ctl.alt;
             //send = 1;
@@ -209,7 +209,7 @@ void NetworkDeviceController::onControllerTick()
 
         // pitch
         temp.f = m_ctl.pitch;
-        if ((m_vcm_axes & VCM_AXIS_PITCH) && (temp.f != prev_pitch))
+        if ((m_axes & AXIS_PITCH) && (temp.f != prev_pitch))
         {
             prev_pitch = m_ctl.pitch;
             send = 1;
@@ -218,7 +218,7 @@ void NetworkDeviceController::onControllerTick()
 
         // roll
         temp.f = m_ctl.roll;
-        if ((m_vcm_axes & VCM_AXIS_ROLL) && (temp.f != prev_roll))
+        if ((m_axes & AXIS_ROLL) && (temp.f != prev_roll))
         {
             prev_roll = m_ctl.roll;
             send = 1;
@@ -227,7 +227,7 @@ void NetworkDeviceController::onControllerTick()
 
         // yaw
         temp.f = m_ctl.yaw;
-        if ((m_vcm_axes & VCM_AXIS_YAW) && (temp.f != prev_yaw))
+        if ((m_axes & AXIS_YAW) && (temp.f != prev_yaw))
         {
             prev_yaw = m_ctl.yaw;
             send = 1;
@@ -390,6 +390,11 @@ void NetworkDeviceController::onSocketReadyRead()
             m_state = STATE_KILLED;
             break;
         }
+        m_axes = 0;
+        if (packet[PKT_VCM_AXES] & VCM_AXIS_ALT)   m_axes |= AXIS_ALT;
+        if (packet[PKT_VCM_AXES] & VCM_AXIS_YAW)   m_axes |= AXIS_YAW;
+        if (packet[PKT_VCM_AXES] & VCM_AXIS_PITCH) m_axes |= AXIS_PITCH;
+        if (packet[PKT_VCM_AXES] & VCM_AXIS_ROLL)  m_axes |= AXIS_ROLL;
         emit stateChanged((int)m_state);
         break;
     case SERVER_UPDATE_TRACKING:
@@ -454,35 +459,40 @@ void NetworkDeviceController::onInputReady(
             }
 
             // request server to set new control mode
-            m_vcm_axes = VCM_AXIS_ALL;
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = vcm_type;
-            cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
+            cmd_buffer[PKT_VCM_AXES] = VCM_AXIS_ALL;
             sendPacket(cmd_buffer, PKT_VCM_LENGTH);
         }
         else if ((STATE_MIXED_CONTROL == m_state) && (value > 0.0) && 
                 (index >= 4) && (index <= 7))
         {
             // update the mixed mode controlled axes
+            int vcm_axes = 0;
+            if (m_axes & AXIS_ALT)   vcm_axes |= VCM_AXIS_ALT;
+            if (m_axes & AXIS_YAW)   vcm_axes |= VCM_AXIS_YAW;
+            if (m_axes & AXIS_PITCH) vcm_axes |= VCM_AXIS_PITCH;
+            if (m_axes & AXIS_ROLL)  vcm_axes |= VCM_AXIS_ROLL;
+
             switch (index)
             {
                 case 4: // A
-                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_ALT);
+                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ALT);
                     m_prev_alt = 0.0f;
-                    if (m_vcm_axes & VCM_AXIS_ALT)
+                    if (vcm_axes & VCM_AXIS_ALT)
                         m_throttle_timer->start(50);
                     else
                         m_throttle_timer->stop();
                     break;
                 case 5: // B
-                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_ROLL);
+                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ROLL);
                     break;
                 case 6: // X
-                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_YAW);
+                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_YAW);
                     break;
                 case 7: // Y
-                    m_vcm_axes = BIT_INV(m_vcm_axes, VCM_AXIS_PITCH);
+                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
                     break;
                 default:
                     fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
@@ -493,7 +503,7 @@ void NetworkDeviceController::onInputReady(
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_MIXED;
-            cmd_buffer[PKT_VCM_AXES] = m_vcm_axes;
+            cmd_buffer[PKT_VCM_AXES] = vcm_axes;
             sendPacket(cmd_buffer, PKT_VCM_LENGTH);
         }
     }
