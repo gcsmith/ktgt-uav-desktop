@@ -59,7 +59,7 @@ void ConnectionDialog::s_connectButton(){
     m_controller = new SimulatedDeviceController(editDevice->text());
     break;
     }
-
+/*
     if(m_controller->open()){
         accept();
     } else {
@@ -67,7 +67,8 @@ void ConnectionDialog::s_connectButton(){
                    "Connection Failure",
                    "Connection Failed to Open - Please check your device string");
         mb.exec();    
-    }    
+    } 
+    */   
 }
 
 void ConnectionDialog::s_cbChange(int index){

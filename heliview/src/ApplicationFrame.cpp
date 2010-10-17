@@ -33,15 +33,7 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     setupStatusBar();
     setupDeviceController();
     setupGamepad();
-
-    connect(m_controller, SIGNAL(videoFrameReady(const char *, size_t)),
-            m_video, SLOT(onImageReady(const char *, size_t)));
-
-    connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
-            m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
-
-    connect(m_video, SIGNAL(updateTrackColor(int, int, int)),
-            m_controller, SLOT(onUpdateTrackColor(int, int, int)));
+    
 }
 
 // -----------------------------------------------------------------------------
@@ -120,6 +112,15 @@ void ApplicationFrame::setupDeviceController()
     {
         qDebug() << "failed to open device" << m_controller->device();
     }
+    
+    connect(m_controller, SIGNAL(videoFrameReady(const char *, size_t)),
+            m_video, SLOT(onImageReady(const char *, size_t)));
+
+    connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
+            m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
+
+    connect(m_video, SIGNAL(updateTrackColor(int, int, int)),
+            m_controller, SLOT(onUpdateTrackColor(int, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -268,6 +269,10 @@ void ApplicationFrame::onFileConnectTriggered()
 {
     ConnectionDialog cd(this, m_controller);
     cd.exec();
+    
+    if( cd.result() == QDialog::Accepted){
+        setupDeviceController();
+    }
 }
 
 // -----------------------------------------------------------------------------

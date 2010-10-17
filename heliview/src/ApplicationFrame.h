@@ -66,6 +66,7 @@ protected:
     void setupStatusBar();
     void setupDeviceController();
     void setupGamepad();
+    void setupSignalsSlots();
 
     LineGraph        *m_graphs[AXIS_COUNT];
     VirtualView      *m_virtual;
