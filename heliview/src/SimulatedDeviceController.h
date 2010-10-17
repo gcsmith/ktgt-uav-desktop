@@ -21,6 +21,7 @@ public:
     virtual bool open();
     virtual void close();
     virtual QString device() { return m_device; }
+    virtual QString controllerType() { return QString("sim"); }
     
     static const char * m_description;
     static const bool m_takesDevice;

@@ -30,6 +30,7 @@ public:
     virtual bool open();
     virtual void close();
     virtual QString device() { return m_device; }
+    virtual QString controllerType() { return QString("network"); }
     virtual DeviceState currentState() { return m_state; }
 
     bool requestTakeoff();

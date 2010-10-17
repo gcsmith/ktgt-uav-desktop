@@ -16,11 +16,21 @@ ConnectionDialog::ConnectionDialog(QWidget *parent, DeviceController *controller
     connect(btnConnect, SIGNAL(released()), this, SLOT(s_connectButton()));
     connect(cbType, SIGNAL(currentIndexChanged(int)), this, SLOT(s_cbChange(int)));
     
-    //TODO Remove functions and just connect slots to signals
     
     //Set Default description
-    lblDescription->setText(QString(NetworkDeviceController::m_description));
-    editDevice->setEnabled(NetworkDeviceController::m_takesDevice);
+    editDevice->setText(m_controller->device());
+    
+    if(QString::compare(QString("network"),m_controller->controllerType()) == 0){
+        cbType->setCurrentIndex(0);
+        lblDescription->setText(QString(NetworkDeviceController::m_description));
+    } else if(QString::compare(QString("serial"),m_controller->controllerType()) == 0){
+        cbType->setCurrentIndex(1);
+        lblDescription->setText(QString(SerialDeviceController::m_description));
+    } else if(QString::compare(QString("sim"),m_controller->controllerType()) == 0){
+        cbType->setCurrentIndex(2);
+        lblDescription->setText(QString(SimulatedDeviceController::m_description));
+    }
+       
 }
 
 ConnectionDialog::~ConnectionDialog()
