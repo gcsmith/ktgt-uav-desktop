@@ -40,6 +40,7 @@ public slots:
                           int alt, int rssi, int batt, int aux);
     void onConnectionStatusChanged(const QString &text, bool status);
     void onStateChanged(int state);
+    void onUpdateLog(const char *msg, int log_flags);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();

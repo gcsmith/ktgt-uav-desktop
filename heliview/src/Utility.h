@@ -18,6 +18,11 @@
 #define D2R(x) ((x) * PI / 180.0)
 #define R2D(x) ((x) * 180.0 / PI)
 
+// logging flags
+#define LOG_DIALOG  0x1
+#define LOG_FILE    0x2
+#define LOG_ALL     0x3
+
 // macro inverts the bit (y) in the number (x)
 #define BIT_INV(x,y) ((((x) & (y)) ^ (y)) | ((x) & ~(y)))
 

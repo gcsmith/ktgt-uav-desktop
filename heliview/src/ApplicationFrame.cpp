@@ -39,9 +39,7 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
         qDebug() << "failed to open device" << m_controller->device();
     }
     
-    
     setupGamepad();
-    
 }
 
 // -----------------------------------------------------------------------------
@@ -60,6 +58,9 @@ void ApplicationFrame::setupCameraView()
 {
     m_video = new VideoView(tabPaneCamera);
     tabPaneCameraLayout->addWidget(m_video);
+
+    connect(m_video, SIGNAL(updateLog(const char *, int)), 
+            this, SLOT(onUpdateLog(const char *, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -124,6 +125,8 @@ void ApplicationFrame::setupDeviceController()
     connect(m_video, SIGNAL(updateTrackColor(int, int, int)),
             m_controller, SLOT(onUpdateTrackColor(int, int, int)));
 
+    connect(m_controller, SIGNAL(updateLog(const char *, int)), 
+            this, SLOT(onUpdateLog(const char *, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -134,14 +137,22 @@ void ApplicationFrame::setupGamepad()
 
     if (NULL == m_gamepad)
     {
+        //onUpdateLog("AppFrame: could not create gamepad object\n", LOG_FILE);
         qDebug() << "could not create gamepad object";
     }
     if (!m_gamepad->open(dev))
     {
+        //onUpdateLog("AppFrame: failed to open /dev/input/js0\n", LOG_FILE);
         qDebug() << "failed to open /dev/input/js0";
     }
     else
     {
+        //char msg[128];
+        //sprintf(msg, "AppFrame: successfully opened %s\n", m_gamepad->driverName().toAscii().constData());
+        //sprintf(msg, "%sAppFrame:   version: %d\n", msg, m_gamepad->driverVersion());
+        //sprintf(msg, "%sAppFrame:   buttons: %d\n", msg, m_gamepad->buttonCount());
+        //sprintf(msg, "%sAppFrame:   axes:    %d\n", msg, m_gamepad->axisCount());
+        //onUpdateLog(msg, LOG_FILE);
         qDebug() << "successfully opened" << m_gamepad->driverName();
         qDebug() << "   version: " << m_gamepad->driverVersion();
         qDebug() << "   buttons: " << m_gamepad->buttonCount();
@@ -191,6 +202,22 @@ void ApplicationFrame::closeLogFile()
 void ApplicationFrame::enableLogging(bool enable)
 {
     m_logging = enable;
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onUpdateLog(const char *msg, int log_flags)
+{
+    if (log_flags & LOG_DIALOG)
+    {
+        txtCommandLog->textCursor().insertText(QString(msg));
+    }
+
+    if ((log_flags & LOG_FILE) && m_logging && m_log)
+    {
+        QString message(msg);
+        (*m_log) << message;
+        m_log->flush();
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -315,9 +342,15 @@ void ApplicationFrame::onSaveFrameTriggered()
     bool saved = m_video->saveFrame();
 
     if (saved)
+    {
+        onUpdateLog("Frame saved\n", LOG_ALL);
         qDebug() << "Frame saved";
+    }
     else
+    {
+        onUpdateLog("Frame not saved\n", LOG_ALL);
         qDebug() << "Frame not saved";
+    }
 }
 
 // -----------------------------------------------------------------------------

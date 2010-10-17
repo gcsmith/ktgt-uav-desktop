@@ -9,6 +9,7 @@
 #include <QMouseEvent>
 #include <QImage>
 #include <QPainter>
+#include <QTextEdit>
 #include <QUdpSocket>
 #include <QWidget>
 
@@ -24,6 +25,7 @@ public:
 
 signals:
     void updateTrackColor(int r, int g, int b);
+    void updateLog(const char *msg, int flags);
 
 public slots:
     void setDragBoxColor(int r, int g, int b, int a);

@@ -111,8 +111,13 @@ bool VideoView::saveFrame()
     const char *format = "hh-mm-ss-zzz";
     const char *tstamp = datetime.toString(format).toAscii().constData();
 
-    char filename[64];
+    char filename[32];
     sprintf(filename, "heliview_%s.jpg", tstamp);
+
+    char cmdLogMsg[64];
+    sprintf(cmdLogMsg, "Attempting to save current frame as %s\n", filename);
+    
+    emit updateLog(cmdLogMsg, LOG_ALL);
 
     return (m_image->save(QString(filename)));
 }

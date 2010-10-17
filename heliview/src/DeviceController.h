@@ -57,6 +57,7 @@ signals:
     void stateChanged(int state);
     void takeoff();
     void landing();
+    void updateLog(const char *msg, int log_flags);
 };
 
 DeviceController *CreateDeviceController(
