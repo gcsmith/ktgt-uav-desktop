@@ -478,33 +478,29 @@ void NetworkDeviceController::onInputReady(
 
             switch (index)
             {
-                case 4: // A
-                    cerr << "button alt\n";
-                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ALT);
-                    m_prev_alt = 0.0f;
-                    if (vcm_axes & VCM_AXIS_ALT)
-                        m_throttle_timer->start(50);
-                    else
-                        m_throttle_timer->stop();
-                    break;
-                case 5: // B
-                    cerr << "button roll\n";
-                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ROLL);
-                    break;
-                case 6: // X
-                    cerr << "button yaw\n";
-                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_YAW);
-                    break;
-                case 7: // Y
-                    cerr << "button pitch\n";
-                    vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
-                    break;
-                default:
-                    fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
-                    break;
+            case 4: // A
+                vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ALT);
+                m_prev_alt = 0.0f;
+                if (vcm_axes & VCM_AXIS_ALT)
+                    m_throttle_timer->start(50);
+                else
+                    m_throttle_timer->stop();
+                break;
+            case 5: // B
+                vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_ROLL);
+                break;
+            case 6: // X
+                vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_YAW);
+                break;
+            case 7: // Y
+                vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
+                break;
+            default:
+                fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
+                break;
             }
 
-            // tell server about which axes are controlled by the mixed mode controller
+            // tell server which axes are manually controlled by mixed mode
             cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
             cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
             cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_MIXED;

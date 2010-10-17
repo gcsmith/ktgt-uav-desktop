@@ -191,7 +191,7 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
 // -----------------------------------------------------------------------------
 void VideoView::onImageReady(const char *data, size_t length)
 {
-    cerr << "loading image size " << length << endl;
+    // cerr << "loading image size " << length << endl;
     if (m_image->loadFromData((const uchar *)data, (int)length))
     {
         // reset the heartbeat timeout and force a redraw of the client area
