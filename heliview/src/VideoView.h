@@ -25,7 +25,7 @@ public:
 
 signals:
     void updateTracking(int r, int g, int b, int ht, int st);
-    void updateLog(const char *msg, int flags);
+    void updateLog(const QString &msg, int loc_flags, int priority);
 
 public slots:
     void setDragBoxColor(int r, int g, int b, int a);

@@ -20,18 +20,19 @@ namespace po = boost::program_options;
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    string source("network"), logfile("heliview.log"), device;
+    string source("network"), logfile("heliview.log"), device, log_verbosity;
 
     bool show_usage = false;
     bool disable_virtual_view = false;
 
     po::options_description desc("Program options");
     desc.add_options()
-        S_ARG("source,s", "select data source (network|serial|sim)")
-        S_ARG("device,d", "specify device for network or serial communication")
-        S_ARG("log,l",    "specify log file path")
-        N_ARG("help,h",   "produce this help message")
-        N_ARG("novirtual","disable the virtual view pane");
+        S_ARG("source,s",    "select data source (network|serial|sim)")
+        S_ARG("device,d",    "specify device for network or serial communication")
+        S_ARG("log,l",       "specify log file path")
+        S_ARG("verbosity,v", "specify log verbosity (excess|normal)")
+        N_ARG("help,h",      "produce this help message")
+        N_ARG("novirtual",   "disable the virtual view pane");
 
     try
     {
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
         optional_arg(vm, "source", source);
         optional_arg(vm, "device", device);
         optional_arg(vm, "log", logfile);
+        optional_arg(vm, "verbosity", log_verbosity);
 
         show_usage = !!vm.count("help");
 
@@ -78,7 +80,11 @@ int main(int argc, char *argv[])
         if (0 != logfile.length())
         {
             frame.openLogFile(QString::fromStdString(logfile));
-            frame.enableLogging(true);
+            if (!frame.enableLogging(true, QString::fromStdString(log_verbosity)))
+            {
+                cerr << "invalid logging mode '" << log_verbosity << "' specified\n";
+                cerr << "defaulted logging mode to normal\n";
+            }
         }
 
         frame.show();

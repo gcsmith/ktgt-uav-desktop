@@ -111,13 +111,12 @@ bool VideoView::saveFrame()
     const char *format = "hh-mm-ss-zzz";
     const char *tstamp = datetime.toString(format).toAscii().constData();
 
-    char filename[32];
-    sprintf(filename, "heliview_%s.jpg", tstamp);
+    QString filename = QString("heliview_%1.jpg").arg(tstamp);
 
-    char cmdLogMsg[64];
-    sprintf(cmdLogMsg, "Attempting to save current frame as %s\n", filename);
+    QString log_msg = QString("Video: Attempting to save current frame as %1\n")
+        .arg(filename);
     
-    emit updateLog(cmdLogMsg, LOG_ALL);
+    emit updateLog(log_msg, LOG_LOC_ALL, LOG_PRIORITY_HI);
 
     return (m_image->save(QString(filename)));
 }
@@ -189,6 +188,7 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
 void VideoView::onImageReady(const char *data, size_t length)
 {
     // cerr << "loading image size " << length << endl;
+    updateLog("Video: loading image size\n", LOG_LOC_ALL, LOG_PRIORITY_LOW);
     if (m_image->loadFromData((const uchar *)data, (int)length))
     {
         // reset the heartbeat timeout and force a redraw of the client area
@@ -199,6 +199,7 @@ void VideoView::onImageReady(const char *data, size_t length)
     {
         // uh oh
         cerr << "failed to load image data\n";
+        updateLog("Video: failed to load image data\n", LOG_LOC_ALL, LOG_PRIORITY_HI);
     }
 }
 

@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <iostream>
 #include <cmath>
+#include "Utility.h"
 #include "SimulatedDeviceController.h"
 
 using namespace std;
@@ -32,6 +33,8 @@ SimulatedDeviceController::~SimulatedDeviceController()
 bool SimulatedDeviceController::open()
 {
     qDebug() << "creating simulated device" << m_device;
+    updateLog(QString("SimDC: creating simulated device\n"), LOG_LOC_ALL, 
+            LOG_PRIORITY_HI);
 
     // attach the specified simulation callback
     QTimer *timer = new QTimer(this);

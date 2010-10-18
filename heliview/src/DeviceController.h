@@ -67,7 +67,7 @@ signals:
     void stateChanged(int state);
     void takeoff();
     void landing();
-    void updateLog(const char *msg, int log_flags);
+    void updateLog(const QString &msg, int log_flags, int priority);
 };
 
 DeviceController *CreateDeviceController(

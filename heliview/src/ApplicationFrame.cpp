@@ -5,6 +5,7 @@
 // Wraps the main window UI script and provides the application view.
 // -----------------------------------------------------------------------------
 
+#include <QDateTime>
 #include <QMessageBox>
 #include <QTimer>
 #include <QTextStream>
@@ -59,8 +60,8 @@ void ApplicationFrame::setupCameraView()
     m_video = new VideoView(tabPaneCamera);
     tabPaneCameraLayout->addWidget(m_video);
 
-    connect(m_video, SIGNAL(updateLog(const char *, int)), 
-            this, SLOT(onUpdateLog(const char *, int)));
+    connect(m_video, SIGNAL(updateLog(const QString &, int, int)), 
+            this, SLOT(onUpdateLog(const QString &, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -125,8 +126,8 @@ void ApplicationFrame::setupDeviceController()
     connect(m_video, SIGNAL(updateTracking(int, int, int, int, int)),
             m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
 
-    connect(m_controller, SIGNAL(updateLog(const char *, int)), 
-            this, SLOT(onUpdateLog(const char *, int)));
+    connect(m_controller, SIGNAL(updateLog(const QString &, int, int)), 
+            this, SLOT(onUpdateLog(const QString &, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -137,22 +138,14 @@ void ApplicationFrame::setupGamepad()
 
     if (NULL == m_gamepad)
     {
-        //onUpdateLog("AppFrame: could not create gamepad object\n", LOG_FILE);
         qDebug() << "could not create gamepad object";
     }
     if (!m_gamepad->open(dev))
     {
-        //onUpdateLog("AppFrame: failed to open /dev/input/js0\n", LOG_FILE);
         qDebug() << "failed to open /dev/input/js0";
     }
     else
     {
-        //char msg[128];
-        //sprintf(msg, "AppFrame: successfully opened %s\n", m_gamepad->driverName().toAscii().constData());
-        //sprintf(msg, "%sAppFrame:   version: %d\n", msg, m_gamepad->driverVersion());
-        //sprintf(msg, "%sAppFrame:   buttons: %d\n", msg, m_gamepad->buttonCount());
-        //sprintf(msg, "%sAppFrame:   axes:    %d\n", msg, m_gamepad->axisCount());
-        //onUpdateLog(msg, LOG_FILE);
         qDebug() << "successfully opened" << m_gamepad->driverName();
         qDebug() << "   version: " << m_gamepad->driverVersion();
         qDebug() << "   buttons: " << m_gamepad->buttonCount();
@@ -185,6 +178,10 @@ void ApplicationFrame::openLogFile(const QString &logfile)
         return;
 
     m_log = new QTextStream(m_file);
+
+    *m_log << "Session: " << 
+        QDateTime::currentDateTime().toString("MMM ddd, yyyy - hh:mm:ss") << 
+        "\n\n";
 }
 
 // -----------------------------------------------------------------------------
@@ -192,6 +189,7 @@ void ApplicationFrame::closeLogFile()
 {
     if (m_file)
     {
+        m_log->flush();
         m_file->close();
         SafeDelete(m_file);
         SafeDelete(m_log);
@@ -199,24 +197,47 @@ void ApplicationFrame::closeLogFile()
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::enableLogging(bool enable)
+bool ApplicationFrame::enableLogging(bool enable, const QString &verbosity)
 {
     m_logging = enable;
+
+    if (m_logging)
+    {
+        if (verbosity == "excess")
+            m_verbosity = LOG_MODE_EXCESSIVE;
+        else if (verbosity == "normal")
+            m_verbosity = LOG_MODE_NORMAL;
+        else
+        {
+            m_verbosity = LOG_MODE_NORMAL;
+            return false;
+        }
+    }
+    return true;
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onUpdateLog(const char *msg, int log_flags)
+void ApplicationFrame::onUpdateLog(const QString &msg, int log_flags, int priority)
 {
-    if (log_flags & LOG_DIALOG)
-    {
-        txtCommandLog->textCursor().insertText(QString(msg));
-    }
+    if (!m_logging)
+        return;
 
-    if ((log_flags & LOG_FILE) && m_logging && m_log)
+    if (m_verbosity == LOG_MODE_EXCESSIVE || priority == LOG_PRIORITY_HI)
     {
-        QString message(msg);
-        (*m_log) << message;
-        m_log->flush();
+        // log anything that comes in
+        if (log_flags & LOG_LOC_DIALOG)
+        {
+            txtCommandLog->textCursor().insertText(msg);
+    
+            QTextCursor c = txtCommandLog->textCursor();
+            c.movePosition(QTextCursor::End);
+            txtCommandLog->setTextCursor(c);
+        }
+
+        if ((log_flags & LOG_LOC_FILE) && m_logging && m_log)
+        {
+            *m_log << msg;
+        }
     }
 }
 
@@ -342,18 +363,35 @@ void ApplicationFrame::onHelpAboutTriggered()
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onSaveFrameTriggered()
+void ApplicationFrame::onFileSaveLogTriggered()
+{
+    if (!m_logging)
+    {
+        QMessageBox mb(QMessageBox::Information,
+                "Information",
+                "Logging is disabled");
+    }
+    else
+    {
+        onUpdateLog(QString("Log saved\n"), LOG_LOC_ALL, LOG_PRIORITY_HI);
+        m_log->flush();
+        m_file->flush();
+    }
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onFileSaveFrameTriggered()
 {
     bool saved = m_video->saveFrame();
 
     if (saved)
     {
-        onUpdateLog("Frame saved\n", LOG_ALL);
+        onUpdateLog(QString("Frame saved\n"), LOG_LOC_ALL, LOG_PRIORITY_HI);
         qDebug() << "Frame saved";
     }
     else
     {
-        onUpdateLog("Frame not saved\n", LOG_ALL);
+        onUpdateLog(QString("Frame not saved\n"), LOG_LOC_ALL, LOG_PRIORITY_HI);
         qDebug() << "Frame not saved";
     }
 }

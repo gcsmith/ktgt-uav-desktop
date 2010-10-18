@@ -23,6 +23,8 @@
 #define BUTTON_NONE       0x00
 #define BUTTON_ALL        0xFF
 
+using namespace std;
+
 class ApplicationFrame : public QMainWindow, public Ui::ApplicationFrame
 {
     Q_OBJECT
@@ -33,21 +35,22 @@ public:
 
     void openLogFile(const QString &logfile);
     void closeLogFile();
-    void enableLogging(bool enable);
+    bool enableLogging(bool enable, const QString &verbosity);
 
 public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
                           int alt, int rssi, int batt, int aux);
     void onConnectionStatusChanged(const QString &text, bool status);
     void onStateChanged(int state);
-    void onUpdateLog(const char *msg, int log_flags);
+    void onUpdateLog(const QString &msg, int log_flags, int priority);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
     void onFileExitTriggered();
     void onEditSettingsTriggered();
     void onHelpAboutTriggered();
-    void onSaveFrameTriggered();
+    void onFileSaveFrameTriggered();
+    void onFileSaveLogTriggered();
 
     // control panel button click event callbacks
     void onTakeoffClicked();
@@ -88,6 +91,9 @@ protected:
     DeviceController *m_controller;
     Gamepad          *m_gamepad;
     ControllerView   *m_ctlview;
+    int               m_verbosity;
+    int               m_r, m_g, m_b;
+    int               m_ht, m_st;
 };
 
 #endif // _HELIVIEW_APPLICATIONFRAME__H_
