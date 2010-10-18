@@ -60,20 +60,15 @@ bool NetworkDeviceController::open()
         QStringList ssplit = m_device.split(":", QString::SkipEmptyParts);
         if (ssplit.size() != 2)
         {
-            emit updateLog(QString("NDC: invalid address format (addr:port)\n"), 
-                    LOG_LOC_ALL, LOG_PRIORITY_HI);
-            qDebug() << "invalid address format (addr:port)";
+            log("invalid address format (addr:port)");
             return false;
         }
 
         address = ssplit[0];
         portnum = ssplit[1].toInt();
     }
-    qDebug() << "creating network device" << address << "port" << portnum;
-    QString log_msg = QString("NDC: creating network device %1 port %2\n")
-        .arg(address)
-        .arg(portnum);
-    emit updateLog(log_msg, LOG_LOC_ALL, LOG_PRIORITY_HI);
+
+    log(QString("creating network device %1:%2").arg(address).arg(portnum));
 
     // attempt to create and connect to the network socket
     m_sock = new QTcpSocket();
@@ -86,16 +81,12 @@ bool NetworkDeviceController::open()
     m_sock->connectToHost(address, portnum);
     if (!m_sock->waitForConnected()) {
         emit connectionStatusChanged(QString("Connection failed"), false);
-        qDebug() << "connection timed out";
-        emit updateLog(QString("NDC: connection timed out"), LOG_LOC_ALL,
-                LOG_PRIORITY_HI);
+        log("socket connection to host timed out");
         return false;
     }
 
-    emit connectionStatusChanged(QString("Connected to ") + m_device, true);
-    emit updateLog(QString("NDC: connected to ") + m_device, LOG_LOC_ALL, 
-            LOG_PRIORITY_HI);
-
+    emit connectionStatusChanged(QString("connected to ") + m_device, true);
+    log(QString("connected to device ") + m_device);
     return true;
 }
 
@@ -105,16 +96,12 @@ void NetworkDeviceController::close()
     if (m_sock)
     {
         // disconnect the socket, wait for completion
-        qDebug() << "disconnecting from host ...";
-        emit updateLog(QString("NDC: disconnecting from host ...\n"), 
-                LOG_LOC_ALL, LOG_PRIORITY_HI);
+        log(QString("disconnecting from ") + m_device);
         m_sock->disconnectFromHost();
         m_sock->waitForDisconnected();
         SafeDelete(m_sock);
         shutdown();
-        qDebug() << "disconnected";
-        emit updateLog(QString("NDC: disconnected\n"), LOG_LOC_ALL,
-                LOG_PRIORITY_HI);
+        log("successfully disconnected");
     }
 }
 
@@ -187,9 +174,8 @@ void NetworkDeviceController::onTelemetryTick()
 {
     if (!sendPacket(CLIENT_REQ_TELEMETRY))
     {
-        cerr << "failed to send telemetry request\n";
-        emit updateLog(QString("NDC: failed to send telemetry request\n"), 
-                LOG_LOC_ALL, LOG_PRIORITY_HI);
+        // report the failure
+        log("failed to send telemetry request");
     }
 }
 
@@ -198,9 +184,8 @@ void NetworkDeviceController::onVideoTick()
 {
     if (!sendPacket(CLIENT_REQ_MJPG_FRAME))
     {
-        cerr << "failed to send mjpg frame request\n";
-        emit updateLog(QString("NDC: failed to send mjpg frame request\n"),
-                LOG_LOC_ALL, LOG_PRIORITY_HI);
+        // report the failure
+        log("failed to send mjpg frame request");
     }
 }
 
@@ -259,9 +244,8 @@ void NetworkDeviceController::onControllerTick()
 
         if (send && !sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         {
-            cerr << "failed to send flight control request\n";
-            emit updateLog(QString("NDC: failed to send flight control request\n"),
-                    LOG_LOC_ALL, LOG_PRIORITY_HI);
+            // report the failure
+            log("failed to send flight control request");
         }
         else if (send)
         {
@@ -305,9 +289,8 @@ void NetworkDeviceController::onThrottleTick()
         fprintf(stderr, "acting on throttle event signal %f\n", m_ctl.alt);
         if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         {
-            cerr << "failed to send throttle event\n";
-            emit updateLog(QString("NDC: failed to send throttle event\n"), 
-                    LOG_LOC_ALL, LOG_PRIORITY_HI);
+            // report the failure
+            log("failed to send throttle event"); 
         }
     }
 }
@@ -319,7 +302,6 @@ void NetworkDeviceController::onSocketReadyRead()
     stream.setVersion(QDataStream::Qt_4_0);
     int32_t rssi, altitude, battery, aux, framesz;
     float x, y, z;
-    QString log_msg;
 
     if (0 == m_blocksz)
     {
@@ -347,9 +329,7 @@ void NetworkDeviceController::onSocketReadyRead()
     switch (packet[0])
     {
     case SERVER_REQ_IDENT:
-        cerr << "SERVER_REQ_IDENT: sending response...\n";
-        emit updateLog(QString("NDC: SERVER_REQ_IDENT: sending response...\n"), 
-                LOG_LOC_ALL, LOG_PRIORITY_HI);
+        log("received SERVER_REQ_IDENT: sending response...");
         packet[PKT_COMMAND]     = CLIENT_ACK_IDENT;
         packet[PKT_LENGTH]      = PKT_RCI_LENGTH;
         packet[PKT_RCI_MAGIC]   = IDENT_MAGIC;
@@ -360,19 +340,13 @@ void NetworkDeviceController::onSocketReadyRead()
         m_controller_timer->start(50); // begin requesting flight control
         break;
     case SERVER_ACK_IGNORED:
-        cerr << "SERVER_ACK_IGNORED" << endl;
-        emit updateLog(QString("NDC: SERVER_ACK_IGNORED\n"), LOG_LOC_ALL, 
-                LOG_PRIORITY_HI);
+        log("received SERVER_ACK_IGNORED");
         break;
     case SERVER_ACK_TAKEOFF:
-        cerr << "SERVER_ACK_TAKEOFF" << endl;
-        emit updateLog(QString("NDC: SERVER_ACK_TAKEOFF\n"), LOG_LOC_ALL,
-                LOG_PRIORITY_HI);
+        log("received SERVER_ACK_TAKEOFF");
         break;
     case SERVER_ACK_LANDING:
-        cerr << "SERVER_ACK_LANDING" << endl;
-        emit updateLog(QString("NDC: SERVER_ACK_LANDING\n"), LOG_LOC_ALL,
-                LOG_PRIORITY_HI);
+        log("received SERVER_ACK_LANDING");
         break;
     case SERVER_ACK_TELEMETRY:
         x = *(float *)&packet[PKT_VTI_YAW];
@@ -400,44 +374,36 @@ void NetworkDeviceController::onSocketReadyRead()
         if (m_state == STATE_MIXED_CONTROL)
             m_throttle_timer->stop();
 
-        cerr << "got UPDATE_CTL_MODE: ";
-        log_msg = QString("NDC: got UPDATE_CTL_MODE: ");
         switch (packet[PKT_VCM_TYPE])
         {
         case VCM_TYPE_RADIO:
-            cerr << "radio\n";
-            log_msg.append("radio\n");
+            log("received UPDATE_CTL_MODE: switching to radio mode");
             m_state = STATE_RADIO_CONTROL;
             break;
         case VCM_TYPE_AUTO:
-            cerr << "auto\n";
-            log_msg.append("auto\n");
+            log("received UPDATE_CTL_MODE: switching to autonomous mode");
             m_state = STATE_AUTONOMOUS;
             break;
         case VCM_TYPE_MIXED:
-            cerr << "mixed\n";
-            log_msg.append("mixed\n");
+            log("received UPDATE_CTL_MODE: switching to mixed mode");
             m_state = STATE_MIXED_CONTROL;
             m_prev_alt = 0.0f;
             m_throttle_timer->start(50);
             break;
         case VCM_TYPE_KILL: 
-            cerr << "killed\n";
-            log_msg.append("killed\n");
+            log("received UPDATE_CTL_MODE: switching to killed mode");
             m_state = STATE_KILLED;
             break;
         case VCM_TYPE_LOCKOUT:
-            cerr << "lockout\n";
-            log_msg.append("lockout\n");
+            log("received UPDATE_CTL_MODE: switching to lockout mode");
             m_state = STATE_LOCKOUT;
             break;
         default:
-            cerr << "!!! invalid !!!\n";
-            log_msg.append("invalid VCM_TYPE reached\n");
+            log("received UPDATE_CTL_MODE: <!!!> invalid VCM_TYPE <!!!>");
             m_state = STATE_KILLED;
             break;
         }
-        emit updateLog(log_msg, LOG_LOC_ALL, LOG_PRIORITY_HI);
+
         m_axes = 0;
         if (packet[PKT_VCM_AXES] & VCM_AXIS_ALT)   m_axes |= AXIS_ALT;
         if (packet[PKT_VCM_AXES] & VCM_AXIS_YAW)   m_axes |= AXIS_YAW;
@@ -467,26 +433,20 @@ void NetworkDeviceController::onSocketDisconnected()
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 {
-    QString log_msg = QString("NDC: QAbstractSocket::");
     switch (error) {
     case QAbstractSocket::RemoteHostClosedError:
-        cerr << "QAbstractSocket::RemoteHostClosedError" << endl;
-        log_msg.append("RemoteHostClosedError\n");
+        log("socket error: QAbstractSocket::RemoteHostClosedError");
         break;
     case QAbstractSocket::HostNotFoundError:
-        cerr << "QAbstractSocket::HostNotFoundError" << endl;
-        log_msg.append("HostNotFoundError\n");
+        log("socket error: QAbstractSocket::HostNotFoundError");
         break;
     case QAbstractSocket::ConnectionRefusedError:
-        cerr << "QAbstractSocket::ConnectionRefusedError" << endl;
-        log_msg.append("ConnectionRefusedError\n");
+        log("socket error: QAbstractSocket::ConnectionRefusedError");
         break;
     default:
-        cerr << "unknown socket error" << endl;
-        log_msg.append("unknown socket error\n");
+        log("socket error: unknown or generic failure");
         break;
     }
-    emit updateLog(log_msg, LOG_LOC_ALL, LOG_PRIORITY_HI);
     shutdown();
 }
 
@@ -503,16 +463,12 @@ void NetworkDeviceController::onInputReady(
             int vcm_type;
             if (STATE_MIXED_CONTROL == m_state)
             {
-                cerr << "requesting switch to autonomous...\n";
-                emit updateLog(QString("NDC: requesting switch to autonomous\n"), 
-                        LOG_LOC_ALL, LOG_PRIORITY_HI);
+                log("requesting switch to autonomous");
                 vcm_type = VCM_TYPE_AUTO;
             }
             else
             {
-                cerr << "requesting switch to mixed mode...\n";
-                emit updateLog(QString("NDC: requesting switch to mixed mode\n"), 
-                        LOG_LOC_ALL, LOG_PRIORITY_HI);
+                log("requesting switch to mixed mode");
                 vcm_type = VCM_TYPE_MIXED;
             }
 
@@ -553,9 +509,7 @@ void NetworkDeviceController::onInputReady(
                 vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
                 break;
             default:
-                fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
-                emit updateLog(QString("NDC: unknown controller button\n"), 
-                        LOG_LOC_ALL, LOG_PRIORITY_HI);
+                log("unknown or unhandled controller button pressed");
                 break;
             }
 
@@ -606,13 +560,16 @@ void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b, int ht, in
     cmd_buffer[PKT_LENGTH]  = PKT_TC_LENGTH;
 
     cmd_buffer[PKT_TC_COLOR_FMT] = TC_COLOR_FMT_RGB;
-    cmd_buffer[PKT_TC_CHANNEL_0] = r;
-    cmd_buffer[PKT_TC_CHANNEL_1] = g;
-    cmd_buffer[PKT_TC_CHANNEL_2] = b;
+    cmd_buffer[PKT_TC_CHANNEL_0] = m_track.color.red();
+    cmd_buffer[PKT_TC_CHANNEL_1] = m_track.color.green();
+    cmd_buffer[PKT_TC_CHANNEL_2] = m_track.color.blue();
 
-    cmd_buffer[PKT_TC_THRESH_0] = ht;
-    cmd_buffer[PKT_TC_THRESH_1] = st;
+    cmd_buffer[PKT_TC_THRESH_0] = m_track.ht;
+    cmd_buffer[PKT_TC_THRESH_1] = m_track.st;
     cmd_buffer[PKT_TC_THRESH_2] = 0;
+
+    log(QString("requesting track color [%1 %2 %3] with threshold [%4 %5]")
+            .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st)),
 
     sendPacket(cmd_buffer, PKT_TC_LENGTH);
 }

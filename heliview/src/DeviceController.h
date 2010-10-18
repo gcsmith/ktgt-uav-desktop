@@ -68,6 +68,10 @@ signals:
     void takeoff();
     void landing();
     void updateLog(const QString &msg, int log_flags, int priority);
+
+protected:
+    void log(const QString &msg, int flags, int pri);
+    void log(const QString &msg);
 };
 
 DeviceController *CreateDeviceController(

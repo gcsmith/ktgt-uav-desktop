@@ -31,7 +31,7 @@ public:
     virtual void close();
 
     virtual QString device() const { return m_device; }
-    virtual QString controllerType() const { return QString("network"); }
+    virtual QString controllerType() const { return QString("NetworkDevice"); }
     virtual DeviceState currentState() const { return m_state; }
     virtual int currentAxes() const { return m_axes; }
     virtual TrackSettings currentTrackSettings() const { return m_track; }
