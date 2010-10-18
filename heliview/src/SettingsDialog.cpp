@@ -3,8 +3,8 @@
 #include "DeviceController.h"
 
 // -----------------------------------------------------------------------------
-SettingsDialog::SettingsDialog(QWidget *pp, int r, int g, int b, int ht, int st)
-: QDialog(pp), m_r(r), m_g(g), m_b(b), m_ht(ht), m_st(st)
+SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track)
+: QDialog(pp)
 {
     setupUi(this);
 
@@ -14,11 +14,12 @@ SettingsDialog::SettingsDialog(QWidget *pp, int r, int g, int b, int ht, int st)
     connect(btnApply, SIGNAL(released()), this, SLOT(onApplyClicked()));
     connect(btnNewColor, SIGNAL(released()), this, SLOT(onNewColorClicked()));
 
-    sbR->setValue(m_r);
-    sbG->setValue(m_g);
-    sbB->setValue(m_b);
-    sbHt->setValue(m_ht);
-    sbSt->setValue(m_st);
+    // assign specified color and threshold values to dialog widgets
+    sbR->setValue(track.color.red());
+    sbG->setValue(track.color.green());
+    sbB->setValue(track.color.blue());
+    sbHt->setValue(track.ht);
+    sbSt->setValue(track.st);
 
     //TODO: Set LogFile Value
     //TODO: Set RGB Values
@@ -45,13 +46,8 @@ void SettingsDialog::onOkClicked()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onApplyClicked()
 {
-    m_r = sbR->value();
-    m_g = sbG->value();
-    m_b = sbB->value();
-    m_ht = sbHt->value();
-    m_st = sbSt->value();
-
-    emit updateTracking(m_r, m_g, m_b, m_ht, m_st);
+    emit updateTracking(sbR->value(), sbG->value(), sbB->value(),
+            sbHt->value(), sbSt->value());
 }
 
 // -----------------------------------------------------------------------------

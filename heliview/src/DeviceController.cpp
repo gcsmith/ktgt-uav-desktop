@@ -11,14 +11,19 @@
 
 using namespace std;
 
-DeviceState DeviceController::currentState()
+DeviceState DeviceController::currentState() const
 {
     return STATE_AUTONOMOUS;
 }
 
-int DeviceController::currentAxes()
+int DeviceController::currentAxes() const
 {
     return AXIS_ALL;
+}
+
+TrackSettings DeviceController::currentTrackSettings() const
+{
+    return TrackSettings(QColor(255, 255, 255), 10, 10);
 }
 
 bool DeviceController::requestTakeoff()

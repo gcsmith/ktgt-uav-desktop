@@ -20,6 +20,14 @@ enum DeviceState
     STATE_LOCKOUT
 };
 
+struct TrackSettings
+{
+    TrackSettings(QColor _color, int _ht, int _st)
+    : color(_color), ht(_ht), st(_st) { }
+    QColor color;
+    int ht, st;
+};
+
 #define AXIS_ALT    0x01
 #define AXIS_YAW    0x02
 #define AXIS_PITCH  0x04
@@ -33,10 +41,12 @@ class DeviceController: public QObject
 public:
     virtual bool open() = 0;
     virtual void close() = 0;
-    virtual QString device() = 0;
-    virtual QString controllerType() = 0;
-    virtual DeviceState currentState();
-    virtual int currentAxes();
+
+    virtual QString device() const = 0;
+    virtual QString controllerType() const = 0;
+    virtual DeviceState currentState() const;
+    virtual int currentAxes() const;
+    virtual TrackSettings currentTrackSettings() const;
 
     virtual bool requestTakeoff();
     virtual bool requestLanding();

@@ -72,8 +72,8 @@ void VideoView::paintEvent(QPaintEvent *e)
 
     if (m_showBox)
     {
-        float xscale = width() / 320.0f;    // TODO: don't hard code this
-        float yscale = height() / 240.0f;   // TODO: don't hard code this
+        float xscale = width() / (float)m_image->width();
+        float yscale = height() / (float)m_image->height();
 
         // scale coordinates from client to jpeg image dimensions
         int x_s = (int)(m_bbox.x() * xscale);
@@ -152,8 +152,8 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
     {
         // determine the average color of the selected region
         long avg_r = 0, avg_b = 0, avg_g = 0;
-        float xscale = 320.0f / width();    // TODO: don't hard code this
-        float yscale = 240.0f / height();   // TODO: don't hard code this
+        float xscale = (float)m_image->width() / width();
+        float yscale = (float)m_image->height() / height();
 
         QRect coord = m_dp.normalized();
         int x1 = (int)(xscale * coord.left());

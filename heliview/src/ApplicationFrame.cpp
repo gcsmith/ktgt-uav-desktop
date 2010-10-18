@@ -20,7 +20,7 @@ using namespace std;
 ApplicationFrame::ApplicationFrame(DeviceController *controller, 
         bool show_virtview)
 : m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
-  m_controller(controller), m_r(159), m_g(39), m_b(100), m_ht(10), m_st(20)
+  m_controller(controller)
 {
     setupUi(this);
     setupControllerPane();
@@ -318,7 +318,7 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    SettingsDialog sd(this, m_r, m_g, m_b, m_ht, m_st);
+    SettingsDialog sd(this, m_controller->currentTrackSettings());
 
     // allow settings dialog to communicate data to device controller
     connect(&sd, SIGNAL(updateTracking(int, int, int, int, int)),

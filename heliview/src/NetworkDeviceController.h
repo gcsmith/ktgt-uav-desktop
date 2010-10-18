@@ -29,10 +29,12 @@ public:
 
     virtual bool open();
     virtual void close();
-    virtual QString device() { return m_device; }
-    virtual QString controllerType() { return QString("network"); }
-    virtual DeviceState currentState() { return m_state; }
-    virtual int currentAxes() { return m_axes; }
+
+    virtual QString device() const { return m_device; }
+    virtual QString controllerType() const { return QString("network"); }
+    virtual DeviceState currentState() const { return m_state; }
+    virtual int currentAxes() const { return m_axes; }
+    virtual TrackSettings currentTrackSettings() const { return m_track; }
 
     bool requestTakeoff();
     bool requestLanding();
@@ -71,6 +73,7 @@ protected:
     DeviceState       m_state;
     int               m_axes;
     float             m_prev_alt;
+    TrackSettings     m_track;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_
