@@ -20,7 +20,7 @@ using namespace std;
 ApplicationFrame::ApplicationFrame(DeviceController *controller, 
         bool show_virtview)
 : m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
-  m_controller(controller)
+  m_controller(controller), m_r(159), m_g(39), m_b(100), m_ht(10), m_st(20)
 {
     setupUi(this);
     setupControllerPane();
@@ -40,11 +40,6 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     }
     
     setupGamepad();
-    r = 159;
-    g = 39;
-    b = 100;
-    ht = 10;
-    st = 20;
 }
 
 // -----------------------------------------------------------------------------
@@ -61,7 +56,7 @@ ApplicationFrame::~ApplicationFrame()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::setupCameraView()
 {
-    m_video = new VideoView(tabPaneCamera, &r, &g, &b, &ht, &st);
+    m_video = new VideoView(tabPaneCamera);
     tabPaneCameraLayout->addWidget(m_video);
 
     connect(m_video, SIGNAL(updateLog(const char *, int)), 
@@ -127,12 +122,11 @@ void ApplicationFrame::setupDeviceController()
     connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
             m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
 
-    connect(m_video, SIGNAL(updateTrackColor(int, int, int, int, int)),
+    connect(m_video, SIGNAL(updateTracking(int, int, int, int, int)),
             m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
 
     connect(m_controller, SIGNAL(updateLog(const char *, int)), 
             this, SLOT(onUpdateLog(const char *, int)));
-    
 }
 
 // -----------------------------------------------------------------------------
@@ -324,7 +318,12 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    SettingsDialog sd(this, m_controller, &r, &g, &b, &ht, &st);
+    SettingsDialog sd(this, m_r, m_g, m_b, m_ht, m_st);
+
+    // allow settings dialog to communicate data to device controller
+    connect(&sd, SIGNAL(updateTracking(int, int, int, int, int)),
+            m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
+
     sd.exec();
 }
 

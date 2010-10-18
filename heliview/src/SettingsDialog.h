@@ -15,21 +15,20 @@ class SettingsDialog : public QDialog, public Ui::SettingsDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent, DeviceController * controller, int *_r, 
-                    int *_g, int *_b, int *_ht, int *_st);
+    SettingsDialog(QWidget *parent, int r, int g, int b, int ht, int st);
     virtual ~SettingsDialog();
+
+signals:
+    void updateTracking(int r, int g, int b, int ht, int st);
     
 public slots:
-    void s_cancelButton();
-    void s_okButton();
-    void s_applyButton();
-    
-    void s_newColorButton();
+    void onCancelClicked();
+    void onOkClicked();
+    void onApplyClicked();
+    void onNewColorClicked();
 
 private:
-    DeviceController * m_controller;
-    int *r,*g,*b,*ht,*st;   
-    
+    int m_r, m_g, m_b, m_ht, m_st;   
 };
 
 #endif // _HELIVIEW_SETTINGSDIALOG__H_

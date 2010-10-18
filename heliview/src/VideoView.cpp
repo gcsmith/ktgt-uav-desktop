@@ -13,10 +13,9 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-VideoView::VideoView(QWidget *parent, int *_r, int *_g, int *_b, int *_ht, 
-  int *_st): QWidget(parent), m_ticks(0), m_maxTicks(25), m_showBox(false),
-  m_dragging(false), m_bbox(0, 0, 0, 0), m_dp(0, 0, 0, 0), r(_r), g(_g), b(_b), 
-  ht(_ht), st(_st)
+VideoView::VideoView(QWidget *parent)
+: QWidget(parent), m_ticks(0), m_maxTicks(25), m_showBox(false),
+  m_dragging(false), m_bbox(0, 0, 0, 0), m_dp(0, 0, 0, 0)
 {
     // set default image at startup to test pattern
     m_image = new QImage(":/data/test_pattern.jpg");
@@ -178,12 +177,8 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
         avg_r = (int)(avg_r * inv_pixels);
         avg_g = (int)(avg_g * inv_pixels);
         avg_b = (int)(avg_b * inv_pixels);
-        emit updateTrackColor(avg_r, avg_g, avg_b, *ht, *st);
+        emit updateTracking(avg_r, avg_g, avg_b, -1, -1);
         
-        *r = avg_r;
-        *g = avg_g;
-        *b = avg_b;
-
         // disable the dragging rectangle and force an update of the widget
         m_dragging = false;
         repaint(m_dp.normalized().adjusted(-1, -1, 1, 1));

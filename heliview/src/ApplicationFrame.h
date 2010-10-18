@@ -34,7 +34,6 @@ public:
     void openLogFile(const QString &logfile);
     void closeLogFile();
     void enableLogging(bool enable);
-    int  r,g,b,ht,st;
 
 public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
@@ -89,7 +88,8 @@ protected:
     DeviceController *m_controller;
     Gamepad          *m_gamepad;
     ControllerView   *m_ctlview;
-    
+    int               m_r, m_g, m_b;
+    int               m_ht, m_st;
 };
 
 #endif // _HELIVIEW_APPLICATIONFRAME__H_

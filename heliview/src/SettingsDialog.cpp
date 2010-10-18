@@ -2,55 +2,69 @@
 #include <QColorDialog>
 #include "DeviceController.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent,DeviceController * controller,
-                                int *_r, int *_g, int *_b, int *_ht, int *_st)
-: QDialog(parent), m_controller(controller), r(_r), g(_g), b(_b), ht(_ht), st(_st)
+// -----------------------------------------------------------------------------
+SettingsDialog::SettingsDialog(QWidget *pp, int r, int g, int b, int ht, int st)
+: QDialog(pp), m_r(r), m_g(g), m_b(b), m_ht(ht), m_st(st)
 {
     setupUi(this);
-    //Primary Buttons
-    connect(btnCancel, SIGNAL(released()), this, SLOT(s_cancelButton()));
-    connect(btnOK, SIGNAL(released()), this, SLOT(s_okButton()));
-    connect(btnApply, SIGNAL(released()), this, SLOT(s_applyButton()));
-    
-    connect(btnNewColor, SIGNAL(released()), this, SLOT(s_newColorButton()));
-    sbR->setValue(*_r);
-    sbG->setValue(*_g);
-    sbB->setValue(*_b);
-    sbHt->setValue(*_ht);
-    sbSt->setValue(*_st);
+
+    // connect primary button events
+    connect(btnCancel, SIGNAL(released()), this, SLOT(onCancelClicked()));
+    connect(btnOK, SIGNAL(released()), this, SLOT(onOkClicked()));
+    connect(btnApply, SIGNAL(released()), this, SLOT(onApplyClicked()));
+    connect(btnNewColor, SIGNAL(released()), this, SLOT(onNewColorClicked()));
+
+    sbR->setValue(m_r);
+    sbG->setValue(m_g);
+    sbB->setValue(m_b);
+    sbHt->setValue(m_ht);
+    sbSt->setValue(m_st);
 
     //TODO: Set LogFile Value
     //TODO: Set RGB Values
 }
 
+// -----------------------------------------------------------------------------
 SettingsDialog::~SettingsDialog()
 {
 }
 
-void SettingsDialog::s_cancelButton(){
+// -----------------------------------------------------------------------------
+void SettingsDialog::onCancelClicked()
+{
     reject();
 }
-void SettingsDialog::s_okButton(){
-    s_applyButton();
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onOkClicked()
+{
+    onApplyClicked();
     accept();
 }
-void SettingsDialog::s_applyButton(){
-    m_controller->onUpdateTrackColor(sbR->value(), sbG->value(), sbB->value(), 
-        sbHt->value(), sbSt->value());
-    *r = sbR->value();
-    *g = sbG->value();
-    *b = sbB->value();
-    *ht = sbHt->value();
-    *st = sbSt->value();
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onApplyClicked()
+{
+    m_r = sbR->value();
+    m_g = sbG->value();
+    m_b = sbB->value();
+    m_ht = sbHt->value();
+    m_st = sbSt->value();
+
+    emit updateTracking(m_r, m_g, m_b, m_ht, m_st);
 }
 
-void SettingsDialog::s_newColorButton(){
-    QColor color = QColorDialog::getColor(
-        QColor(sbR->value(), sbG->value(), sbB->value(),0), this);
+// -----------------------------------------------------------------------------
+void SettingsDialog::onNewColorClicked()
+{
+    QColor initial(sbR->value(), sbG->value(), sbB->value());
+    QColor color = QColorDialog::getColor(initial, this);
     
-    sbR->setValue(color.red());
-    sbG->setValue(color.blue());
-    sbB->setValue(color.green());
-       
-    
+    if (color.isValid())
+    {
+        sbR->setValue(color.red());
+        sbG->setValue(color.green());
+        sbB->setValue(color.blue());
+    }
 }
+
