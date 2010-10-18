@@ -30,7 +30,7 @@ public slots:
     void onSimulateTick();
     void onSimulateNoiseTick();
     void onInputReady(GamepadEvent event, int index, float value);
-    void onUpdateTrackColor(int r, int g, int b) { }
+    void onUpdateTrackColor(int r, int g, int b, int ht, int st) { }
 
 protected:
     QString m_device;

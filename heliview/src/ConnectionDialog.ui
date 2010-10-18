@@ -185,6 +185,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnConnect</tabstop>
+  <tabstop>btnCancel</tabstop>
+  <tabstop>cbType</tabstop>
+  <tabstop>editDevice</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

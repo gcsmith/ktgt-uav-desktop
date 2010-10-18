@@ -18,13 +18,13 @@ class VideoView: public QWidget
     Q_OBJECT
 
 public:
-    VideoView(QWidget *parent);
+    VideoView(QWidget *parent, int *_r, int *_g, int *_b, int *_ht, int *_st);
     virtual ~VideoView();
 
     bool saveFrame();
 
 signals:
-    void updateTrackColor(int r, int g, int b);
+    void updateTrackColor(int r, int g, int b, int ht, int st);
     void updateLog(const char *msg, int flags);
 
 public slots:
@@ -49,6 +49,7 @@ protected:
     QRect m_bbox, m_dp;
     QBrush m_dragBrush, m_bboxBrush;
     QPen m_dragPen, m_bboxPen;
+    int *r, *g, *b, *ht, *st;
 };
 
 #endif // _HELIVIEW_VIDEOVIEW__H_

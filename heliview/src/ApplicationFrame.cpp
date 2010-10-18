@@ -40,6 +40,11 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     }
     
     setupGamepad();
+    r = 159;
+    g = 39;
+    b = 100;
+    ht = 10;
+    st = 20;
 }
 
 // -----------------------------------------------------------------------------
@@ -56,7 +61,7 @@ ApplicationFrame::~ApplicationFrame()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::setupCameraView()
 {
-    m_video = new VideoView(tabPaneCamera);
+    m_video = new VideoView(tabPaneCamera, &r, &g, &b, &ht, &st);
     tabPaneCameraLayout->addWidget(m_video);
 
     connect(m_video, SIGNAL(updateLog(const char *, int)), 
@@ -122,11 +127,12 @@ void ApplicationFrame::setupDeviceController()
     connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
             m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
 
-    connect(m_video, SIGNAL(updateTrackColor(int, int, int)),
-            m_controller, SLOT(onUpdateTrackColor(int, int, int)));
+    connect(m_video, SIGNAL(updateTrackColor(int, int, int, int, int)),
+            m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
 
     connect(m_controller, SIGNAL(updateLog(const char *, int)), 
             this, SLOT(onUpdateLog(const char *, int)));
+    
 }
 
 // -----------------------------------------------------------------------------
@@ -318,7 +324,7 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    SettingsDialog sd(this, m_controller);
+    SettingsDialog sd(this, m_controller, &r, &g, &b, &ht, &st);
     sd.exec();
 }
 

@@ -15,7 +15,8 @@ class SettingsDialog : public QDialog, public Ui::SettingsDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent, DeviceController * controller);
+    SettingsDialog(QWidget *parent, DeviceController * controller, int *_r, 
+                    int *_g, int *_b, int *_ht, int *_st);
     virtual ~SettingsDialog();
     
 public slots:
@@ -26,7 +27,8 @@ public slots:
     void s_newColorButton();
 
 private:
-    DeviceController * m_controller;    
+    DeviceController * m_controller;
+    int *r,*g,*b,*ht,*st;   
     
 };
 
