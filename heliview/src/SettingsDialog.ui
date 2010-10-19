@@ -76,7 +76,11 @@
        <item row="1" column="2">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QSpinBox" name="sbLogBuffer"/>
+          <widget class="QSpinBox" name="sbLogBuffer">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="lbLogBufferSize">

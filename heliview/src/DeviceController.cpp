@@ -51,17 +51,6 @@ bool DeviceController::requestKillswitch()
     return true;
 }
 
-void DeviceController::log(const QString &msg, int flags, int pri)
-{
-    QString message = QString("%1: %2\n").arg(controllerType()).arg(msg);
-    emit updateLog(message, flags, pri);
-}
-
-void DeviceController::log(const QString &msg)
-{
-    log(msg, LOG_LOC_ALL, LOG_PRIORITY_HI);
-}
-
 DeviceController *CreateDeviceController(
         const QString &name,
         const QString &device)

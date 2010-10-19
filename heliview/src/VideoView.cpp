@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QPainter>
 #include <QTimer>
+#include "Logger.h"
 #include "Utility.h"
 #include "VideoView.h"
 
@@ -108,7 +109,7 @@ bool VideoView::saveFrame()
     QDateTime datetime;
     datetime = QDateTime::currentDateTime();
 
-    const char *format = "hh-mm-ss-zzz";
+    const char *format = "MMM-dd-yyyy_hh-mm-ss-zzz";
     const char *tstamp = datetime.toString(format).toAscii().constData();
 
     QString filename = QString("heliview_%1.jpg").arg(tstamp);
@@ -116,7 +117,7 @@ bool VideoView::saveFrame()
     QString log_msg = QString("Video: Attempting to save current frame as %1\n")
         .arg(filename);
     
-    emit updateLog(log_msg, LOG_LOC_ALL, LOG_PRIORITY_HI);
+    Logger::info(log_msg);
 
     return (m_image->save(QString(filename)));
 }
@@ -188,7 +189,8 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
 void VideoView::onImageReady(const char *data, size_t length)
 {
     // cerr << "loading image size " << length << endl;
-    updateLog("Video: loading image size\n", LOG_LOC_ALL, LOG_PRIORITY_LOW);
+    QString log_msg = QString("loading image size %1\n").arg(length);
+    Logger::extraDebug(log_msg);
     if (m_image->loadFromData((const uchar *)data, (int)length))
     {
         // reset the heartbeat timeout and force a redraw of the client area
@@ -199,7 +201,7 @@ void VideoView::onImageReady(const char *data, size_t length)
     {
         // uh oh
         cerr << "failed to load image data\n";
-        updateLog("Video: failed to load image data\n", LOG_LOC_ALL, LOG_PRIORITY_HI);
+        Logger::error(QString("Video: failed to load image data\n"));
     }
 }
 

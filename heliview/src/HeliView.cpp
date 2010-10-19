@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
         S_ARG("source,s",    "select data source (network|serial|sim)")
         S_ARG("device,d",    "specify device for network or serial communication")
         S_ARG("log,l",       "specify log file path")
-        S_ARG("verbosity,v", "specify log verbosity (excess|normal)")
+        S_ARG("verbosity,v", "specify log verbosity (normal|debug|excess")
         N_ARG("help,h",      "produce this help message")
         N_ARG("novirtual",   "disable the virtual view pane");
 
@@ -79,12 +79,12 @@ int main(int argc, char *argv[])
         ApplicationFrame frame(controller, disable_virtual_view);
         if (0 != logfile.length())
         {
-            frame.openLogFile(QString::fromStdString(logfile));
             if (!frame.enableLogging(true, QString::fromStdString(log_verbosity)))
             {
                 cerr << "invalid logging mode '" << log_verbosity << "' specified\n";
                 cerr << "defaulted logging mode to normal\n";
             }
+            frame.openLogFile(QString::fromStdString(logfile));
         }
 
         frame.show();

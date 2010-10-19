@@ -42,7 +42,7 @@ public slots:
                           int alt, int rssi, int batt, int aux);
     void onConnectionStatusChanged(const QString &text, bool status);
     void onStateChanged(int state);
-    void onUpdateLog(const QString &msg, int log_flags, int priority);
+    void onUpdateLog(int type, const QString &msg);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
@@ -69,6 +69,9 @@ public slots:
     void onTabChanged(int index);
     void onGraphsChanged();
 
+    // settings dialog event callbacks
+    void onUpdateLogFile(const QString &file, int bufsize);
+
 protected:
     void setupCameraView();
     void setupControllerPane();
@@ -80,6 +83,7 @@ protected:
     void setupSignalsSlots();
 
     void setEnabledButtons(int buttons);
+    void writeToLog(const QString &plain, const QString &rich);
 
     LineGraph        *m_graphs[AXIS_COUNT];
     VirtualView      *m_virtual;
@@ -87,6 +91,8 @@ protected:
     QFile            *m_file;
     QLabel           *m_connStat;
     QTextStream      *m_log;
+    QByteArray       *m_logbuffer;
+    int               m_bufsize;
     bool              m_logging;
     DeviceController *m_controller;
     Gamepad          *m_gamepad;

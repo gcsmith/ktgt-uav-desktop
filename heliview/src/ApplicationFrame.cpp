@@ -12,6 +12,7 @@
 #include <iostream>
 #include "ApplicationFrame.h"
 #include "ConnectionDialog.h"
+#include "Logger.h"
 #include "SettingsDialog.h"
 #include "Utility.h"
 
@@ -20,10 +21,11 @@ using namespace std;
 // -----------------------------------------------------------------------------
 ApplicationFrame::ApplicationFrame(DeviceController *controller, 
         bool show_virtview)
-: m_virtual(NULL), m_file(NULL), m_log(NULL), m_logging(false),
-  m_controller(controller)
+: m_virtual(NULL), m_file(NULL), m_log(NULL), m_logbuffer(NULL),
+  m_bufsize(1024), m_logging(false), m_controller(controller)
 {
     setupUi(this);
+
     setupControllerPane();
     setupCameraView();
     setupSensorView();
@@ -41,6 +43,11 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     }
     
     setupGamepad();
+ 
+    m_logbuffer = new QByteArray();
+
+    connect(Logger::instance(), SIGNAL(updateLog(int, const QString &)), this,
+            SLOT(onUpdateLog(int, const QString &)));
 }
 
 // -----------------------------------------------------------------------------
@@ -59,9 +66,6 @@ void ApplicationFrame::setupCameraView()
 {
     m_video = new VideoView(tabPaneCamera);
     tabPaneCameraLayout->addWidget(m_video);
-
-    connect(m_video, SIGNAL(updateLog(const QString &, int, int)), 
-            this, SLOT(onUpdateLog(const QString &, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -125,9 +129,6 @@ void ApplicationFrame::setupDeviceController()
 
     connect(m_video, SIGNAL(updateTracking(int, int, int, int, int)),
             m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
-
-    connect(m_controller, SIGNAL(updateLog(const QString &, int, int)), 
-            this, SLOT(onUpdateLog(const QString &, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -173,15 +174,53 @@ void ApplicationFrame::setEnabledButtons(int buttons)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::openLogFile(const QString &logfile)
 {
-    m_file = new QFile(logfile);
+    QString dbg;
+
+    if (!m_file)
+        m_file = new QFile(logfile);
     if (!m_file->open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        Logger::error(QString("could not open new log file\n"));
         return;
+    }
+    
+    dbg = QString("new file name is '%1'\n")
+        .arg(m_file->fileName().toAscii().constData());
+    Logger::debug(dbg);
 
-    m_log = new QTextStream(m_file);
+    if (!m_log)
+        m_log = new QTextStream();
+    m_log->setDevice(m_file);
 
-    *m_log << "Session: " << 
-        QDateTime::currentDateTime().toString("MMM ddd, yyyy - hh:mm:ss") << 
-        "\n\n";
+    // log some of the current status of the system to start each log file
+    // log device controller connection status
+    if (!m_controller)
+    {
+        Logger::fail(QString("failed to open device\n"));
+    }
+    else
+    {
+        QString log_msg = QString("using %1 device '%2'\n")
+            .arg(m_controller->controllerType())
+            .arg(m_controller->device());
+        Logger::info(log_msg);
+    }
+
+    // log gamepad status
+    if (!m_gamepad)
+    {
+        Logger::error(QString("could not create gamepad object\n"));
+    }
+    else
+    {
+        QString log_msg = QString("successfully opened %1\n")
+            .arg(m_gamepad->driverName());
+        log_msg += QString("   version: %1\n").arg(m_gamepad->driverVersion());
+        log_msg += QString("   buttons: %1\n").arg(m_gamepad->buttonCount());
+        log_msg += QString("   axes:    %1\n").arg(m_gamepad->axisCount());
+
+        Logger::info(log_msg);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -207,6 +246,8 @@ bool ApplicationFrame::enableLogging(bool enable, const QString &verbosity)
             m_verbosity = LOG_MODE_EXCESSIVE;
         else if (verbosity == "normal")
             m_verbosity = LOG_MODE_NORMAL;
+        else if (verbosity == "debug")
+            m_verbosity = LOG_MODE_NORMAL_DEBUG;
         else
         {
             m_verbosity = LOG_MODE_NORMAL;
@@ -217,27 +258,112 @@ bool ApplicationFrame::enableLogging(bool enable, const QString &verbosity)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onUpdateLog(const QString &msg, int log_flags, int priority)
+void ApplicationFrame::writeToLog(const QString &plain, const QString &rich)
+{
+    txtCommandLog->textCursor().insertHtml(rich);
+   
+    QTextCursor c = txtCommandLog->textCursor();
+    c.movePosition(QTextCursor::End);
+    txtCommandLog->setTextCursor(c);
+
+    m_logbuffer->append(plain);
+    if (m_logbuffer->size() >= m_bufsize)
+    {
+        if (m_log)
+        {
+            // only write to file when we reach bufsize limit
+            *m_log << *m_logbuffer;
+            m_log->flush();
+        }
+        m_logbuffer->clear();
+    }
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onUpdateLogFile(const QString &file, int bufsize)
+{
+    // close last file opened
+    m_log->flush();
+    m_file->flush();
+    m_file->close();
+    SafeDelete(m_file);
+
+    // clear buffer to start fresh
+    m_logbuffer->clear();
+
+    // open lof file and set buffer size limit
+    openLogFile(file);
+    m_bufsize = bufsize * 1024;
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onUpdateLog(int type, const QString &msg)
 {
     if (!m_logging)
         return;
 
-    if (m_verbosity == LOG_MODE_EXCESSIVE || priority == LOG_PRIORITY_HI)
-    {
-        // log anything that comes in
-        if (log_flags & LOG_LOC_DIALOG)
-        {
-            txtCommandLog->textCursor().insertText(msg);
-    
-            QTextCursor c = txtCommandLog->textCursor();
-            c.movePosition(QTextCursor::End);
-            txtCommandLog->setTextCursor(c);
-        }
+    QString plain_msg = msg; // copy for plain text
+    QString rich_msg = msg;  // copy for rich text
 
-        if ((log_flags & LOG_LOC_FILE) && m_logging && m_log)
+    rich_msg.replace(QString("\n"), QString("<br>"));
+
+    switch (type)
+    {
+        case LOG_TYPE_FAILURE:
+            rich_msg.prepend("<font color=red><b>failure: </b></font>");
+            plain_msg.prepend("failure: ");
+            break;
+        case LOG_TYPE_ERROR:
+            rich_msg.prepend("<font color=red><b>error: </b></font>");
+            plain_msg.prepend("error: ");
+            break;
+        case LOG_TYPE_WARNING:
+            rich_msg.prepend("<font color=goldenrod><b>warning: </b></font>");
+            plain_msg.prepend("warning: ");
+            break;
+        case LOG_TYPE_INFO:
+            break;
+        case LOG_TYPE_DEBUG:
+        case LOG_TYPE_EXTRADEBUG:
+            rich_msg.prepend("<font color=forestgreen><b>debug: </b></font>");
+            plain_msg.prepend("debug: ");
+            break;
+        default:
+            // type is comprised of multiple flags
+            break;
+    }
+
+    switch (m_verbosity)
+    {
+        case LOG_MODE_EXCESSIVE:
+        // excessive mode logs any type of log message
+        // print debug statements to cmd line as well
+        if ((type & LOG_TYPE_DEBUG) || (type & LOG_TYPE_EXTRADEBUG))
         {
-            *m_log << msg;
+            cerr << plain_msg.toAscii().constData() << endl;
         }
+        
+        writeToLog(plain_msg, rich_msg);
+        break;
+        case LOG_MODE_NORMAL_DEBUG:
+        // log debug messages plus normal messages
+        case LOG_MODE_NORMAL:
+        // normal mode watches for failures, errors, warnings, information
+        if ((type & LOG_TYPE_FAILURE) ||
+            (type & LOG_TYPE_ERROR)   ||
+            (type & LOG_TYPE_WARNING) ||
+            (type & LOG_TYPE_INFO))
+        {
+            writeToLog(plain_msg, rich_msg);
+        }
+        else if ((m_verbosity == LOG_MODE_NORMAL_DEBUG) && (type & LOG_TYPE_DEBUG))
+        {
+            cerr << plain_msg.toAscii().constData() << endl;
+            writeToLog(plain_msg, rich_msg);
+        }
+        break;
+        default:
+        break;
     }
 }
 
@@ -340,11 +466,21 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    SettingsDialog sd(this, m_controller->currentTrackSettings());
+    QString filename;
+    if (!m_file)
+        filename = "";
+    else
+        filename = m_file->fileName();
+
+    SettingsDialog sd(this, m_controller->currentTrackSettings(),
+            filename, m_bufsize/1024);
 
     // allow settings dialog to communicate data to device controller
     connect(&sd, SIGNAL(updateTracking(int, int, int, int, int)),
             m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
+    
+    connect(&sd, SIGNAL(updateLogFile(const QString &, int)), this, 
+                SLOT(onUpdateLogFile(const QString &, int)));
 
     sd.exec();
 }
@@ -371,10 +507,13 @@ void ApplicationFrame::onFileSaveLogTriggered()
         QMessageBox mb(QMessageBox::Information,
                 "Information",
                 "Logging is disabled");
+        mb.exec();
     }
     else
     {
-        onUpdateLog(QString("Log saved\n"), LOG_LOC_ALL, LOG_PRIORITY_HI);
+        Logger::info(QString("Log saved\n"));
+
+        *m_log << *m_logbuffer;
         m_log->flush();
         m_file->flush();
     }
@@ -386,15 +525,9 @@ void ApplicationFrame::onFileSaveFrameTriggered()
     bool saved = m_video->saveFrame();
 
     if (saved)
-    {
-        onUpdateLog(QString("Frame saved\n"), LOG_LOC_ALL, LOG_PRIORITY_HI);
-        qDebug() << "Frame saved";
-    }
+        Logger::info(QString("Frame saved\n"));
     else
-    {
-        onUpdateLog(QString("Frame not saved\n"), LOG_LOC_ALL, LOG_PRIORITY_HI);
-        qDebug() << "Frame not saved";
-    }
+        Logger::warn(QString("Frame not saved\n"));
 }
 
 // -----------------------------------------------------------------------------

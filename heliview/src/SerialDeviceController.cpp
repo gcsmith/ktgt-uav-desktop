@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <QDebug>
+#include "Logger.h"
 #include "SerialDeviceController.h"
 #include "Utility.h"
 
@@ -33,8 +34,7 @@ bool SerialDeviceController::open()
     // make sure to close if there's a device currently open
     close();
     qDebug() << "creating serial device" << m_device;
-    updateLog(QString("SDC: creating serial device\n"), LOG_LOC_ALL, 
-            LOG_PRIORITY_HI);
+    Logger::info(QString("SDC: creating serial device\n"));
 
     m_serial = new QextSerialPort(m_device, QextSerialPort::EventDriven);
     m_serial->setBaudRate(BAUD57600);

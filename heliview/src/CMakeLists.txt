@@ -43,6 +43,7 @@ SET(heliview_cpp
         DeviceController.cpp
         HeliView.cpp
         LineGraph.cpp
+        Logger.cpp
         NetworkDeviceController.cpp
         SerialDeviceController.cpp
         SettingsDialog.cpp
@@ -58,6 +59,7 @@ SET(heliview_src_moc
         DeviceController.h
         Gamepad.h
         LineGraph.h
+        Logger.h
         NetworkDeviceController.h
         SerialDeviceController.h
         SettingsDialog.h

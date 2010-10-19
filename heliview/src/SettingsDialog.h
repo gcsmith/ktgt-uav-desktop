@@ -15,13 +15,16 @@ class SettingsDialog : public QDialog, protected Ui::SettingsDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent, const TrackSettings &track);
+    SettingsDialog(QWidget *parent, const TrackSettings &track, 
+            const QString &logfile, const int logbufsize);
     virtual ~SettingsDialog();
 
 signals:
     void updateTracking(int r, int g, int b, int ht, int st);
+    void updateLogFile(const QString &, int);
     
 public slots:
+    void onBrowseClicked();
     void onCancelClicked();
     void onOkClicked();
     void onApplyClicked();
