@@ -78,8 +78,8 @@ protected:
     void setupSensorView();
     void setupVirtualView();
     void setupStatusBar();
-    void setupDeviceController();
-    void setupGamepad();
+    void connectDeviceController();
+    void connectGamepad();
     void setupSignalsSlots();
 
     void setEnabledButtons(int buttons);

@@ -20,11 +20,12 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 ApplicationFrame::ApplicationFrame(bool noVirtualView)
-: m_virtual(NULL), m_file(NULL), m_log(NULL), m_logbuffer(NULL),
-  m_bufsize(1024), m_logging(false), m_controller(NULL)
+: m_virtual(NULL), m_video(NULL), m_file(NULL), m_log(NULL), m_logbuffer(NULL),
+  m_bufsize(1024), m_logging(false), m_controller(NULL), m_gamepad(NULL)
 {
     setupUi(this);
 
+    setupStatusBar();
     setupControllerPane();
     setupCameraView();
     setupSensorView();
@@ -32,10 +33,6 @@ ApplicationFrame::ApplicationFrame(bool noVirtualView)
     if (!noVirtualView)
         setupVirtualView();
 
-    setupStatusBar();
-    setupDeviceController();
-    setupGamepad();
- 
     m_logbuffer = new QByteArray();
 
     connect(Logger::instance(), SIGNAL(updateLog(int, const QString &)), this,
@@ -100,7 +97,7 @@ void ApplicationFrame::setupStatusBar()
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::setupDeviceController()
+void ApplicationFrame::connectDeviceController()
 {
     connect(m_controller,
             SIGNAL(telemetryReady(float, float, float, int, int, int, int)),
@@ -124,25 +121,39 @@ void ApplicationFrame::setupDeviceController()
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::setupGamepad()
+void ApplicationFrame::connectGamepad()
 {
-    m_gamepad = CreateGamepad();
     const QString dev = "/dev/input/js0";
 
+    // if a gamepad is already opened, close and destroy it
+    if (m_gamepad)
+    {
+        m_gamepad->close();
+        SafeDelete(m_gamepad);
+    }
+
+    // attempt to allocate the gamepad object
+    m_gamepad = CreateGamepad();
     if (NULL == m_gamepad)
     {
-        qDebug() << "could not create gamepad object";
+        Logger::err("failed to create gamepad object");
+        return;
     }
+
+    // attempt to open the gamepad device
     if (!m_gamepad->open(dev))
     {
-        qDebug() << "failed to open /dev/input/js0";
+        Logger::err(tr("failed to open gamepad device \"%1\"\n") + dev);
+        SafeDelete(m_gamepad);
+        return;
     }
     else
     {
-        qDebug() << "successfully opened" << m_gamepad->driverName();
-        qDebug() << "   version: " << m_gamepad->driverVersion();
-        qDebug() << "   buttons: " << m_gamepad->buttonCount();
-        qDebug() << "   axes:    " << m_gamepad->axisCount();
+        Logger::info(tr("opened gamepad '%1' - version:%2 buttons:%3 axes:%4\n")
+                .arg(m_gamepad->driverName())
+                .arg(m_gamepad->driverVersion())
+                .arg(m_gamepad->buttonCount())
+                .arg(m_gamepad->axisCount()));
 
         connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
                 m_ctlview, SLOT(onInputReady(GamepadEvent, int, float)));
@@ -166,46 +177,32 @@ void ApplicationFrame::openLogFile(const QString &logfile)
     QString dbg;
 
     if (!m_file)
+    {
         m_file = new QFile(logfile);
+        if (!m_file)
+        {
+            Logger::fail("failed to allocate file object\n");
+            return;
+        }
+    }
+
     if (!m_file->open(QIODevice::WriteOnly | QIODevice::Text))
     {
         Logger::err("could not open new log file\n");
         return;
     }
-    
-    Logger::dbg(tr("new file name is '%1'\n").arg(m_file->fileName()));
+    Logger::dbg(tr("successfully opened log '%1'\n").arg(m_file->fileName()));
 
     if (!m_log)
+    {
         m_log = new QTextStream();
+        if (!m_log)
+        {
+            Logger::fail("failed to allocate log stream\n");
+            return;
+        }
+    }
     m_log->setDevice(m_file);
-
-    // log some of the current status of the system to start each log file
-    // log device controller connection status
-    if (!m_controller)
-    {
-        Logger::fail("failed to open device\n");
-    }
-    else
-    {
-        Logger::info(QString("using %1 device '%2'\n")
-            .arg(m_controller->controllerType())
-            .arg(m_controller->device()));
-    }
-
-    // log gamepad status
-    if (!m_gamepad)
-    {
-        Logger::err("could not create gamepad object\n");
-    }
-    else
-    {
-        QString log_msg = QString("successfully opened %1\n")
-            .arg(m_gamepad->driverName());
-        log_msg += QString("\tversion: %1\n").arg(m_gamepad->driverVersion());
-        log_msg += QString("\tbuttons: %1\n").arg(m_gamepad->buttonCount());
-        log_msg += QString("\taxes:    %1\n").arg(m_gamepad->axisCount());
-        Logger::info(log_msg);
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -291,26 +288,31 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
     QString rich_msg = msg;  // copy for rich text
 
     rich_msg.replace(QString("\n"), QString("<br>"));
+    rich_msg.replace(QString(" "), QString("&nbsp;"));
 
     switch (type)
     {
         case LOG_TYPE_FAIL:
-            rich_msg.prepend("<font color=red><b>failure: </b></font>");
+            rich_msg.prepend("<font color=red><b>[failure] ");
+            rich_msg.append("</b></font>");
             plain_msg.prepend("failure: ");
             break;
         case LOG_TYPE_ERR:
-            rich_msg.prepend("<font color=red><b>error: </b></font>");
+            rich_msg.prepend("<font color=red>[error] ");
+            rich_msg.append("</font>");
             plain_msg.prepend("error: ");
             break;
         case LOG_TYPE_WARN:
-            rich_msg.prepend("<font color=goldenrod><b>warning: </b></font>");
+            rich_msg.prepend("<font color=orange>[warning] ");
+            rich_msg.append("</font>");
             plain_msg.prepend("warning: ");
             break;
         case LOG_TYPE_INFO:
             break;
         case LOG_TYPE_DBG:
         case LOG_TYPE_EXTRADEBUG:
-            rich_msg.prepend("<font color=forestgreen><b>debug: </b></font>");
+            rich_msg.prepend("<font color=forestgreen>[debug] ");
+            rich_msg.append("</font>");
             plain_msg.prepend("debug: ");
             break;
         default:
@@ -436,12 +438,6 @@ void ApplicationFrame::onFileConnectTriggered()
     connect(&cd, SIGNAL(requestConnection(const QString &, const QString &)),
             this, SLOT(connectTo(const QString &, const QString &)));
     cd.exec();
-    
-    if (QDialog::Accepted == cd.result())
-    {
-        setupDeviceController();
-        setupGamepad();
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -453,6 +449,7 @@ bool ApplicationFrame::connectTo(const QString &source, const QString &device)
         m_controller->close();
     }
 
+    // attempt to allocate the specified device controller
     m_controller = CreateDeviceController(source, device);
     if (!m_controller)
     {
@@ -460,12 +457,17 @@ bool ApplicationFrame::connectTo(const QString &source, const QString &device)
         return false;
     }
 
+    // attempt to connect to the device
     if (!m_controller->open())
     {
-        Logger::fail(tr("failed to open device \"%1\"\n").arg(device));
+        Logger::err(tr("failed to open device \"%1\"\n").arg(device));
         SafeDelete(m_controller);
         return false;
     }
+
+    // connect the signals and slots for this device
+    connectDeviceController();
+    connectGamepad();
 
     return true;
 }

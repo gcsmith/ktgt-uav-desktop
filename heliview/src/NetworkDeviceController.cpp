@@ -75,7 +75,7 @@ bool NetworkDeviceController::open()
 
     // attempt to connect to the specified address:port
     m_sock->connectToHost(address, portnum);
-    if (!m_sock->waitForConnected()) {
+    if (!m_sock->waitForConnected(3000)) {
         emit connectionStatusChanged(QString("Connection failed"), false);
         Logger::warn("NetworkDevice: connection timed out\n");
         return false;
@@ -95,7 +95,7 @@ void NetworkDeviceController::close()
         // disconnect the socket, wait for completion
         Logger::info("NetworkDevice: disconnecting from host ...\n");
         m_sock->disconnectFromHost();
-        m_sock->waitForDisconnected();
+        m_sock->waitForDisconnected(3000);
         SafeDelete(m_sock);
         shutdown();
         Logger::info("NetworkDevice: disconnected\n");
@@ -430,16 +430,16 @@ void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 {
     switch (error) {
     case QAbstractSocket::RemoteHostClosedError:
-        Logger::fail("NetworkDevice: connection error (RemoteHostClosed)\n");
+        Logger::err("NetworkDevice: connection error (RemoteHostClosed)\n");
         break;
     case QAbstractSocket::HostNotFoundError:
-        Logger::fail("NetworkDevice: connection error (HostNotFound)\n");
+        Logger::err("NetworkDevice: connection error (HostNotFound)\n");
         break;
     case QAbstractSocket::ConnectionRefusedError:
-        Logger::fail("NetworkDevice: connection error (ConnectionRefused)\n");
+        Logger::err("NetworkDevice: connection error (ConnectionRefused)\n");
         break;
     default:
-        Logger::fail("NetworkDevice: connection error (generic/unknown)\n");
+        Logger::err("NetworkDevice: connection error (generic/unknown)\n");
         break;
     }
     shutdown();

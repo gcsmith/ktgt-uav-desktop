@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
         show_usage = !!vm.count("help");
 
-        disable_virtual_view = !vm.count("novirtual");
+        disable_virtual_view = !!vm.count("novirtual");
     }
     catch (exception &e)
     {
