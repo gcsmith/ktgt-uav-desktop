@@ -20,7 +20,7 @@ namespace po = boost::program_options;
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    string source("network"), logfile("heliview.log"), device, log_verbosity;
+    string source, logfile("heliview.log"), device, log_verbosity;
 
     bool show_usage = false;
     bool disable_virtual_view = false;
@@ -66,17 +66,8 @@ int main(int argc, char *argv[])
 
     try
     {
-        DeviceController *controller = CreateDeviceController(
-                QString::fromStdString(source),
-                QString::fromStdString(device));
-        if (!controller)
-        {
-            cerr << "invalid source type '" << source << "' specified\n";
-            return EXIT_FAILURE;
-        }
-
         // create and show the interface
-        ApplicationFrame frame(controller, disable_virtual_view);
+        ApplicationFrame frame(disable_virtual_view);
         if (0 != logfile.length())
         {
             if (!frame.enableLogging(true, QString::fromStdString(log_verbosity)))
@@ -85,6 +76,13 @@ int main(int argc, char *argv[])
                 cerr << "defaulted logging mode to normal\n";
             }
             frame.openLogFile(QString::fromStdString(logfile));
+        }
+
+        // optionally connect to a device if specified
+        if (source.length())
+        {
+            frame.connectTo(QString::fromStdString(source),
+                    QString::fromStdString(device));
         }
 
         frame.show();

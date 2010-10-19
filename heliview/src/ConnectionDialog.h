@@ -10,24 +10,21 @@
 #include "ui_ConnectionDialog.h"
 #include "DeviceController.h"
 
-class ConnectionDialog : public QDialog, public Ui::ConnectionDialog
+class ConnectionDialog: public QDialog, protected Ui::ConnectionDialog
 {
     Q_OBJECT
 
 public:
-    ConnectionDialog(QWidget *parent, DeviceController **controller);
+    ConnectionDialog(QWidget *parent);
     virtual ~ConnectionDialog();
-    
-    
+
+signals:
+    void requestConnection(const QString &source, const QString &device);
 
 public slots:
-    void s_cancelButton();
-    void s_connectButton();
-    void s_cbChange(int index);
-    
-private:
-    DeviceController **m_controller;
-    
+    void onCancelClicked();
+    void onConnectClicked();
+    void onComboChanged(int index);
 };
 
 #endif // _HELIVIEW_CONNECTIONDIALOG__H_

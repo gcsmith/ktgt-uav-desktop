@@ -25,12 +25,12 @@
 
 using namespace std;
 
-class ApplicationFrame : public QMainWindow, public Ui::ApplicationFrame
+class ApplicationFrame: public QMainWindow, protected Ui::ApplicationFrame
 {
     Q_OBJECT
 
 public:
-    ApplicationFrame(DeviceController *controller, bool disable_virtual_view);
+    ApplicationFrame(bool noVirtualView);
     virtual ~ApplicationFrame();
 
     void openLogFile(const QString &logfile);
@@ -38,11 +38,14 @@ public:
     bool enableLogging(bool enable, const QString &verbosity);
 
 public slots:
+    bool connectTo(const QString &source, const QString &device);
+    void onUpdateLogFile(const QString &file, int bufsize);
+    void onUpdateLog(int type, const QString &msg);
+    void onConnectionStatusChanged(const QString &text, bool status);
+
     void onTelemetryReady(float yaw, float pitch, float roll,
                           int alt, int rssi, int batt, int aux);
-    void onConnectionStatusChanged(const QString &text, bool status);
     void onStateChanged(int state);
-    void onUpdateLog(int type, const QString &msg);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
@@ -68,9 +71,6 @@ public slots:
 
     void onTabChanged(int index);
     void onGraphsChanged();
-
-    // settings dialog event callbacks
-    void onUpdateLogFile(const QString &file, int bufsize);
 
 protected:
     void setupCameraView();

@@ -19,10 +19,9 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-ApplicationFrame::ApplicationFrame(DeviceController *controller, 
-        bool show_virtview)
+ApplicationFrame::ApplicationFrame(bool noVirtualView)
 : m_virtual(NULL), m_file(NULL), m_log(NULL), m_logbuffer(NULL),
-  m_bufsize(1024), m_logging(false), m_controller(controller)
+  m_bufsize(1024), m_logging(false), m_controller(NULL)
 {
     setupUi(this);
 
@@ -30,18 +29,11 @@ ApplicationFrame::ApplicationFrame(DeviceController *controller,
     setupCameraView();
     setupSensorView();
 
-    if(show_virtview)
+    if (!noVirtualView)
         setupVirtualView();
 
     setupStatusBar();
     setupDeviceController();
-    
-    // attempt to open the specified device
-    if (!m_controller->open())
-    {
-        qDebug() << "failed to open device" << m_controller->device();
-    }
-    
     setupGamepad();
  
     m_logbuffer = new QByteArray();
@@ -154,9 +146,6 @@ void ApplicationFrame::setupGamepad()
 
         connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
                 m_ctlview, SLOT(onInputReady(GamepadEvent, int, float)));
-
-        connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
-                m_controller, SLOT(onInputReady(GamepadEvent, int, float)));
 
         m_gamepad->start();
     }
@@ -443,13 +432,42 @@ void ApplicationFrame::onStateChanged(int state)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onFileConnectTriggered()
 {
-    ConnectionDialog cd(this, &m_controller);
+    ConnectionDialog cd(this);
+    connect(&cd, SIGNAL(requestConnection(const QString &, const QString &)),
+            this, SLOT(connectTo(const QString &, const QString &)));
     cd.exec();
     
-    if( cd.result() == QDialog::Accepted) {
+    if (QDialog::Accepted == cd.result())
+    {
         setupDeviceController();
         setupGamepad();
     }
+}
+
+// -----------------------------------------------------------------------------
+bool ApplicationFrame::connectTo(const QString &source, const QString &device)
+{
+    if (m_controller)
+    {
+        Logger::info(tr("closing \"%1\"\n").arg(m_controller->device()));
+        m_controller->close();
+    }
+
+    m_controller = CreateDeviceController(source, device);
+    if (!m_controller)
+    {
+        Logger::fail(tr("failed to allocate \"%1\"\n").arg(source));
+        return false;
+    }
+
+    if (!m_controller->open())
+    {
+        Logger::fail(tr("failed to open device \"%1\"\n").arg(device));
+        SafeDelete(m_controller);
+        return false;
+    }
+
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -462,18 +480,18 @@ void ApplicationFrame::onFileExitTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onEditSettingsTriggered()
 {
-    QString filename;
-    if (!m_file)
-        filename = "";
-    else
-        filename = m_file->fileName();
+    QString filename = m_file ? m_file->fileName() : "";
+    TrackSettings track;
+    if (m_controller)
+        track = m_controller->currentTrackSettings();
 
-    SettingsDialog sd(this, m_controller->currentTrackSettings(),
-            filename, m_bufsize/1024);
-
-    // allow settings dialog to communicate data to device controller
-    connect(&sd, SIGNAL(updateTracking(int, int, int, int, int)),
-            m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
+    SettingsDialog sd(this, track, filename, m_bufsize/1024);
+    if (m_controller)
+    {
+        // allow settings dialog to communicate data to device controller
+        connect(&sd, SIGNAL(updateTracking(int, int, int, int, int)),
+                m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
+    }
     
     connect(&sd, SIGNAL(updateLogFile(const QString &, int)), this, 
                 SLOT(onUpdateLogFile(const QString &, int)));

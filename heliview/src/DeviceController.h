@@ -22,6 +22,8 @@ enum DeviceState
 
 struct TrackSettings
 {
+    TrackSettings()
+    : color(0, 0, 0), ht(0), st(0) { }
     TrackSettings(QColor _color, int _ht, int _st)
     : color(_color), ht(_ht), st(_st) { }
     QColor color;
