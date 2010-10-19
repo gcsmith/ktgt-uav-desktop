@@ -296,11 +296,12 @@ void ApplicationFrame::onStateChanged(int state)
     {
     case STATE_RADIO_CONTROL:
         setEnabledButtons(BUTTON_OVERRIDE | BUTTON_KILLSWITCH);
-        btnOverride->setText("Release Manual");
+        btnOverride->setText("Release Radio Control");
         m_ctlview->setEnabled(false);
         break;
     case STATE_MIXED_CONTROL:
         setEnabledButtons(BUTTON_OVERRIDE | BUTTON_KILLSWITCH);
+        btnOverride->setText("Release Mixed Control");
         m_ctlview->setEnabled(true);
         m_ctlview->setAxes(m_controller->currentAxes());
         break;
