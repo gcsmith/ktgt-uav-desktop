@@ -180,13 +180,11 @@ void ApplicationFrame::openLogFile(const QString &logfile)
         m_file = new QFile(logfile);
     if (!m_file->open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        Logger::error(QString("could not open new log file\n"));
+        Logger::err("could not open new log file\n");
         return;
     }
     
-    dbg = QString("new file name is '%1'\n")
-        .arg(m_file->fileName().toAscii().constData());
-    Logger::debug(dbg);
+    Logger::dbg(tr("new file name is '%1'\n").arg(m_file->fileName()));
 
     if (!m_log)
         m_log = new QTextStream();
@@ -196,29 +194,27 @@ void ApplicationFrame::openLogFile(const QString &logfile)
     // log device controller connection status
     if (!m_controller)
     {
-        Logger::fail(QString("failed to open device\n"));
+        Logger::fail("failed to open device\n");
     }
     else
     {
-        QString log_msg = QString("using %1 device '%2'\n")
+        Logger::info(QString("using %1 device '%2'\n")
             .arg(m_controller->controllerType())
-            .arg(m_controller->device());
-        Logger::info(log_msg);
+            .arg(m_controller->device()));
     }
 
     // log gamepad status
     if (!m_gamepad)
     {
-        Logger::error(QString("could not create gamepad object\n"));
+        Logger::err("could not create gamepad object\n");
     }
     else
     {
         QString log_msg = QString("successfully opened %1\n")
             .arg(m_gamepad->driverName());
-        log_msg += QString("   version: %1\n").arg(m_gamepad->driverVersion());
-        log_msg += QString("   buttons: %1\n").arg(m_gamepad->buttonCount());
-        log_msg += QString("   axes:    %1\n").arg(m_gamepad->axisCount());
-
+        log_msg += QString("\tversion: %1\n").arg(m_gamepad->driverVersion());
+        log_msg += QString("\tbuttons: %1\n").arg(m_gamepad->buttonCount());
+        log_msg += QString("\taxes:    %1\n").arg(m_gamepad->axisCount());
         Logger::info(log_msg);
     }
 }
@@ -309,21 +305,21 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
 
     switch (type)
     {
-        case LOG_TYPE_FAILURE:
+        case LOG_TYPE_FAIL:
             rich_msg.prepend("<font color=red><b>failure: </b></font>");
             plain_msg.prepend("failure: ");
             break;
-        case LOG_TYPE_ERROR:
+        case LOG_TYPE_ERR:
             rich_msg.prepend("<font color=red><b>error: </b></font>");
             plain_msg.prepend("error: ");
             break;
-        case LOG_TYPE_WARNING:
+        case LOG_TYPE_WARN:
             rich_msg.prepend("<font color=goldenrod><b>warning: </b></font>");
             plain_msg.prepend("warning: ");
             break;
         case LOG_TYPE_INFO:
             break;
-        case LOG_TYPE_DEBUG:
+        case LOG_TYPE_DBG:
         case LOG_TYPE_EXTRADEBUG:
             rich_msg.prepend("<font color=forestgreen><b>debug: </b></font>");
             plain_msg.prepend("debug: ");
@@ -338,7 +334,7 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
         case LOG_MODE_EXCESSIVE:
         // excessive mode logs any type of log message
         // print debug statements to cmd line as well
-        if ((type & LOG_TYPE_DEBUG) || (type & LOG_TYPE_EXTRADEBUG))
+        if ((type & LOG_TYPE_DBG) || (type & LOG_TYPE_EXTRADEBUG))
         {
             cerr << plain_msg.toAscii().constData() << endl;
         }
@@ -349,14 +345,14 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
         // log debug messages plus normal messages
         case LOG_MODE_NORMAL:
         // normal mode watches for failures, errors, warnings, information
-        if ((type & LOG_TYPE_FAILURE) ||
-            (type & LOG_TYPE_ERROR)   ||
-            (type & LOG_TYPE_WARNING) ||
+        if ((type & LOG_TYPE_FAIL) ||
+            (type & LOG_TYPE_ERR)   ||
+            (type & LOG_TYPE_WARN) ||
             (type & LOG_TYPE_INFO))
         {
             writeToLog(plain_msg, rich_msg);
         }
-        else if ((m_verbosity == LOG_MODE_NORMAL_DEBUG) && (type & LOG_TYPE_DEBUG))
+        else if ((m_verbosity == LOG_MODE_NORMAL_DEBUG) && (type & LOG_TYPE_DBG))
         {
             cerr << plain_msg.toAscii().constData() << endl;
             writeToLog(plain_msg, rich_msg);
@@ -511,7 +507,7 @@ void ApplicationFrame::onFileSaveLogTriggered()
     }
     else
     {
-        Logger::info(QString("Log saved\n"));
+        Logger::info("Log successfully saved\n");
 
         *m_log << *m_logbuffer;
         m_log->flush();
@@ -525,9 +521,9 @@ void ApplicationFrame::onFileSaveFrameTriggered()
     bool saved = m_video->saveFrame();
 
     if (saved)
-        Logger::info(QString("Frame saved\n"));
+        Logger::info(("Frame successfully saved\n"));
     else
-        Logger::warn(QString("Frame not saved\n"));
+        Logger::warn(("Failed to save frame\n"));
 }
 
 // -----------------------------------------------------------------------------

@@ -5,15 +5,10 @@
 // Network device interface implementation.
 // -----------------------------------------------------------------------------
 
-#include <QDebug>
-#include <iostream>
-#include <algorithm>
 #include "Logger.h"
 #include "NetworkDeviceController.h"
 #include "Utility.h"
 #include "uav_protocol.h"
-
-using namespace std;
 
 const char *NetworkDeviceController::m_description = "Network description";
 const bool NetworkDeviceController::m_takesDevice = true;
@@ -61,19 +56,15 @@ bool NetworkDeviceController::open()
         QStringList ssplit = m_device.split(":", QString::SkipEmptyParts);
         if (ssplit.size() != 2)
         {
-            Logger::error(QString("NetworkDevice: invalid address format (addr:port)\n"));
-            qDebug() << "invalid address format (addr:port)";
+            Logger::err("NetworkDevice: invalid address format (addr:port)\n");
             return false;
         }
 
         address = ssplit[0];
         portnum = ssplit[1].toInt();
     }
-    qDebug() << "creating network device" << address << "port" << portnum;
-    QString log_msg = QString("NetworkDevice: creating network device %1 port %2\n")
-        .arg(address)
-        .arg(portnum);
-    Logger::info(log_msg);
+    Logger::info(tr("NetworkDevice: creating network device %1 port %2\n")
+            .arg(address).arg(portnum));
 
     // attempt to create and connect to the network socket
     m_sock = new QTcpSocket();
@@ -86,13 +77,12 @@ bool NetworkDeviceController::open()
     m_sock->connectToHost(address, portnum);
     if (!m_sock->waitForConnected()) {
         emit connectionStatusChanged(QString("Connection failed"), false);
-        qDebug() << "connection timed out";
-        Logger::warn(QString("NetworkDevice: connection timed out\n"));
+        Logger::warn("NetworkDevice: connection timed out\n");
         return false;
     }
 
     emit connectionStatusChanged(QString("Connected to ") + m_device, true);
-    Logger::info(QString("NetworkDevice: connected to ") + m_device + "\n");
+    Logger::info(tr("NetworkDevice: connected to ") + m_device + "\n");
 
     return true;
 }
@@ -103,14 +93,12 @@ void NetworkDeviceController::close()
     if (m_sock)
     {
         // disconnect the socket, wait for completion
-        qDebug() << "disconnecting from host ...";
-        Logger::info(QString("NetworkDevice: disconnecting from host ...\n"));
+        Logger::info("NetworkDevice: disconnecting from host ...\n");
         m_sock->disconnectFromHost();
         m_sock->waitForDisconnected();
         SafeDelete(m_sock);
         shutdown();
-        qDebug() << "disconnected";
-        Logger::info(QString("NetworkDevice: disconnected\n"));
+        Logger::info("NetworkDevice: disconnected\n");
     }
 }
 
@@ -183,8 +171,7 @@ void NetworkDeviceController::onTelemetryTick()
 {
     if (!sendPacket(CLIENT_REQ_TELEMETRY))
     {
-        cerr << "failed to send telemetry request\n";
-        Logger::error(QString("NetworkDevice: failed to send telemetry request\n"));
+        Logger::err("NetworkDevice: failed to send telemetry request\n");
     }
 }
 
@@ -193,8 +180,7 @@ void NetworkDeviceController::onVideoTick()
 {
     if (!sendPacket(CLIENT_REQ_MJPG_FRAME))
     {
-        cerr << "failed to send mjpg frame request\n";
-        Logger::error(QString("NetworkDevice: failed to send mjpg frame request\n"));
+        Logger::err("NetworkDevice: failed to send mjpg frame request\n");
     }
 }
 
@@ -253,8 +239,7 @@ void NetworkDeviceController::onControllerTick()
 
         if (send && !sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         {
-            cerr << "failed to send flight control request\n";
-            Logger::error(QString("NetworkDevice: failed to send flight control request\n"));
+            Logger::err("NetworkDevice: failed to send flight control request\n");
         }
         else if (send)
         {
@@ -298,8 +283,8 @@ void NetworkDeviceController::onThrottleTick()
         fprintf(stderr, "acting on throttle event signal %f\n", m_ctl.alt);
         if (!sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         {
-            cerr << "failed to send throttle event\n";
-            Logger::error(QString("NetworkDevice: failed to send throttle event\n"));
+            // report the error and continue on
+            Logger::err("NetworkDevice: failed to send throttle event\n");
         }
     }
 }
@@ -339,8 +324,7 @@ void NetworkDeviceController::onSocketReadyRead()
     switch (packet[0])
     {
     case SERVER_REQ_IDENT:
-        cerr << "SERVER_REQ_IDENT: sending response...\n";
-        Logger::info(QString("NetworkDevice: SERVER_REQ_IDENT: sending response...\n"));
+        Logger::info("NetworkDevice: SERVER_REQ_IDENT: sending response...\n");
         packet[PKT_COMMAND]     = CLIENT_ACK_IDENT;
         packet[PKT_LENGTH]      = PKT_RCI_LENGTH;
         packet[PKT_RCI_MAGIC]   = IDENT_MAGIC;
@@ -351,16 +335,13 @@ void NetworkDeviceController::onSocketReadyRead()
         m_controller_timer->start(50); // begin requesting flight control
         break;
     case SERVER_ACK_IGNORED:
-        cerr << "SERVER_ACK_IGNORED" << endl;
-        Logger::info(QString("NetworkDevice: SERVER_ACK_IGNORED\n"));
+        Logger::info("NetworkDevice: SERVER_ACK_IGNORED\n");
         break;
     case SERVER_ACK_TAKEOFF:
-        cerr << "SERVER_ACK_TAKEOFF" << endl;
-        Logger::info(QString("NetworkDevice: SERVER_ACK_TAKEOFF\n"));
+        Logger::info("NetworkDevice: SERVER_ACK_TAKEOFF\n");
         break;
     case SERVER_ACK_LANDING:
-        cerr << "SERVER_ACK_LANDING" << endl;
-        Logger::info(QString("NetworkDevice: SERVER_ACK_LANDING\n"));
+        Logger::info("NetworkDevice: SERVER_ACK_LANDING\n");
         break;
     case SERVER_ACK_TELEMETRY:
         x = *(float *)&packet[PKT_VTI_YAW];
@@ -388,44 +369,36 @@ void NetworkDeviceController::onSocketReadyRead()
         if (m_state == STATE_MIXED_CONTROL)
             m_throttle_timer->stop();
 
-        cerr << "got UPDATE_CTL_MODE: ";
-        log_msg = QString("NetworkDevice: got UPDATE_CTL_MODE: ");
         switch (packet[PKT_VCM_TYPE])
         {
         case VCM_TYPE_RADIO:
-            cerr << "radio\n";
-            log_msg.append("radio\n");
+            Logger::info("NetworkDevice: got UPDATE_CTL_MODE to radio\n");
             m_state = STATE_RADIO_CONTROL;
             break;
         case VCM_TYPE_AUTO:
-            cerr << "auto\n";
-            log_msg.append("auto\n");
+            Logger::info("NetworkDevice: got UPDATE_CTL_MODE to auto\n");
             m_state = STATE_AUTONOMOUS;
             break;
         case VCM_TYPE_MIXED:
-            cerr << "mixed\n";
-            log_msg.append("mixed\n");
+            Logger::info("NetworkDevice: got UPDATE_CTL_MODE to mixed\n");
             m_state = STATE_MIXED_CONTROL;
             m_prev_alt = 0.0f;
             m_throttle_timer->start(50);
             break;
         case VCM_TYPE_KILL: 
-            cerr << "killed\n";
-            log_msg.append("killed\n");
+            Logger::info("NetworkDevice: got UPDATE_CTL_MODE to killed\n");
             m_state = STATE_KILLED;
             break;
         case VCM_TYPE_LOCKOUT:
-            cerr << "lockout\n";
-            log_msg.append("lockout\n");
+            Logger::info("NetworkDevice: got UPDATE_CTL_MODE to lockout\n");
             m_state = STATE_LOCKOUT;
             break;
         default:
-            cerr << "!!! invalid !!!\n";
-            log_msg.append("invalid VCM_TYPE reached\n");
+            Logger::info("NetworkDevice: got UPDATE_CTL_MODE !! invalid !!\n");
             m_state = STATE_KILLED;
             break;
         }
-        Logger::info(log_msg);
+
         m_axes = 0;
         if (packet[PKT_VCM_AXES] & VCM_AXIS_ALT)   m_axes |= AXIS_ALT;
         if (packet[PKT_VCM_AXES] & VCM_AXIS_YAW)   m_axes |= AXIS_YAW;
@@ -440,7 +413,7 @@ void NetworkDeviceController::onSocketReadyRead()
                 (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
         break;
     default:
-        cerr << "unknown server command (" << packet[0] << ")\n";
+        Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
         break;
     }
 
@@ -455,26 +428,20 @@ void NetworkDeviceController::onSocketDisconnected()
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 {
-    QString log_msg = QString("NetworkDevice: QAbstractSocket::");
     switch (error) {
     case QAbstractSocket::RemoteHostClosedError:
-        cerr << "QAbstractSocket::RemoteHostClosedError" << endl;
-        log_msg.append("RemoteHostClosedError\n");
+        Logger::fail("NetworkDevice: connection error (RemoteHostClosed)\n");
         break;
     case QAbstractSocket::HostNotFoundError:
-        cerr << "QAbstractSocket::HostNotFoundError" << endl;
-        log_msg.append("HostNotFoundError\n");
+        Logger::fail("NetworkDevice: connection error (HostNotFound)\n");
         break;
     case QAbstractSocket::ConnectionRefusedError:
-        cerr << "QAbstractSocket::ConnectionRefusedError" << endl;
-        log_msg.append("ConnectionRefusedError\n");
+        Logger::fail("NetworkDevice: connection error (ConnectionRefused)\n");
         break;
     default:
-        cerr << "unknown socket error" << endl;
-        log_msg.append("unknown socket error\n");
+        Logger::fail("NetworkDevice: connection error (generic/unknown)\n");
         break;
     }
-    Logger::fail(log_msg);
     shutdown();
 }
 
@@ -491,14 +458,12 @@ void NetworkDeviceController::onInputReady(
             int vcm_type;
             if (STATE_MIXED_CONTROL == m_state)
             {
-                cerr << "requesting switch to autonomous...\n";
-                Logger::info(QString("NetworkDevice: requesting switch to autonomous\n"));
+                Logger::info("NetworkDevice: requesting switch to autonomous\n");
                 vcm_type = VCM_TYPE_AUTO;
             }
             else
             {
-                cerr << "requesting switch to mixed mode...\n";
-                Logger::info(QString("NetworkDevice: requesting switch to mixed mode\n"));
+                Logger::info("NetworkDevice: requesting switch to mixed mode\n");
                 vcm_type = VCM_TYPE_MIXED;
             }
 
@@ -539,8 +504,7 @@ void NetworkDeviceController::onInputReady(
                 vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
                 break;
             default:
-                fprintf(stderr, "NetworkDeviceController: unknown controller button\n");
-                Logger::warn(QString("NetworkDevice: unknown controller button\n"));
+                Logger::warn("NetworkDevice: unknown controller button\n");
                 break;
             }
 
@@ -591,13 +555,16 @@ void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b, int ht, in
     cmd_buffer[PKT_LENGTH]  = PKT_TC_LENGTH;
 
     cmd_buffer[PKT_TC_COLOR_FMT] = TC_COLOR_FMT_RGB;
-    cmd_buffer[PKT_TC_CHANNEL_0] = r;
-    cmd_buffer[PKT_TC_CHANNEL_1] = g;
-    cmd_buffer[PKT_TC_CHANNEL_2] = b;
+    cmd_buffer[PKT_TC_CHANNEL_0] = m_track.color.red();
+    cmd_buffer[PKT_TC_CHANNEL_1] = m_track.color.green();
+    cmd_buffer[PKT_TC_CHANNEL_2] = m_track.color.blue();
 
-    cmd_buffer[PKT_TC_THRESH_0] = ht;
-    cmd_buffer[PKT_TC_THRESH_1] = st;
+    cmd_buffer[PKT_TC_THRESH_0] = m_track.ht;
+    cmd_buffer[PKT_TC_THRESH_1] = m_track.st;
     cmd_buffer[PKT_TC_THRESH_2] = 0;
+
+    Logger::info(tr("requesting track color [%1 %2 %3] with threshold [%4 %5]")
+            .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st));
 
     sendPacket(cmd_buffer, PKT_TC_LENGTH);
 }

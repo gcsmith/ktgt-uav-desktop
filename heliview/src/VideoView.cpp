@@ -3,15 +3,12 @@
 // Authors: Kevin Macksamie, Garrett Smith, Tyler Thierolf
 // -----------------------------------------------------------------------------
 
-#include <iostream>
 #include <QDateTime>
 #include <QPainter>
 #include <QTimer>
 #include "Logger.h"
 #include "Utility.h"
 #include "VideoView.h"
-
-using namespace std;
 
 // -----------------------------------------------------------------------------
 VideoView::VideoView(QWidget *parent)
@@ -113,11 +110,7 @@ bool VideoView::saveFrame()
     const char *tstamp = datetime.toString(format).toAscii().constData();
 
     QString filename = QString("heliview_%1.jpg").arg(tstamp);
-
-    QString log_msg = QString("Video: Attempting to save current frame as %1\n")
-        .arg(filename);
-    
-    Logger::info(log_msg);
+    Logger::info(tr("Video: Attempting to save frame as %1\n").arg(filename));
 
     return (m_image->save(QString(filename)));
 }
@@ -188,9 +181,7 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
 // -----------------------------------------------------------------------------
 void VideoView::onImageReady(const char *data, size_t length)
 {
-    // cerr << "loading image size " << length << endl;
-    QString log_msg = QString("loading image size %1\n").arg(length);
-    Logger::extraDebug(log_msg);
+    Logger::extraDebug(tr("loading image size %1\n").arg(length));
     if (m_image->loadFromData((const uchar *)data, (int)length))
     {
         // reset the heartbeat timeout and force a redraw of the client area
@@ -200,8 +191,7 @@ void VideoView::onImageReady(const char *data, size_t length)
     else
     {
         // uh oh
-        cerr << "failed to load image data\n";
-        Logger::error(QString("Video: failed to load image data\n"));
+        Logger::err("Video: failed to load image data\n");
     }
 }
 
