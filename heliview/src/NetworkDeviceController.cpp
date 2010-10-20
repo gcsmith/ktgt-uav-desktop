@@ -563,7 +563,7 @@ void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b, int ht, in
     cmd_buffer[PKT_TC_THRESH_1] = m_track.st;
     cmd_buffer[PKT_TC_THRESH_2] = 0;
 
-    Logger::info(tr("requesting track color [%1 %2 %3] with threshold [%4 %5]")
+    Logger::info(tr("request track color [%1 %2 %3] with threshold [%4 %5]\n")
             .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st));
 
     sendPacket(cmd_buffer, PKT_TC_LENGTH);

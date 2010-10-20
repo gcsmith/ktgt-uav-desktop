@@ -149,19 +149,21 @@ void ApplicationFrame::connectGamepad()
         SafeDelete(m_gamepad);
         return;
     }
-    else
-    {
-        Logger::info(tr("opened gamepad '%1' - version:%2 buttons:%3 axes:%4\n")
-                .arg(m_gamepad->driverName())
-                .arg(m_gamepad->driverVersion())
-                .arg(m_gamepad->buttonCount())
-                .arg(m_gamepad->axisCount()));
 
-        connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
-                m_ctlview, SLOT(onInputReady(GamepadEvent, int, float)));
+    Logger::info(tr("opened gamepad '%1' - version:%2 buttons:%3 axes:%4\n")
+            .arg(m_gamepad->driverName())
+            .arg(m_gamepad->driverVersion())
+            .arg(m_gamepad->buttonCount())
+            .arg(m_gamepad->axisCount()));
 
-        m_gamepad->start();
-    }
+    connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
+            m_ctlview, SLOT(onInputReady(GamepadEvent, int, float)));
+
+
+    connect(m_gamepad, SIGNAL(inputReady(GamepadEvent, int, float)),
+            m_controller, SLOT(onInputReady(GamepadEvent, int, float)));
+
+    m_gamepad->start();
 }
 
 // -----------------------------------------------------------------------------
@@ -176,8 +178,6 @@ void ApplicationFrame::setEnabledButtons(int buttons)
 // -----------------------------------------------------------------------------
 void ApplicationFrame::openLogFile(const QString &logfile)
 {
-    QString dbg;
-
     if (!m_file)
     {
         m_file = new QFile(logfile);
@@ -193,7 +193,7 @@ void ApplicationFrame::openLogFile(const QString &logfile)
         Logger::err("could not open new log file\n");
         return;
     }
-    Logger::dbg(tr("successfully opened log '%1'\n").arg(m_file->fileName()));
+    Logger::info(tr("successfully opened log '%1'\n").arg(m_file->fileName()));
 
     if (!m_log)
     {
