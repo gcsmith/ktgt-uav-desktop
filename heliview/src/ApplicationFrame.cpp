@@ -143,7 +143,7 @@ void ApplicationFrame::connectGamepad()
     // attempt to open the gamepad device
     if (!m_gamepad->open(dev))
     {
-        Logger::err(tr("failed to open gamepad device \"%1\"\n") + dev);
+        Logger::err(tr("failed to open gamepad device '%1'\n").arg(dev));
         SafeDelete(m_gamepad);
         return;
     }
@@ -441,13 +441,20 @@ void ApplicationFrame::onFileConnectTriggered()
 }
 
 // -----------------------------------------------------------------------------
-bool ApplicationFrame::connectTo(const QString &source, const QString &device)
+void ApplicationFrame::onFileDisconnectTriggered()
 {
     if (m_controller)
     {
-        Logger::info(tr("closing \"%1\"\n").arg(m_controller->device()));
+        Logger::info(tr("disconnecting \"%1\"\n").arg(m_controller->device()));
         m_controller->close();
+        SafeDelete(m_controller);
     }
+}
+
+// -----------------------------------------------------------------------------
+bool ApplicationFrame::connectTo(const QString &source, const QString &device)
+{
+    onFileDisconnectTriggered();
 
     // attempt to allocate the specified device controller
     m_controller = CreateDeviceController(source, device);
@@ -457,6 +464,9 @@ bool ApplicationFrame::connectTo(const QString &source, const QString &device)
         return false;
     }
 
+    // connect the signals and slots for this device
+    connectDeviceController();
+
     // attempt to connect to the device
     if (!m_controller->open())
     {
@@ -465,10 +475,7 @@ bool ApplicationFrame::connectTo(const QString &source, const QString &device)
         return false;
     }
 
-    // connect the signals and slots for this device
-    connectDeviceController();
     connectGamepad();
-
     return true;
 }
 

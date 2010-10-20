@@ -59,7 +59,7 @@ DeviceController *CreateDeviceController(
         return new NetworkDeviceController(device);
     else if (name == "serial")
         return new SerialDeviceController(device);
-    else if (name == "sim")
+    else if (name == "simulated")
         return new SimulatedDeviceController(device);
     else
         return NULL;

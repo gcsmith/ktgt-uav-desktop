@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <cassert>
 #include "LinuxGamepad.h"
+#include "Logger.h"
 #include "Utility.h"
 
 using namespace std;
@@ -104,16 +105,42 @@ LinuxGamepadThread::~LinuxGamepadThread()
     m_active = false;
 }
 
+#include <iostream>
 // -----------------------------------------------------------------------------
 void LinuxGamepadThread::run()
 {
     struct js_event event;
-    while (m_active)
+    struct timeval tv;
+    fd_set rdset;
+
+    for (;;)
     {
+        // wait until joydev data is available
+        for (;;)
+        {
+            // kill the thread if requested
+            if (!m_active)
+                return;
+
+            FD_ZERO(&rdset);
+            FD_SET(m_fd, &rdset);
+            tv.tv_sec = 1;
+            tv.tv_usec = 0;
+
+            int rc = select(m_fd + 1, &rdset, NULL, NULL, &tv);
+            if (rc < 0)
+                Logger::err("select call failed in LinuxGamepadThread\n");
+            else if (rc > 0)
+                break;
+        }
+
+        // attempt to read the joydev data
+        std::cerr << "reading";
         if (read(m_fd, &event, sizeof(struct js_event)) != sizeof(event)) {
-            fprintf(stderr, "failed to read from joystick\n");
+            Logger::err("failed to read from joystick\n");
             continue;
         }
+        std::cerr << "...done\n";
 
         GamepadEvent gpe;
         float val;

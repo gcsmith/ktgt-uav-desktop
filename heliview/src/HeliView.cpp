@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
     po::options_description desc("Program options");
     desc.add_options()
-        S_ARG("source,s",    "select data source (network|serial|sim)")
+        S_ARG("source,s",    "select data source (network|serial|simulated)")
         S_ARG("device,d",    "specify device for network or serial communication")
         S_ARG("log,l",       "specify log file path")
         S_ARG("verbosity,v", "specify log verbosity (normal|debug|excess")
@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
         optional_arg(vm, "verbosity", log_verbosity);
 
         show_usage = !!vm.count("help");
-
         disable_virtual_view = !!vm.count("novirtual");
     }
     catch (exception &e)

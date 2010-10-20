@@ -33,7 +33,6 @@ SimulatedDeviceController::~SimulatedDeviceController()
 // -----------------------------------------------------------------------------
 bool SimulatedDeviceController::open()
 {
-    qDebug() << "creating simulated device" << m_device;
     Logger::info(QString("SimDC: creating simulated device\n"));
 
     // attach the specified simulation callback
@@ -42,14 +41,16 @@ bool SimulatedDeviceController::open()
         connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateNoiseTick()));
     else
         connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateTick()));
-
     timer->start(20);
+
+    emit connectionStatusChanged(QString("Simulated connection opened"), true);
     return true;
 }
 
 // -----------------------------------------------------------------------------
 void SimulatedDeviceController::close()
 {
+    emit connectionStatusChanged(QString("Connection closed"), false);
 }
 
 // -----------------------------------------------------------------------------

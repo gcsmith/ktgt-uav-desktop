@@ -49,6 +49,7 @@ public slots:
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
+    void onFileDisconnectTriggered();
     void onFileExitTriggered();
     void onEditSettingsTriggered();
     void onHelpAboutTriggered();
