@@ -33,7 +33,7 @@ SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track,
     sbSt->setValue(track.st);
 
     //TODO: Set LogFile Value
-    leLogFileName->setText(logfile);
+    editLogFileName->setText(logfile);
     sbLogBuffer->setValue(logbufsize);
     //TODO: Set RGB Values
 }
@@ -53,7 +53,7 @@ void SettingsDialog::onBrowseClicked()
     fd.exec();
 
     filename = fd.selectedFiles();
-    leLogFileName->setText(filename.at(0));
+    editLogFileName->setText(filename.at(0));
 }
 
 // -----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ void SettingsDialog::onApplyClicked()
     emit updateTracking(sbR->value(), sbG->value(), sbB->value(),
             sbHt->value(), sbSt->value());
 
-    emit updateLogFile(leLogFileName->text(), sbLogBuffer->value());
+    emit updateLogFile(editLogFileName->text(), sbLogBuffer->value());
 }
 
 // -----------------------------------------------------------------------------

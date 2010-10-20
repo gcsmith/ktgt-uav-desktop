@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>594</width>
+    <width>561</width>
     <height>225</height>
    </rect>
   </property>
@@ -19,9 +19,9 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QTabWidget" name="tabWidget">
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabSettings">
      <property name="minimumSize">
       <size>
        <width>400</width>
@@ -29,9 +29,9 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
-     <widget class="QWidget" name="tGeneral">
+     <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
        <string>General</string>
       </attribute>
@@ -64,7 +64,7 @@
         </spacer>
        </item>
        <item row="0" column="2">
-        <widget class="QLineEdit" name="leLogFileName"/>
+        <widget class="QLineEdit" name="editLogFileName"/>
        </item>
        <item row="0" column="4">
         <widget class="QPushButton" name="btnLogFile">
@@ -106,13 +106,182 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="tabTrimAdjustment">
+      <attribute name="title">
+       <string>Trim Adjustment</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="1">
+        <widget class="QSlider" name="slideThrottle">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="sliderPosition">
+          <number>50</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSlider" name="slideYaw">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="sliderPosition">
+          <number>50</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSlider" name="slidePitch">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="sliderPosition">
+          <number>50</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QSlider" name="slideRoll">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="sliderPosition">
+          <number>50</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblThrottle">
+         <property name="text">
+          <string>Throttle:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblYaw">
+         <property name="text">
+          <string>Yaw:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblPitch">
+         <property name="text">
+          <string>Pitch:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="lblRoll">
+         <property name="text">
+          <string>Roll:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="lineEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="lineEdit_2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="lineEdit_3">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QLineEdit" name="lineEdit_4">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>40</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="maxLength">
+          <number>32768</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabColorTracking">
       <attribute name="title">
        <string>Color Tracking</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="QLabel" name="lbTrack">
+        <widget class="QLabel" name="lblTrackingColor">
          <property name="text">
           <string>Tracking Color:</string>
          </property>
@@ -202,7 +371,7 @@
         </layout>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="lbThresh">
+        <widget class="QLabel" name="lblTrackingThresholds">
          <property name="text">
           <string>Tracking Thresholds:</string>
          </property>
@@ -299,20 +468,20 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tController">
+     <widget class="QWidget" name="tabControllerMapping">
       <attribute name="title">
        <string>Controller Mapping</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="lblThrottleAxis">
          <property name="text">
           <string>Throttle Axis:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="editThrottleAxis">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -322,14 +491,14 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="lblYawAxis">
          <property name="text">
           <string>Yaw Axis:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_2">
+        <widget class="QLineEdit" name="editYawAxis">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -339,14 +508,14 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="lblPitchAxis">
          <property name="text">
           <string>Pitch Axis:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_3">
+        <widget class="QLineEdit" name="editPitchAxis">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -356,14 +525,14 @@
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="lblRollAxis">
          <property name="text">
           <string>Roll Axis:</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_4">
+        <widget class="QLineEdit" name="editRollAxis">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -373,35 +542,35 @@
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="lblThrottleEnable">
          <property name="text">
           <string>Throttle Enable:</string>
          </property>
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="lblYawEnable">
          <property name="text">
           <string>Yaw Enable:</string>
          </property>
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="lblPitchEnable">
          <property name="text">
           <string>Pitch Enable:</string>
          </property>
         </widget>
        </item>
        <item row="3" column="2">
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="lblRollEnable">
          <property name="text">
           <string>Roll Enable:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="3">
-        <widget class="QLineEdit" name="lineEdit_5">
+        <widget class="QLineEdit" name="editThrottleEnable">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -411,7 +580,7 @@
         </widget>
        </item>
        <item row="1" column="3">
-        <widget class="QLineEdit" name="lineEdit_6">
+        <widget class="QLineEdit" name="editYawEnable">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -421,7 +590,7 @@
         </widget>
        </item>
        <item row="2" column="3">
-        <widget class="QLineEdit" name="lineEdit_7">
+        <widget class="QLineEdit" name="editPitchEnable">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -431,7 +600,7 @@
         </widget>
        </item>
        <item row="3" column="3">
-        <widget class="QLineEdit" name="lineEdit_8">
+        <widget class="QLineEdit" name="editRollEnable">
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -457,14 +626,14 @@
      </widget>
     </widget>
    </item>
-   <item>
-    <widget class="QWidget" name="widget" native="true">
+   <item row="1" column="0">
+    <widget class="QWidget" name="dialogButtonBar" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="margin">
        <number>0</number>
       </property>
       <item>
-       <spacer name="horizontalSpacer">
+       <spacer name="spaceDialogButtonBar">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
