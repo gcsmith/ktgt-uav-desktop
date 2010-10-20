@@ -120,10 +120,13 @@ void VideoView::mouseMoveEvent(QMouseEvent *e)
 {
     if (m_dragging)
     {
+        int right = std::max(0, std::min(e->x(), width() - 1));
+        int bottom = std::max(0, std::min(e->y(), height() - 1));
+
         // repaint only the union of the old and new drag rectangles
         QRect old_rect = m_dp;
-        m_dp.setRight(e->x());
-        m_dp.setBottom(e->y());
+        m_dp.setRight(right);
+        m_dp.setBottom(bottom);
         repaint(old_rect.united(m_dp).adjusted(-1, -1, 1, 1));
     }
 }
