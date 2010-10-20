@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    ConnectionDialog.h
-// Authors: Garrett Smith
+// Authors: Garrett Smith, Tyler Thierolf
+// Created: 10-04-2010
+//
+// Definitions for connection dialog window.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_CONNECTIONDIALOG__H_

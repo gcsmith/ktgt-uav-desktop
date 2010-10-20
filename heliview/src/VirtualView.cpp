@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    VirtualView.cpp
 // Authors: Garrett Smith
+// Created: 08-23-2010
+//
+// Displays a 3D representation of the helicopter's current orientation.
 // -----------------------------------------------------------------------------
 
 #include <iostream>

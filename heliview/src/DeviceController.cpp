@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    DeviceController.cpp
 // Authors: Garrett Smith
+// Created: 08-24-2010
 //
 // Abstract interface for device communication.
 // -----------------------------------------------------------------------------
@@ -11,46 +12,55 @@
 
 using namespace std;
 
+// -----------------------------------------------------------------------------
 DeviceState DeviceController::currentState() const
 {
     return STATE_AUTONOMOUS;
 }
 
+// -----------------------------------------------------------------------------
 int DeviceController::currentAxes() const
 {
     return AXIS_ALL;
 }
 
+// -----------------------------------------------------------------------------
 TrackSettings DeviceController::currentTrackSettings() const
 {
     return TrackSettings(QColor(255, 255, 255), 10, 10);
 }
 
+// -----------------------------------------------------------------------------
 bool DeviceController::requestTakeoff()
 {
     return true;
 }
 
+// -----------------------------------------------------------------------------
 bool DeviceController::requestLanding()
 {
     return true;
 }
 
+// -----------------------------------------------------------------------------
 bool DeviceController::requestManualOverride()
 {
     return true;
 }
 
+// -----------------------------------------------------------------------------
 bool DeviceController::requestAutonomous()
 {
     return true;
 }
 
+// -----------------------------------------------------------------------------
 bool DeviceController::requestKillswitch()
 {
     return true;
 }
 
+// -----------------------------------------------------------------------------
 DeviceController *CreateDeviceController(
         const QString &name,
         const QString &device)

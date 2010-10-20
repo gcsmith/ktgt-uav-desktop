@@ -1,12 +1,12 @@
 // -----------------------------------------------------------------------------
 // File:    SimulatedDeviceController.cpp
 // Authors: Garrett Smith
+// Created: 08-24-2010
 //
 // Simulated device interface implementation.
 // -----------------------------------------------------------------------------
 
 #include <QTimer>
-#include <QDebug>
 #include <iostream>
 #include <cmath>
 #include "Logger.h"

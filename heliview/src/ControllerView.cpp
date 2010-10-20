@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    ControllerView.cpp
-// Authors: Kevin Macksamie
+// Authors: Kevin Macksamie, Garrett Smith
+// Created: 09-25-2010
+//
+// Widget that displays the current gamepad positions (buttons & analog sticks)
 // -----------------------------------------------------------------------------
 
 #include <QPainter>

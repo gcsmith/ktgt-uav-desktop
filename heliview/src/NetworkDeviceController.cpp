@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    NetworkDeviceController.cpp
-// Authors: Garrett Smith
+// Authors: Garrett Smith, Kevin Macksamie
+// Created: 08-24-2010
 //
 // Network device interface implementation.
 // -----------------------------------------------------------------------------

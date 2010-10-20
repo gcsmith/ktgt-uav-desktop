@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    Utility.h
-// Authors: Garrett Smith
+// Authors: Garrett Smith, Kevin Macksamie
+// Created: 09-05-2010
+//
+// General purpose macro and constant declarations.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_UTILITY__H_

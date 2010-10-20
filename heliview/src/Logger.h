@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    Logger.h
-// Authors: Kevin Macksamie
+// Authors: Kevin Macksamie, Garrett Smith
+// Created: 10-25-2010
 //
 // Singleton Logger class used to log messages during runtime.
 // -----------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    HeliView.cpp
 // Authors: Garrett Smith, Tim Miller, Kevin Macksamie, Tyler Thierolf
+// Created: 08-23-2010
 //
 // Entry point for HeliView application.
 // -----------------------------------------------------------------------------

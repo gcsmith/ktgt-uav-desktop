@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    LinuxGamepad.cpp
 // Authors: Garrett Smith
+// Created: 09-17-2010
+//
+// Linux implementation of the Gamepad interface.
 // -----------------------------------------------------------------------------
 
 #include <QDebug>

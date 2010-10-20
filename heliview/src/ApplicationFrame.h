@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    ApplicationFrame.h
-// Authors: Garrett Smith
+// Authors: Garrett Smith, Kevin Macksamie, Tyler Thierolf, Timothy Miller
+// Created: 08-23-2010
+//
+// Wraps the main window UI script and provides the application view.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_APPLICATIONFRAME__H_

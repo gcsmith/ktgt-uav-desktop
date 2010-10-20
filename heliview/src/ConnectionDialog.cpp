@@ -1,18 +1,15 @@
 // -----------------------------------------------------------------------------
 // File:    ConnectionDialog.cpp
-// Authors: Garrett Smith
+// Authors: Garrett Smith, Tyler Thierolf
+// Created: 10-04-2010
+//
+// Dialog that prompts user for type and address of device to connect to.
 // -----------------------------------------------------------------------------
 
-#include "ConnectionDialog.h"
-#include "DeviceController.h"
-#include "NetworkDeviceController.h"
-#include "SerialDeviceController.h"
-#include "SimulatedDeviceController.h"
-#include <stdio.h>
 #include <iostream>
-#include <QComboBox>
 #include <QString>
 #include <QMessageBox>
+#include "ConnectionDialog.h"
 
 // -----------------------------------------------------------------------------
 ConnectionDialog::ConnectionDialog(QWidget *parent)

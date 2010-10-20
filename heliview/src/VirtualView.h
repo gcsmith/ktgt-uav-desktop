@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    VirtualView.h
 // Authors: Garrett Smith
+// Created: 08-23-2010
+//
+// Displays a 3D representation of the helicopter's current orientation.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_VIRTUALVIEW__H_

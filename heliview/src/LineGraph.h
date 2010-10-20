@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    LineGraph.h
 // Authors: Garrett Smith
+// Created: 08-23-2010
+//
+// Plot object that wraps QWT class.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_LINEGRAPH__H_

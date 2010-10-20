@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    DeviceController.h
 // Authors: Garrett Smith
+// Created: 08-24-2010
 //
 // Abstract interface for device communication.
 // -----------------------------------------------------------------------------

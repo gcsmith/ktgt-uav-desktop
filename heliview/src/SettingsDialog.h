@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    SettingsDialog.h
-// Authors: Garrett Smith
+// Authors: Garrett Smith, Kevin Macksamie, Tyler Thierolf, Timothy Miller
+// Created: 10-04-2010
+//
+// General purpose settings dialog window.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_SETTINGSDIALOG__H_

@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    SimulatedDeviceController.h
 // Authors: Garrett Smith
+// Created: 08-24-2010
 //
 // Simulated device interface declaration.
 // -----------------------------------------------------------------------------

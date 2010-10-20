@@ -1,9 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    LineGraph.cpp
 // Authors: Garrett Smith
+// Created: 08-23-2010
 //
-// Plot object that wraps QWT classes. Capable of rendering both acceleration
-// and velocity (filtered and/or raw sensor data).
+// Plot object that wraps QWT class.
 // -----------------------------------------------------------------------------
 
 #include <cassert>

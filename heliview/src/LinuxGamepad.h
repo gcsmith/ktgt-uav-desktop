@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    LinuxGamepad.h
 // Authors: Garrett Smith
+// Created: 09-17-2010
+//
+// Linux implementation of the Gamepad interface.
 // -----------------------------------------------------------------------------
 
 #ifndef _HELIVIEW_LINUXGAMEPAD__H_

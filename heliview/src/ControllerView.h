@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------
 // File:    ControllerView.h
 // Authors: Kevin Macksamie
+// Created: 09-25-2010
+//
+// Widget that displays the current gamepad positions (buttons & analog sticks)
 // -----------------------------------------------------------------------------
 
 #ifndef _CONTROLLERVIEW__H_

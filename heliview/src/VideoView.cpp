@@ -1,6 +1,10 @@
 // -----------------------------------------------------------------------------
 // File:    VideoView.cpp
 // Authors: Kevin Macksamie, Garrett Smith, Tyler Thierolf
+// Created: 09-15-2010
+//
+// Widget that displays mjpg video frames and allows the user to click and drag
+// a bounding rectangle over the image to select a target tracking color.
 // -----------------------------------------------------------------------------
 
 #include <QDateTime>

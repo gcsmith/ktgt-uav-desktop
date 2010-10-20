@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // File:    SerialDeviceController.cpp
 // Authors: Garrett Smith
+// Created: 08-24-2010
 //
 // Serial device interface implementation.
 // -----------------------------------------------------------------------------
