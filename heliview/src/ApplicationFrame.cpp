@@ -51,6 +51,8 @@ ApplicationFrame::~ApplicationFrame()
     }
 
     closeLogFile();
+    SafeDelete(m_controller);
+    SafeDelete(m_gamepad);
 }
 
 // -----------------------------------------------------------------------------
@@ -165,6 +167,19 @@ void ApplicationFrame::connectGamepad()
             m_controller, SLOT(onInputReady(GamepadEvent, int, float)));
 
     m_gamepad->start();
+}
+
+// -----------------------------------------------------------------------------
+bool ApplicationFrame::openDevice()
+{
+    // attempt to connect to the device
+    if (!m_controller->open())
+    {
+        QString device = m_controller->device();
+        Logger::err(tr("failed to open device \"%1\"\n").arg(device));
+        return false;
+    }
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -449,13 +464,25 @@ void ApplicationFrame::onFileConnectTriggered()
 }
 
 // -----------------------------------------------------------------------------
+void ApplicationFrame::onFileReconnectTriggered()
+{
+    if (!m_controller)
+    {
+        Logger::err("no device to reconnect to\n");
+        return;
+    }
+
+    m_controller->close();
+    openDevice();
+}
+
+// -----------------------------------------------------------------------------
 void ApplicationFrame::onFileDisconnectTriggered()
 {
     if (m_controller)
     {
         Logger::info(tr("disconnecting \"%1\"\n").arg(m_controller->device()));
         m_controller->close();
-        SafeDelete(m_controller);
     }
 }
 
@@ -474,17 +501,9 @@ bool ApplicationFrame::connectTo(const QString &source, const QString &device)
 
     // connect the signals and slots for this device
     connectDeviceController();
-
-    // attempt to connect to the device
-    if (!m_controller->open())
-    {
-        Logger::err(tr("failed to open device \"%1\"\n").arg(device));
-        SafeDelete(m_controller);
-        return false;
-    }
-
     connectGamepad();
-    return true;
+
+    return openDevice();
 }
 
 // -----------------------------------------------------------------------------

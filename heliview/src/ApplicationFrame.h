@@ -52,6 +52,7 @@ public slots:
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
+    void onFileReconnectTriggered();
     void onFileDisconnectTriggered();
     void onFileExitTriggered();
     void onEditSettingsTriggered();
@@ -86,6 +87,7 @@ protected:
     void connectGamepad();
     void setupSignalsSlots();
 
+    bool openDevice();
     void setEnabledButtons(int buttons);
     void writeToLog(const QString &plain, const QString &rich);
 

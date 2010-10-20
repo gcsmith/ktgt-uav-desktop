@@ -215,6 +215,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionFileConnect"/>
+    <addaction name="actionFileReconnect"/>
     <addaction name="actionFileDisconnect"/>
     <addaction name="separator"/>
     <addaction name="actionSave_Log"/>
@@ -678,10 +679,18 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionFileDisconnect">
    <property name="text">
-    <string>Disconnect</string>
+    <string>&amp;Disconnect</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionFileReconnect">
+   <property name="text">
+    <string>&amp;Reconnect</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>
@@ -696,8 +705,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowXFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>526</y>
+     <x>119</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>193</x>
@@ -712,8 +721,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowXUFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>552</y>
+     <x>119</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>149</x>
@@ -728,8 +737,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowYUFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>375</x>
-     <y>552</y>
+     <x>119</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>389</x>
@@ -744,8 +753,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowYFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>375</x>
-     <y>526</y>
+     <x>119</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>425</x>
@@ -760,8 +769,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowZFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>526</y>
+     <x>119</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>676</x>
@@ -776,8 +785,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowZUFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>612</x>
-     <y>552</y>
+     <x>119</x>
+     <y>111</y>
     </hint>
     <hint type="destinationlabel">
      <x>646</x>
@@ -977,6 +986,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionFileReconnect</sender>
+   <signal>triggered()</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onFileReconnectTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onShowXFChanged(bool)</slot>
@@ -997,5 +1022,6 @@ p, li { white-space: pre-wrap; }
   <slot>onFileSaveFrameTriggered()</slot>
   <slot>onFileSaveLogTriggered()</slot>
   <slot>onFileDisconnectTriggered()</slot>
+  <slot>onFileReconnectTriggered()</slot>
  </slots>
 </ui>
