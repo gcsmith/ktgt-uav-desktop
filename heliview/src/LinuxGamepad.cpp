@@ -105,7 +105,6 @@ LinuxGamepadThread::~LinuxGamepadThread()
     m_active = false;
 }
 
-#include <iostream>
 // -----------------------------------------------------------------------------
 void LinuxGamepadThread::run()
 {
@@ -135,12 +134,10 @@ void LinuxGamepadThread::run()
         }
 
         // attempt to read the joydev data
-        std::cerr << "reading";
         if (read(m_fd, &event, sizeof(struct js_event)) != sizeof(event)) {
             Logger::err("failed to read from joystick\n");
             continue;
         }
-        std::cerr << "...done\n";
 
         GamepadEvent gpe;
         float val;
