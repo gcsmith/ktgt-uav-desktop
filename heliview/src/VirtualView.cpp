@@ -26,7 +26,7 @@ VirtualView::VirtualView(QWidget *parent)
     m_log->setDebugOutputEnabled(false);
 
     // create the Ogre root object and load the OpenGL render plugin
-    m_root = OGRE_NEW Ogre::Root("cfg/plugins.cfg", "cfg/ogre.cfg");
+    m_root = OGRE_NEW Ogre::Root("cfg/plugins.cfg", "ogre.cfg");
     m_root->loadPlugin("RenderSystem_GL");
 
     loadConfiguration();
