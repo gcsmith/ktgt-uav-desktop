@@ -37,6 +37,8 @@ ApplicationFrame::ApplicationFrame(bool noVirtualView)
 
     connect(Logger::instance(), SIGNAL(updateLog(int, const QString &)), this,
             SLOT(onUpdateLog(int, const QString &)));
+
+    onConnectionStatusChanged("No connection", false);
 }
 
 // -----------------------------------------------------------------------------
@@ -400,6 +402,11 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
         elevationStatusBar->setValue(0);
         elevationStatusBar->setFormat(QString("NC"));
     }
+
+    btnLanding->setEnabled(status);
+    btnTakeoff->setEnabled(status);
+    btnOverride->setEnabled(status);
+    btnKillswitch->setEnabled(status);
 }
 
 // -----------------------------------------------------------------------------
@@ -556,18 +563,39 @@ void ApplicationFrame::onFileSaveFrameTriggered()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onTakeoffClicked()
 {
+    if (!m_controller)
+    {
+        assert(!"attempting takeoff request in disconnected state");
+        Logger::fail("attempting takeoff request in disconnected state\n");
+        return;
+    }
+
     m_controller->requestTakeoff();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onLandingClicked()
 {
+    if (!m_controller)
+    {
+        assert(!"attempting landing request in disconnected state");
+        Logger::fail("attempting landing request in disconnected state");
+        return;
+    }
+
     m_controller->requestLanding();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onManualOverrideClicked()
 {
+    if (!m_controller)
+    {
+        assert(!"attempting override request in disconnected state");
+        Logger::fail("attempting override request in disconnected state");
+        return;
+    }
+
     switch (m_controller->currentState())
     {
     case STATE_AUTONOMOUS:
@@ -586,6 +614,13 @@ void ApplicationFrame::onManualOverrideClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onKillswitchClicked()
 {
+    if (!m_controller)
+    {
+        assert(!"attempting killswitch request in disconnected state");
+        Logger::fail("attempting killswitch request in disconnected state");
+        return;
+    }
+
     m_controller->requestKillswitch();
 }
 
