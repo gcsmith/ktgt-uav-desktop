@@ -28,7 +28,7 @@ public:
     bool saveFrame();
 
 signals:
-    void updateTracking(int r, int g, int b, int ht, int st);
+    void updateTracking(int r, int g, int b, int ht, int st, int ft);
 
 public slots:
     void setDragBoxColor(int r, int g, int b, int a);

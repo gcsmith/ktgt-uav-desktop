@@ -33,8 +33,6 @@ public:
 
 public slots:
     void onSerialDataReady();
-    void onInputReady(GamepadEvent event, int index, float value) { }
-    void onUpdateTrackColor(int r, int g, int b, int ht, int st) { }
 
 protected:
     void processSingleLine(const std::string &line);

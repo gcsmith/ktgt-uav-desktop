@@ -25,11 +25,11 @@ enum DeviceState
 struct TrackSettings
 {
     TrackSettings()
-    : color(0, 0, 0), ht(0), st(0) { }
-    TrackSettings(QColor _color, int _ht, int _st)
-    : color(_color), ht(_ht), st(_st) { }
+    : color(0, 0, 0), ht(0), st(0), ft(0) { }
+    TrackSettings(QColor _color, int _ht, int _st, int _ft)
+    : color(_color), ht(_ht), st(_st), ft(_ft) { }
     QColor color;
-    int ht, st;
+    int ht, st, ft;
 };
 
 #define AXIS_ALT    0x01
@@ -59,8 +59,11 @@ public:
     virtual bool requestKillswitch();
 
 public slots:
-    virtual void onInputReady(GamepadEvent event, int index, float value) = 0;
-    virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st) = 0;
+    virtual void onInputReady(GamepadEvent event, int index, float value);
+    virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
+    virtual void onUpdateExposure(int automatic, int value);
+    virtual void onUpdateFocus(int automatic, int value);
+    virtual void onUpdateWhiteBalance(int automatic);
 
 signals:
     void telemetryReady(float x, float y, float z,

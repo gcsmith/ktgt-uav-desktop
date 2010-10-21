@@ -177,7 +177,7 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
         avg_r = (int)(avg_r * inv_pixels);
         avg_g = (int)(avg_g * inv_pixels);
         avg_b = (int)(avg_b * inv_pixels);
-        emit updateTracking(avg_r, avg_g, avg_b, -1, -1);
+        emit updateTracking(avg_r, avg_g, avg_b, -1, -1, -1);
         
         // disable the dragging rectangle and force an update of the widget
         m_dragging = false;

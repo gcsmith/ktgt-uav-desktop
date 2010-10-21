@@ -6,9 +6,9 @@
 // General purpose settings dialog window.
 // -----------------------------------------------------------------------------
 
-#include "SettingsDialog.h"
 #include <QColorDialog>
 #include <QFileDialog>
+#include "SettingsDialog.h"
 #include "DeviceController.h"
 
 // -----------------------------------------------------------------------------
@@ -31,11 +31,11 @@ SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track,
     sbB->setValue(track.color.blue());
     sbHt->setValue(track.ht);
     sbSt->setValue(track.st);
+    sbFt->setValue(track.ft);
 
     //TODO: Set LogFile Value
     editLogFileName->setText(logfile);
     sbLogBuffer->setValue(logbufsize);
-    //TODO: Set RGB Values
 }
 
 // -----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ void SettingsDialog::onOkClicked()
 void SettingsDialog::onApplyClicked()
 {
     emit updateTracking(sbR->value(), sbG->value(), sbB->value(),
-            sbHt->value(), sbSt->value());
+            sbHt->value(), sbSt->value(), sbFt->value());
 
     emit updateLogFile(editLogFileName->text(), sbLogBuffer->value());
 }
@@ -90,5 +90,46 @@ void SettingsDialog::onNewColorClicked()
         sbG->setValue(color.green());
         sbB->setValue(color.blue());
     }
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onSetCurrentWhiteBalanceClicked()
+{
+    emit updateWhiteBalance(0);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onColorTrackingEnabled(bool enabled)
+{
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onManualExposureEnabled(bool enabled)
+{
+    emit updateExposure(enabled ? 0 : 1, 0);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onManualFocusEnabled(bool enabled)
+{
+    emit updateFocus(enabled ? 0 : 1, 0);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onManualWhiteBalanceEnabled(bool enabled)
+{
+    emit updateWhiteBalance(enabled ? 0 : 1);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onExposureSliderValueChanged(int value)
+{
+    emit updateExposure(0, value);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onFocusSliderValueChanged(int value)
+{
+    emit updateFocus(0, value);
 }
 

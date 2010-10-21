@@ -121,8 +121,9 @@ void ApplicationFrame::connectDeviceController()
     connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
             m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
 
-    connect(m_video, SIGNAL(updateTracking(int, int, int, int, int)),
-            m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
+    connect(m_video, SIGNAL(updateTracking(int, int, int, int, int, int)),
+            m_controller,
+            SLOT(onUpdateTrackColor(int, int, int, int, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -522,8 +523,18 @@ void ApplicationFrame::onEditSettingsTriggered()
     if (m_controller)
     {
         // allow settings dialog to communicate data to device controller
-        connect(&sd, SIGNAL(updateTracking(int, int, int, int, int)),
-                m_controller, SLOT(onUpdateTrackColor(int, int, int, int, int)));
+        connect(&sd, SIGNAL(updateTracking(int, int, int, int, int, int)),
+                m_controller,
+                SLOT(onUpdateTrackColor(int, int, int, int, int, int)));
+
+        connect(&sd, SIGNAL(updateExposure(int, int)),
+                m_controller, SLOT(onUpdateExposure(int, int)));
+
+        connect(&sd, SIGNAL(updateFocus(int, int)),
+                m_controller, SLOT(onUpdateFocus(int, int)));
+
+        connect(&sd, SIGNAL(updateWhiteBalance(int)),
+                m_controller, SLOT(onUpdateWhiteBalance(int)));
     }
     
     connect(&sd, SIGNAL(updateLogFile(const QString &, int)), this, 

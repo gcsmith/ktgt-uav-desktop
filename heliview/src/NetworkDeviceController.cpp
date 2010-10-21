@@ -17,7 +17,7 @@ const bool NetworkDeviceController::m_takesDevice = true;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20)
+  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10)
 {
 }
 
@@ -570,29 +570,74 @@ void NetworkDeviceController::onInputReady(
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b, int ht, int st)
+void NetworkDeviceController::onUpdateTrackColor(
+        int r, int g, int b, int ht, int st, int ft)
 {
     uint32_t cmd_buffer[16];
 
     m_track.color = QColor(r, g, b);
     if (ht > 0) m_track.ht = ht;
     if (st > 0) m_track.st = st;
+    if (ft > 0) m_track.ft = ft;
 
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_TRACK_COLOR;
-    cmd_buffer[PKT_LENGTH]  = PKT_TC_LENGTH;
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_TC;
+    cmd_buffer[PKT_LENGTH]  = PKT_CAM_TC_LENGTH;
 
-    cmd_buffer[PKT_TC_COLOR_FMT] = TC_COLOR_FMT_RGB;
-    cmd_buffer[PKT_TC_CHANNEL_0] = m_track.color.red();
-    cmd_buffer[PKT_TC_CHANNEL_1] = m_track.color.green();
-    cmd_buffer[PKT_TC_CHANNEL_2] = m_track.color.blue();
+    cmd_buffer[PKT_CAM_TC_ENABLE] = 1;
+    cmd_buffer[PKT_CAM_TC_FMT]    = CAM_TC_FMT_RGB;
 
-    cmd_buffer[PKT_TC_THRESH_0] = m_track.ht;
-    cmd_buffer[PKT_TC_THRESH_1] = m_track.st;
-    cmd_buffer[PKT_TC_THRESH_2] = 0;
+    cmd_buffer[PKT_CAM_TC_CH0] = m_track.color.red();
+    cmd_buffer[PKT_CAM_TC_CH1] = m_track.color.green();
+    cmd_buffer[PKT_CAM_TC_CH2] = m_track.color.blue();
+
+    cmd_buffer[PKT_CAM_TC_TH0] = m_track.ht;
+    cmd_buffer[PKT_CAM_TC_TH1] = m_track.st;
+    cmd_buffer[PKT_CAM_TC_TH2] = 0;
+    cmd_buffer[PKT_CAM_TC_FILTER] = m_track.ft;
 
     Logger::info(tr("request track color [%1 %2 %3] with threshold [%4 %5]\n")
             .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st));
 
-    sendPacket(cmd_buffer, PKT_TC_LENGTH);
+    sendPacket(cmd_buffer, PKT_CAM_TC_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateExposure(int automatic, int value)
+{
+    uint32_t cmd_buffer[8];
+
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_EXP;
+    cmd_buffer[PKT_LENGTH]  = PKT_CAM_EXP_LENGTH;
+
+    cmd_buffer[PKT_CAM_EXP_AUTO]  = automatic;
+    cmd_buffer[PKT_CAM_EXP_VALUE] = value;
+
+    sendPacket(cmd_buffer, PKT_CAM_EXP_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateFocus(int automatic, int value)
+{
+    uint32_t cmd_buffer[8];
+
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_FOC;
+    cmd_buffer[PKT_LENGTH]  = PKT_CAM_FOC_LENGTH;
+
+    cmd_buffer[PKT_CAM_FOC_AUTO]  = automatic;
+    cmd_buffer[PKT_CAM_FOC_VALUE] = value;
+
+    sendPacket(cmd_buffer, PKT_CAM_FOC_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateWhiteBalance(int automatic)
+{
+    uint32_t cmd_buffer[8];
+
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_WHB;
+    cmd_buffer[PKT_LENGTH]  = PKT_CAM_WHB_LENGTH;
+    cmd_buffer[PKT_CAM_WHB_AUTO] = automatic;
+
+    sendPacket(cmd_buffer, PKT_CAM_WHB_LENGTH);
 }
 

@@ -55,7 +55,10 @@ public slots:
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
-    void onUpdateTrackColor(int r, int g, int b, int ht, int st);
+    void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
+    void onUpdateExposure(int automatic, int value);
+    void onUpdateFocus(int automatic, int value);
+    void onUpdateWhiteBalance(int automatic);
 
 protected:
     void startup();

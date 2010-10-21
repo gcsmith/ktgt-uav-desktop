@@ -21,7 +21,7 @@ const bool SimulatedDeviceController::m_takesDevice = false;
 // -----------------------------------------------------------------------------
 SimulatedDeviceController::SimulatedDeviceController(const QString &device)
 : m_device(device), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
-  m_manual(false), m_track(QColor(0, 0, 0), 15, 15)
+  m_manual(false), m_track(QColor(0, 0, 0), 15, 15, 10)
 {
 }
 
@@ -104,10 +104,11 @@ void SimulatedDeviceController::onInputReady(
 
 // -----------------------------------------------------------------------------
 void SimulatedDeviceController::onUpdateTrackColor(
-        int r, int g, int b, int ht, int st)
+        int r, int g, int b, int ht, int st, int ft)
 {
     m_track.color = QColor(r, g, b);
     if (ht > 0) m_track.ht = ht;
     if (st > 0) m_track.st = st;
+    if (ft > 0) m_track.ft = ft;
 }
 
