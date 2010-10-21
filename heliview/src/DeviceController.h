@@ -18,7 +18,8 @@ enum DeviceState
     STATE_MIXED_CONTROL,
     STATE_AUTONOMOUS,
     STATE_KILLED,
-    STATE_LOCKOUT
+    STATE_LOCKOUT,
+    STATE_DISCONNECTED,
 };
 
 struct TrackSettings

@@ -58,9 +58,10 @@ public slots:
     void onUpdateTrackColor(int r, int g, int b, int ht, int st);
 
 protected:
+    void startup();
+    void shutdown();
     bool sendPacket(uint32_t command);
     bool sendPacket(uint32_t *buffer, int length);
-    void shutdown();
 
     QString           m_device;
     QTcpSocket       *m_sock;

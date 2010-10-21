@@ -19,28 +19,12 @@ NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
   m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20)
 {
-    m_telem_timer = new QTimer(this);
-    connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
-
-    m_mjpeg_timer = new QTimer(this);
-    connect(m_mjpeg_timer, SIGNAL(timeout()), this, SLOT(onVideoTick()));
-
-    m_controller_timer = new QTimer(this);
-    connect(m_controller_timer, SIGNAL(timeout()), this, 
-            SLOT(onControllerTick()));
-
-    m_throttle_timer = new QTimer(this);
-    connect(m_throttle_timer, SIGNAL(timeout()), this, SLOT(onThrottleTick()));
-
-    m_ctl.alt = 0.0f;
-    m_ctl.pitch = 0.0f;
-    m_ctl.roll = 0.0f;
-    m_ctl.yaw = 0.0f;
 }
 
 // -----------------------------------------------------------------------------
 NetworkDeviceController::~NetworkDeviceController()
 {
+    close();
 }
 
 // -----------------------------------------------------------------------------
@@ -85,7 +69,30 @@ bool NetworkDeviceController::open()
     emit connectionStatusChanged(QString("Connected to ") + m_device, true);
     Logger::info(tr("NetworkDevice: connected to ") + m_device + "\n");
 
+    startup();
     return true;
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::startup()
+{
+    m_telem_timer = new QTimer(this);
+    connect(m_telem_timer, SIGNAL(timeout()), this, SLOT(onTelemetryTick()));
+
+    m_mjpeg_timer = new QTimer(this);
+    connect(m_mjpeg_timer, SIGNAL(timeout()), this, SLOT(onVideoTick()));
+
+    m_controller_timer = new QTimer(this);
+    connect(m_controller_timer, SIGNAL(timeout()), this, 
+            SLOT(onControllerTick()));
+
+    m_throttle_timer = new QTimer(this);
+    connect(m_throttle_timer, SIGNAL(timeout()), this, SLOT(onThrottleTick()));
+
+    m_ctl.alt = 0.0f;
+    m_ctl.pitch = 0.0f;
+    m_ctl.roll = 0.0f;
+    m_ctl.yaw = 0.0f;
 }
 
 // -----------------------------------------------------------------------------
@@ -97,10 +104,29 @@ void NetworkDeviceController::close()
         Logger::info("NetworkDevice: disconnecting from host ...\n");
         m_sock->disconnectFromHost();
         m_sock->waitForDisconnected(3000);
-        SafeDelete(m_sock);
-        shutdown();
         Logger::info("NetworkDevice: disconnected\n");
+        SafeDelete(m_sock);
     }
+    shutdown();
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::shutdown()
+{
+    if (m_telem_timer)
+    {
+        m_telem_timer->stop();
+        SafeDelete(m_telem_timer);
+
+        m_mjpeg_timer->stop();
+        SafeDelete(m_mjpeg_timer);
+
+        m_controller_timer->stop();
+        SafeDelete(m_controller_timer);
+    }
+
+    emit connectionStatusChanged(m_device + " disconnected", false);
+    emit stateChanged(STATE_DISCONNECTED);
 }
 
 // -----------------------------------------------------------------------------
@@ -568,17 +594,5 @@ void NetworkDeviceController::onUpdateTrackColor(int r, int g, int b, int ht, in
             .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st));
 
     sendPacket(cmd_buffer, PKT_TC_LENGTH);
-}
-
-// -----------------------------------------------------------------------------
-void NetworkDeviceController::shutdown()
-{
-    if (m_telem_timer)
-    {
-        m_telem_timer->stop();
-        m_mjpeg_timer->stop();
-        m_controller_timer->stop();
-        emit connectionStatusChanged(m_device + QString(" disconnected"), false);
-    }
 }
 

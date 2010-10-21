@@ -36,7 +36,7 @@ ControllerView::~ControllerView()
 // -----------------------------------------------------------------------------
 void ControllerView::setEnabled(bool enabled)
 {
-    m_stale = (enabled != m_enabled);
+    m_stale = true;
     m_enabled = enabled;
     m_axes = m_enabled ? AXIS_ALL : 0;
 }

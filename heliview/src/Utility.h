@@ -11,8 +11,8 @@
 
 #include <stdint.h>
 
-#define SafeDelete(x)       do { delete (x); (x) = NULL; } while (0)
-#define SafeDeleteArray(x)  do { delete[] (x); (x) = NULL; } while (0)
+#define SafeDelete(x)       do { if (x) { delete (x); (x) = NULL; }}  while (0)
+#define SafeDeleteArray(x)  do { if (x) { delete[] (x); (x) = NULL; }} while (0)
 
 #ifndef PI
 #define PI 3.141592654 

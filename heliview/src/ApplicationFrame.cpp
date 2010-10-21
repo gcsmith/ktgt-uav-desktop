@@ -419,10 +419,6 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
         elevationStatusBar->setFormat(QString("NC"));
     }
 
-    btnLanding->setEnabled(status);
-    btnTakeoff->setEnabled(status);
-    btnOverride->setEnabled(status);
-    btnKillswitch->setEnabled(status);
 }
 
 // -----------------------------------------------------------------------------
@@ -446,6 +442,7 @@ void ApplicationFrame::onStateChanged(int state)
         btnOverride->setText("Manual Override");
         m_ctlview->setEnabled(false);
         break;
+    case STATE_DISCONNECTED:
     case STATE_KILLED:
     case STATE_LOCKOUT:
         setEnabledButtons(BUTTON_NONE);
