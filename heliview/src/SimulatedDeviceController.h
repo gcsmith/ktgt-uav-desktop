@@ -22,6 +22,8 @@ public:
     virtual bool open();
     virtual void close();
 
+    virtual bool requestDeviceControls() const;
+
     virtual QString device() const { return m_device; }
     virtual QString controllerType() const { return QString("sim"); }
     virtual TrackSettings currentTrackSettings() const { return m_track; }

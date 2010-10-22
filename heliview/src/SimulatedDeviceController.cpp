@@ -54,6 +54,30 @@ void SimulatedDeviceController::close()
 }
 
 // -----------------------------------------------------------------------------
+bool SimulatedDeviceController::requestDeviceControls() const
+{
+    emit deviceControlUpdate("Example Slider 1", "int", 0, 0, 100, 1, 0);
+    emit deviceControlUpdate("Example Slider 2", "int", 1, -500, 500, 10, 250);
+    emit deviceControlUpdate("Example Slider 3", "int", 2, 0, 10, 1, 0);
+    emit deviceControlUpdate("Example Slider 4", "int", 3, 0, 999999, 1, 0);
+    emit deviceControlUpdate("Example Menu 1", "menu", 4, 0, 2, 1, 0);
+    emit deviceControlUpdate("Example Menu 2", "menu", 5, 0, 2, 1, 0);
+    emit deviceControlUpdate("Example Boolean 1", "bool", 6, 0, 1, 1, 0);
+    emit deviceControlUpdate("Example Boolean 2", "bool", 7, 0, 1, 1, 0);
+    emit deviceControlUpdate("Example Boolean 3", "bool", 8, 0, 1, 1, 0);
+
+    emit deviceMenuUpdate("Menu 1 Item 1", 4, 0);
+    emit deviceMenuUpdate("Menu 1 Item 2", 4, 1);
+    emit deviceMenuUpdate("Menu 1 Item 3", 4, 2);
+
+    emit deviceMenuUpdate("Menu 2 Item 1", 5, 0);
+    emit deviceMenuUpdate("Menu 2 Item 2", 5, 1);
+    emit deviceMenuUpdate("Menu 2 Item 3", 5, 2);
+
+    return true;
+}
+
+// -----------------------------------------------------------------------------
 void SimulatedDeviceController::onSimulateTick()
 {
     m_time += 0.02f; // 20 ms clock

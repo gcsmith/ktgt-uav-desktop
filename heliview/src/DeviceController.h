@@ -71,9 +71,9 @@ signals:
     void videoFrameReady(const char *data, size_t length);
     void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
     void deviceControlUpdate(const QString &name, const QString &type,
-            int id, int minimum, int maximum, int step, int default_value);
-    void deviceMenuUpdate(const QString &name, int id, int index);
-    void stateChanged(int state);
+            int id, int minimum, int maximum, int step, int default_value) const;
+    void deviceMenuUpdate(const QString &name, int id, int index) const;
+    void stateChanged(int state) const;
     void takeoff();
     void landing();
 };

@@ -21,6 +21,11 @@ SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track,
 {
     setupUi(this);
 
+    // add a vertical spacer at some absurdly high row index
+    ((QGridLayout *)deviceControlScrollAreaContents->layout())->addItem(
+        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding),
+        99999, 0, 1, 1);
+
     // connect primary button events
     connect(btnLogFile, SIGNAL(released()), this, SLOT(onBrowseClicked()));
     connect(btnCancel, SIGNAL(released()), this, SLOT(onCancelClicked()));
@@ -51,54 +56,53 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
         const QString &type, int id, int minimum, int maximum, int step,
         int default_value)
 {
-    QWidget *parent = deviceControlScrollAreaContents;
+    QWidget *parent = deviceControlScrollAreaContents, *child;
     QGridLayout *gl = (QGridLayout *)parent->layout();
 
     if (type == "bool")
     {
-        // put a blank label on the left hand side (checkbox text is right)
-        gl->addWidget(new QLabel("", parent), m_devctrls, 0);
-
         // add a checkable box (with device name) on the right hand side
         QCheckBox *cb = new QCheckBox(name, parent);
         connect(cb, SIGNAL(stateChanged(int)),
                 this, SLOT(onDeviceControlCheckStateChanged(int)));
 
-        m_dev_to_id.insert(cb, id);
-        m_id_to_dev.insert(id, cb);
         gl->addWidget(cb, m_devctrls, 1);
+        child = cb;
     }
     else if (type == "int")
     {
-        // add the device control name on the left hand side
-        gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
-
         // put a slider of the specified range on the right hand side
         QSlider *slider = new QSlider(Qt::Horizontal, parent);
         slider->setRange(minimum, maximum);
         slider->setSingleStep(step);
+        slider->setSliderPosition(default_value);
         connect(slider, SIGNAL(valueChanged(int)),
                 this, SLOT(onDeviceControlSliderValueChanged(int)));
 
-        m_dev_to_id.insert(slider, id);
-        m_id_to_dev.insert(id, slider);
+        // put a label on the far right side to display the integer value
+        QLabel *label = new QLabel(tr("%1").arg(default_value), parent);
+        label->setMinimumWidth(40);
+        connect(slider, SIGNAL(valueChanged(int)), label, SLOT(setNum(int)));
+
+        gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
         gl->addWidget(slider, m_devctrls, 1);
+        gl->addWidget(label, m_devctrls, 2);
+        child = slider;
     }
     else if (type == "menu")
     {
-        // add the device control name on the left hand side
-        gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
-
         // put a drop down menu on the right hand side
         QComboBox *cb = new QComboBox(parent);
         connect(cb, SIGNAL(currentIndexChanged(int)),
                 this, SLOT(onDeviceControlMenuItemChanged(int)));
 
-        m_dev_to_id.insert(cb, id);
-        m_id_to_dev.insert(id, cb);
+        gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
         gl->addWidget(cb, m_devctrls, 1);
+        child = cb;
     }
 
+    m_dev_to_id.insert(child, id);
+    m_id_to_dev.insert(id, child);
     m_devctrls++;
 }
 
