@@ -13,11 +13,16 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-enum GraphAxes
+enum GraphType
 {
     AXIS_X,
     AXIS_Y,
     AXIS_Z,
+    CONNECTION,
+    BATTERY,
+    ELEVATION,
+    AUXILIARY,
+    TRACKING,
     AXIS_COUNT
 };
 
@@ -26,25 +31,26 @@ class LineGraph : public QObject
     Q_OBJECT
 
 public:
-    LineGraph(QWidget *parent);
+    LineGraph(QWidget *parent, const QString &graphLabel, double scale_max, 
+            double dependentStep = 0.0f);
     virtual ~LineGraph();
 
     QwtPlot *getPlot() const;
     bool isVisible() const;
-    void addDataPoint(float t, float acc, float vel);
+    void addDataPoint(float t, float value, float secondValue);
 
-    void toggleAcceleration(bool flag);
-    void toggleRawVelocity(bool flag);
-    void toggleFilteredVelocity(bool flag);
+    void togglePrimaryData(bool flag);
+    void toggleSecondaryData(bool flag);
+    void toggleTertiaryData(bool flag);
 
 protected:
     void toggleGeneric(QwtPlotCurve *curve, bool *oldflag, bool newflag);
 
 protected:
     QwtPlot *m_plot;
-    QwtPlotCurve *m_curveAcc, *m_curveVel, *m_curveFVel;
-    QPolygonF m_polyAcc, m_polyVel, m_polyFVel;
-    bool m_acc, m_vel, m_fvel;
+    QwtPlotCurve *m_curvePrimary, *m_curveSecondary, *m_curveTertiary;
+    QPolygonF m_polyPrimary, m_polySecondary, m_polyTertiary;
+    bool m_primary, m_secondary, m_tertiary;
     int m_numVisible;
     float m_time;
     int m_ticker;

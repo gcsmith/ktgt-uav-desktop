@@ -26,7 +26,7 @@
    <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QTabWidget" name="tabPane">
       <property name="currentIndex">
@@ -52,19 +52,45 @@
        </attribute>
        <layout class="QVBoxLayout" name="tabPaneSensorsLayout">
         <item>
-         <widget class="QLabel" name="lblNoAxes">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
           </property>
-          <property name="text">
-           <string>No Axes Seleced</string>
+          <property name="widgetResizable">
+           <bool>true</bool>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>713</width>
+             <height>424</height>
+            </rect>
+           </property>
+           <widget class="QLabel" name="lblNoAxes">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>719</width>
+              <height>429</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>No Axes Selected</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </widget>
          </widget>
         </item>
         <item>
@@ -183,6 +209,65 @@
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QGroupBox" name="groupTelemetry">
+            <property name="title">
+             <string>Telemetry</string>
+            </property>
+            <widget class="QCheckBox" name="cbConn">
+             <property name="geometry">
+              <rect>
+               <x>11</x>
+               <y>23</y>
+               <width>81</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Connection</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="cbBatt">
+             <property name="geometry">
+              <rect>
+               <x>11</x>
+               <y>46</y>
+               <width>72</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Battery</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="cbElev">
+             <property name="geometry">
+              <rect>
+               <x>103</x>
+               <y>23</y>
+               <width>72</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Elevation</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="cbAux">
+             <property name="geometry">
+              <rect>
+               <x>103</x>
+               <y>46</y>
+               <width>72</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Auxiliary</string>
+             </property>
+            </widget>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -207,7 +292,7 @@
      <x>0</x>
      <y>0</y>
      <width>956</width>
-     <height>25</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -611,8 +696,8 @@
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="tabStopWidth">
         <number>4</number>
@@ -1020,6 +1105,70 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbAux</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onShowAuxChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>702</x>
+     <y>548</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbBatt</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onShowBattChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>610</x>
+     <y>548</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbConn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onShowConnChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>615</x>
+     <y>525</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbElev</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onShowElevChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>702</x>
+     <y>525</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>368</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onShowXFChanged(bool)</slot>
@@ -1028,6 +1177,10 @@ p, li { white-space: pre-wrap; }
   <slot>onShowYFChanged(bool)</slot>
   <slot>onShowZFChanged(bool)</slot>
   <slot>onShowZUFChanged(bool)</slot>
+  <slot>onShowAuxChanged(bool)</slot>
+  <slot>onShowBattChanged(bool)</slot>
+  <slot>onShowConnChanged(bool)</slot>
+  <slot>onShowElevChanged(bool)</slot>
   <slot>onTabChanged(int)</slot>
   <slot>onTakeoffClicked()</slot>
   <slot>onLandingClicked()</slot>

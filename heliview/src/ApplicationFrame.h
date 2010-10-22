@@ -73,6 +73,10 @@ public slots:
     void onShowYUFChanged(bool flag);
     void onShowZFChanged(bool flag);
     void onShowZUFChanged(bool flag);
+    void onShowAuxChanged(bool flag);
+    void onShowBattChanged(bool flag);
+    void onShowConnChanged(bool flag);
+    void onShowElevChanged(bool flag);
 
     void onTabChanged(int index);
     void onGraphsChanged();

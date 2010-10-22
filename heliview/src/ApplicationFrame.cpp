@@ -72,12 +72,33 @@ void ApplicationFrame::setupControllerPane()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::setupSensorView()
 {
-    QBoxLayout *layout = (QBoxLayout *)tabPaneSensors->layout();
+    //QBoxLayout *layout = (QBoxLayout *)tabPaneSensors->layout();
+
+    // Tutorials showed creating a widget, giving it a layout, setting
+    // that widget as the QScrollArea's widget, and then adding widgets to
+    // that widget.
+    QWidget *graphArea = new QWidget;
+    QVBoxLayout *graphLayout = new QVBoxLayout;
+    graphArea->setLayout(graphLayout);
+    scrollArea->setWidget(graphArea);
+
+    // Create graphs specific to the data they will be displaying
+    m_graphs[AXIS_X]     = new LineGraph(graphArea, "X-Axis",        256.0f);
+    m_graphs[AXIS_Y]     = new LineGraph(graphArea, "Y-Axis",        256.0f);
+    m_graphs[AXIS_Z]     = new LineGraph(graphArea, "Z-Axis",        256.0f);
+    m_graphs[CONNECTION] = new LineGraph(graphArea, "Connectivity",  200.0f);
+    m_graphs[BATTERY]    = new LineGraph(graphArea, "Battery",       100.0f);
+    m_graphs[TRACKING]   = new LineGraph(graphArea, "Tracking",      100.0f);
+    m_graphs[AUXILIARY]  = new LineGraph(graphArea, "Auxiliary",     100.0f);
+    m_graphs[ELEVATION]  = new LineGraph(graphArea, "Elevation",      80.0f, 10.0f);
 
     for (int i = 0; i < AXIS_COUNT; ++i)
     {
-        m_graphs[i] = new LineGraph(tabPaneSensors);
-        layout->insertWidget(i, m_graphs[i]->getPlot());
+        QWidget *widget = m_graphs[i]->getPlot();
+        widget->setMinimumHeight(200);
+        widget->setMaximumHeight(400);
+        graphLayout->insertWidget(i, m_graphs[i]->getPlot());
+        //layout->insertWidget(i, m_graphs[i]->getPlot());
     }
 }
 
@@ -397,9 +418,14 @@ void ApplicationFrame::onTelemetryReady(
     auxiliaryStatusBar->setValue(aux);
     auxiliaryStatusBar->setFormat(QString("%p%"));
 
-    m_graphs[0]->addDataPoint(time, yaw + 180.0f, 0.0f);
-    m_graphs[1]->addDataPoint(time, pitch + 180.0f, 0.0f);
-    m_graphs[2]->addDataPoint(time, roll + 180.0f, 0.0f);
+    // add new data to their respective plots
+    m_graphs[AXIS_X]->addDataPoint(time, yaw + 180.0f, 0.0f);
+    m_graphs[AXIS_Y]->addDataPoint(time, pitch + 180.0f, 0.0f);
+    m_graphs[AXIS_Z]->addDataPoint(time, roll + 180.0f, 0.0f);
+    m_graphs[CONNECTION]->addDataPoint(time, rssi, 0.0f);
+    m_graphs[BATTERY]->addDataPoint(time, batt, 0.0f);
+    m_graphs[AUXILIARY]->addDataPoint(time, aux, 0.0f);
+    m_graphs[ELEVATION]->addDataPoint(time, alt, 0.0f);
 
     time += 0.5f;
 }
@@ -659,42 +685,70 @@ void ApplicationFrame::onKillswitchClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)
 {
-    m_graphs[0]->toggleAcceleration(flag);
+    m_graphs[AXIS_X]->togglePrimaryData(flag);
     onGraphsChanged();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowXUFChanged(bool flag)
 {
-    m_graphs[0]->toggleRawVelocity(flag);
+    m_graphs[AXIS_X]->toggleSecondaryData(flag);
     onGraphsChanged();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowYFChanged(bool flag)
 {
-    m_graphs[1]->toggleAcceleration(flag);
+    m_graphs[AXIS_Y]->togglePrimaryData(flag);
     onGraphsChanged();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowYUFChanged(bool flag)
 {
-    m_graphs[1]->toggleRawVelocity(flag);
+    m_graphs[AXIS_Y]->toggleSecondaryData(flag);
     onGraphsChanged();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowZFChanged(bool flag)
 {
-    m_graphs[2]->toggleAcceleration(flag);
+    m_graphs[AXIS_Z]->togglePrimaryData(flag);
     onGraphsChanged();
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onShowZUFChanged(bool flag)
 {
-    m_graphs[2]->toggleRawVelocity(flag);
+    m_graphs[AXIS_Z]->toggleSecondaryData(flag);
+    onGraphsChanged();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onShowAuxChanged(bool flag)
+{
+    m_graphs[AUXILIARY]->togglePrimaryData(flag);
+    onGraphsChanged();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onShowBattChanged(bool flag)
+{
+    m_graphs[BATTERY]->togglePrimaryData(flag);
+    onGraphsChanged();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onShowConnChanged(bool flag)
+{
+    m_graphs[CONNECTION]->togglePrimaryData(flag);
+    onGraphsChanged();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onShowElevChanged(bool flag)
+{
+    m_graphs[ELEVATION]->togglePrimaryData(flag);
     onGraphsChanged();
 }
 
@@ -720,6 +774,7 @@ void ApplicationFrame::onGraphsChanged()
         }
     }
 
-    lblNoAxes->setVisible(visible);
+    // I haven't figured out why yet, but this makes HeliView segfault
+    //lblNoAxes->setVisible(visible);
 }
 

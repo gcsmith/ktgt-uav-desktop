@@ -11,8 +11,9 @@
 #include "LineGraph.h"
 
 // -----------------------------------------------------------------------------
-LineGraph::LineGraph(QWidget *parent)
-: m_acc(false), m_vel(false), m_fvel(false), m_numVisible(0), m_ticker(0)
+LineGraph::LineGraph(QWidget *parent, const QString &graphLabel, double scale_max,
+        double dependentStep)
+: m_primary(false), m_secondary(false), m_tertiary(false), m_numVisible(0), m_ticker(0)
 {
     assert(NULL != parent);
 
@@ -34,11 +35,15 @@ LineGraph::LineGraph(QWidget *parent)
     m_plot->setAxisFont(QwtPlot::xBottom, axisFont);
 
     // set up Y axis
-    QwtText yTitle("Sensor Value");
+    QwtText yTitle(graphLabel);
     yTitle.setFont(titleFont);
 
+    // determine Y axis step from constructor input
+    if (dependentStep == 0.0f)
+        dependentStep = scale_max;
+
     m_plot->setAxisTitle(QwtPlot::yLeft, yTitle);
-    m_plot->setAxisScale(QwtPlot::yLeft, 1.0f, 256.0f, 256.0f);
+    m_plot->setAxisScale(QwtPlot::yLeft, 1.0f, scale_max, dependentStep);
     m_plot->setAxisFont(QwtPlot::yLeft, axisFont);
 
     // overlay a grid on the plot
@@ -46,13 +51,13 @@ LineGraph::LineGraph(QWidget *parent)
     grid->setMajPen(QPen(Qt::gray, 0, Qt::DotLine));
     grid->attach(m_plot);
 
-    m_curveAcc = new QwtPlotCurve("Acceleration");
-    m_curveAcc->setPen(QPen(Qt::red, 2));
-    m_curveAcc->setRenderHint(QwtPlotItem::RenderAntialiased);
+    m_curvePrimary = new QwtPlotCurve("Acceleration");
+    m_curvePrimary->setPen(QPen(Qt::red, 2));
+    m_curvePrimary->setRenderHint(QwtPlotItem::RenderAntialiased);
 
-    m_curveVel = new QwtPlotCurve("Velocity");
-    m_curveVel->setPen(QPen(Qt::blue, 2));
-    m_curveVel->setRenderHint(QwtPlotItem::RenderAntialiased);
+    m_curveSecondary = new QwtPlotCurve("Velocity");
+    m_curveSecondary->setPen(QPen(Qt::blue, 2));
+    m_curveSecondary->setRenderHint(QwtPlotItem::RenderAntialiased);
 }
 
 // -----------------------------------------------------------------------------
@@ -73,8 +78,13 @@ bool LineGraph::isVisible() const
 }
 
 // -----------------------------------------------------------------------------
-void LineGraph::addDataPoint(float t, float acc, float vel)
+void LineGraph::addDataPoint(float t, float value, float secondValue)
 {
+    // Should I make the method take in a generic float array of data values
+    // instead of taking in just two values?
+    // It would probably make it a pain to in ApplicationFrame to load each 
+    // value in an array and then pass it to the method
+
     m_time = t;
 
     // XXX this is awful, implement scrolling in a more reasonable fashion
@@ -82,38 +92,38 @@ void LineGraph::addDataPoint(float t, float acc, float vel)
     {
         m_time = 59.5;
 
-        m_polyAcc.translate(-0.5, 0.0);
-        m_polyAcc.pop_front();
+        m_polyPrimary.translate(-0.5, 0.0);
+        m_polyPrimary.pop_front();
 
-        m_polyVel.translate(-0.5, 0.0);
-        m_polyVel.pop_front();
+        m_polySecondary.translate(-0.5, 0.0);
+        m_polySecondary.pop_front();
     }
 
-    m_polyAcc.push_back(QPointF(m_time, acc));
-    m_curveAcc->setData(m_polyAcc);
+    m_polyPrimary.push_back(QPointF(m_time, value));
+    m_curvePrimary->setData(m_polyPrimary);
 
-    m_polyVel.push_back(QPointF(m_time, vel));
-    m_curveVel->setData(m_polyVel);
+    m_polySecondary.push_back(QPointF(m_time, secondValue));
+    m_curveSecondary->setData(m_polySecondary);
 
     m_plot->replot();
 }
 
 // -----------------------------------------------------------------------------
-void LineGraph::toggleAcceleration(bool flag)
+void LineGraph::togglePrimaryData(bool flag)
 {
-    toggleGeneric(m_curveAcc, &m_acc, flag);
+    toggleGeneric(m_curvePrimary, &m_primary, flag);
 }
 
 // -----------------------------------------------------------------------------
-void LineGraph::toggleRawVelocity(bool flag)
+void LineGraph::toggleSecondaryData(bool flag)
 {
-    toggleGeneric(m_curveVel, &m_vel, flag);
+    toggleGeneric(m_curveSecondary, &m_secondary, flag);
 }
 
 // -----------------------------------------------------------------------------
-void LineGraph::toggleFilteredVelocity(bool flag)
+void LineGraph::toggleTertiaryData(bool flag)
 {
-    toggleGeneric(m_curveFVel, &m_fvel, flag);
+    toggleGeneric(m_curveTertiary, &m_tertiary, flag);
 }
 
 // -----------------------------------------------------------------------------
