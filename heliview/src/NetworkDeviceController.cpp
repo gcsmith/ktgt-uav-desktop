@@ -461,7 +461,8 @@ void NetworkDeviceController::onSocketReadyRead()
         emit deviceControlUpdate(QString((char *)&packet[PKT_CAM_DCI_NAME]),
                 type, packet[PKT_CAM_DCI_ID],
                 packet[PKT_CAM_DCI_MIN], packet[PKT_CAM_DCI_MAX],
-                packet[PKT_CAM_DCI_STEP], packet[PKT_CAM_DCI_DEFAULT]);
+                packet[PKT_CAM_DCI_STEP], packet[PKT_CAM_DCI_DEFAULT], 
+                packet[PKT_CAM_DCI_CURRENT]);
         break;
     case SERVER_UPDATE_CAM_DCM:
         emit deviceMenuUpdate(QString((char *)&packet[PKT_CAM_DCM_NAME]),

@@ -32,7 +32,8 @@ signals:
 public slots:
     // device control related events
     void onDeviceControlUpdate(const QString &name, const QString &type,
-            int id, int minimum, int maximum, int step, int default_value);
+            int id, int minimum, int maximum, int step, int default_value,
+            int current_value);
     void onDeviceMenuUpdate(const QString &name, int id, int index);
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);

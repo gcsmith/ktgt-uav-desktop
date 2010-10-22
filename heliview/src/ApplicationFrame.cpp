@@ -563,9 +563,9 @@ void ApplicationFrame::onEditSettingsTriggered()
                 m_controller, SLOT(onUpdateDeviceControl(int, int)));
 
         connect(m_controller, SIGNAL(deviceControlUpdate(const QString &,
-                        const QString &, int, int, int, int, int)),
+                        const QString &, int, int, int, int, int, int)),
                 &sd, SLOT(onDeviceControlUpdate(const QString &,
-                        const QString &, int, int, int, int, int)));
+                        const QString &, int, int, int, int, int, int)));
 
         connect(m_controller, SIGNAL(deviceMenuUpdate(const QString&,int,int)),
                 &sd, SLOT(onDeviceMenuUpdate(const QString &, int, int)));

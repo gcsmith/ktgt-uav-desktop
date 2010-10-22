@@ -54,7 +54,7 @@ SettingsDialog::~SettingsDialog()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onDeviceControlUpdate(const QString &name,
         const QString &type, int id, int minimum, int maximum, int step,
-        int default_value)
+        int default_value, int current_value)
 {
     QWidget *parent = deviceControlScrollAreaContents, *child;
     QGridLayout *gl = (QGridLayout *)parent->layout();
@@ -77,12 +77,12 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
         QSlider *slider = new QSlider(Qt::Horizontal, parent);
         slider->setRange(minimum, maximum);
         slider->setSingleStep(step);
-        slider->setSliderPosition(default_value);
+        slider->setSliderPosition(current_value);
         connect(slider, SIGNAL(valueChanged(int)),
                 this, SLOT(onDeviceControlSliderValueChanged(int)));
 
         // put a label on the far right side to display the integer value
-        QLabel *label = new QLabel(tr("%1").arg(default_value), parent);
+        QLabel *label = new QLabel(tr("%1").arg(current_value), parent);
         label->setMinimumWidth(40);
         connect(slider, SIGNAL(valueChanged(int)), label, SLOT(setNum(int)));
 
@@ -101,6 +101,7 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
         gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
         gl->addWidget(cb, m_devctrls, 1);
         child = cb;
+        cb->setCurrentIndex(current_value);
     }
 
     m_dev_to_id.insert(child, id);
