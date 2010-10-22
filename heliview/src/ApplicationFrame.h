@@ -108,6 +108,7 @@ protected:
     Gamepad          *m_gamepad;
     ControllerView   *m_ctlview;
     int               m_verbosity;
+    QLabel           *m_lblNoAxes;
 };
 
 #endif // _HELIVIEW_APPLICATIONFRAME__H_

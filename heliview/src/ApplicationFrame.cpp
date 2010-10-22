@@ -76,7 +76,7 @@ void ApplicationFrame::setupSensorView()
 
     // Tutorials showed creating a widget, giving it a layout, setting
     // that widget as the QScrollArea's widget, and then adding widgets to
-    // that widget.
+    // the QScrollArea's widget.
     QWidget *graphArea = new QWidget;
     QVBoxLayout *graphLayout = new QVBoxLayout;
     graphArea->setLayout(graphLayout);
@@ -100,6 +100,12 @@ void ApplicationFrame::setupSensorView()
         graphLayout->insertWidget(i, m_graphs[i]->getPlot());
         //layout->insertWidget(i, m_graphs[i]->getPlot());
     }
+
+    m_lblNoAxes = new QLabel;
+    m_lblNoAxes->setText("No Axes Selected");
+    m_lblNoAxes->setAlignment(Qt::AlignCenter);
+    m_lblNoAxes->setVisible(true);
+    graphLayout->insertWidget(AXIS_COUNT, m_lblNoAxes);
 }
 
 // -----------------------------------------------------------------------------
@@ -774,7 +780,6 @@ void ApplicationFrame::onGraphsChanged()
         }
     }
 
-    // I haven't figured out why yet, but this makes HeliView segfault
-    //lblNoAxes->setVisible(visible);
+    m_lblNoAxes->setVisible(visible);
 }
 
