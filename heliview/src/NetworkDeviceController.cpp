@@ -132,6 +132,9 @@ void NetworkDeviceController::shutdown()
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::sendPacket(uint32_t command) const
 {
+    if (!m_sock || QAbstractSocket::ConnectedState != m_sock->state())
+        return false;
+
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
     uint32_t cmd_buffer[] = { command, PKT_BASE_LENGTH };
@@ -142,6 +145,9 @@ bool NetworkDeviceController::sendPacket(uint32_t command) const
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::sendPacket(uint32_t *buffer, int length) const
 {
+    if (!m_sock || QAbstractSocket::ConnectedState != m_sock->state())
+        return false;
+
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
     stream.writeRawData((char *)buffer, length);

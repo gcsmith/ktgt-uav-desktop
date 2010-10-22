@@ -59,6 +59,8 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
     QWidget *parent = deviceControlScrollAreaContents, *child;
     QGridLayout *gl = (QGridLayout *)parent->layout();
 
+    lblNoDeviceControls->setVisible(false);
+
     if (type == "bool")
     {
         // add a checkable box (with device name) on the right hand side
