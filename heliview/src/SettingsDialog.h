@@ -25,30 +25,30 @@ public:
 signals:
     void updateDeviceControl(int id, int value);
     void updateTracking(int r, int g, int b, int ht, int st, int ft);
-    void updateExposure(int automatic, int value);
-    void updateFocus(int automatic, int value);
-    void updateWhiteBalance(int automatic);
     void updateLogFile(const QString &, int);
+    void updateAxisTrim(int axes, int value);
+    void updateSignalFilter(int filter, int samples);
     
 public slots:
+    // device control related events
     void onDeviceControlUpdate(const QString &name, const QString &type,
             int id, int minimum, int maximum, int step, int default_value);
     void onDeviceMenuUpdate(const QString &name, int id, int index);
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);
     void onDeviceControlMenuItemChanged(int index);
+
+    // button click events
     void onBrowseClicked();
     void onCancelClicked();
     void onOkClicked();
     void onApplyClicked();
     void onNewColorClicked();
-    void onSetCurrentWhiteBalanceClicked();
     void onColorTrackingEnabled(bool enabled);
-    void onManualExposureEnabled(bool enabled);
-    void onManualFocusEnabled(bool enabled);
-    void onManualWhiteBalanceEnabled(bool enabled);
-    void onExposureSliderValueChanged(int value);
-    void onFocusSliderValueChanged(int value);
+
+    // slider track events
+    void onTrimSliderChanged(int value);
+    void onFilterSliderChanged(int value);
 
 protected:
     int m_devctrls;

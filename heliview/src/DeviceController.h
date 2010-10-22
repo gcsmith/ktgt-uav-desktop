@@ -22,6 +22,13 @@ enum DeviceState
     STATE_DISCONNECTED,
 };
 
+enum SignalFilters
+{
+    FILTER_ORIENTATION,
+    FILTER_ALTITUDE,
+    FILTER_BATTERY,
+};
+
 struct TrackSettings
 {
     TrackSettings()

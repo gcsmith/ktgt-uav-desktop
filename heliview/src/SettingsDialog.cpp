@@ -152,7 +152,7 @@ void SettingsDialog::onDeviceControlMenuItemChanged(int index)
 {
     if (!m_dev_to_id.contains(sender()))
     {
-        Logger::fail("onDeviceControlSliderValueChanged: invalid sender\n");
+        Logger::fail("onDeviceControlMenuItemChanged: invalid sender\n");
         return;
     }
 
@@ -210,43 +210,31 @@ void SettingsDialog::onNewColorClicked()
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onSetCurrentWhiteBalanceClicked()
-{
-    emit updateWhiteBalance(0);
-}
-
-// -----------------------------------------------------------------------------
 void SettingsDialog::onColorTrackingEnabled(bool enabled)
 {
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onManualExposureEnabled(bool enabled)
+void SettingsDialog::onTrimSliderChanged(int value)
 {
-    emit updateExposure(enabled ? 0 : 1, 0);
+    if (sender() == slideThrottleTrim)
+        emit updateAxisTrim(AXIS_ALT, value);
+    else if (sender() == slideYawTrim)
+        emit updateAxisTrim(AXIS_YAW, value);
+    else if (sender() == slidePitchTrim)
+        emit updateAxisTrim(AXIS_PITCH, value);
+    else if (sender() == slideRollTrim)
+        emit updateAxisTrim(AXIS_ROLL, value);
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onManualFocusEnabled(bool enabled)
+void SettingsDialog::onFilterSliderChanged(int value)
 {
-    emit updateFocus(enabled ? 0 : 1, 0);
-}
-
-// -----------------------------------------------------------------------------
-void SettingsDialog::onManualWhiteBalanceEnabled(bool enabled)
-{
-    emit updateWhiteBalance(enabled ? 0 : 1);
-}
-
-// -----------------------------------------------------------------------------
-void SettingsDialog::onExposureSliderValueChanged(int value)
-{
-    emit updateExposure(0, value);
-}
-
-// -----------------------------------------------------------------------------
-void SettingsDialog::onFocusSliderValueChanged(int value)
-{
-    emit updateFocus(0, value);
+    if (sender() == slideOrientationFilter)
+        emit updateSignalFilter(FILTER_ORIENTATION, value);
+    if (sender() == slideAltitudeFilter)
+        emit updateSignalFilter(FILTER_ALTITUDE, value);
+    if (sender() == slideBatteryFilter)
+        emit updateSignalFilter(FILTER_BATTERY, value);
 }
 
