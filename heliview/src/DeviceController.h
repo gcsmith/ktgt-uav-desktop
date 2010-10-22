@@ -52,18 +52,17 @@ public:
     virtual int currentAxes() const;
     virtual TrackSettings currentTrackSettings() const;
 
-    virtual bool requestTakeoff();
-    virtual bool requestLanding();
-    virtual bool requestManualOverride();
-    virtual bool requestAutonomous();
-    virtual bool requestKillswitch();
+    virtual bool requestDeviceControls() const;
+    virtual bool requestTakeoff() const;
+    virtual bool requestLanding() const;
+    virtual bool requestManualOverride() const;
+    virtual bool requestAutonomous() const;
+    virtual bool requestKillswitch() const;
 
 public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
     virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
-    virtual void onUpdateExposure(int automatic, int value);
-    virtual void onUpdateFocus(int automatic, int value);
-    virtual void onUpdateWhiteBalance(int automatic);
+    virtual void onUpdateDeviceControl(int id, int value);
 
 signals:
     void telemetryReady(float x, float y, float z,
@@ -71,6 +70,9 @@ signals:
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
     void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
+    void deviceControlUpdate(const QString &name, const QString &type,
+            int id, int minimum, int maximum, int step, int default_value);
+    void deviceMenuUpdate(const QString &name, int id, int index);
     void stateChanged(int state);
     void takeoff();
     void landing();

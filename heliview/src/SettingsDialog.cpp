@@ -8,13 +8,16 @@
 
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QCheckBox>
+#include <QComboBox>
 #include "SettingsDialog.h"
 #include "DeviceController.h"
+#include "Logger.h"
 
 // -----------------------------------------------------------------------------
 SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track, 
         const QString &logfile, const int logbufsize)
-: QDialog(pp)
+: QDialog(pp), m_devctrls(0)
 {
     setupUi(this);
 
@@ -41,6 +44,114 @@ SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track,
 // -----------------------------------------------------------------------------
 SettingsDialog::~SettingsDialog()
 {
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onDeviceControlUpdate(const QString &name,
+        const QString &type, int id, int minimum, int maximum, int step,
+        int default_value)
+{
+    QWidget *parent = deviceControlScrollAreaContents;
+    QGridLayout *gl = (QGridLayout *)parent->layout();
+
+    if (type == "bool")
+    {
+        // put a blank label on the left hand side (checkbox text is right)
+        gl->addWidget(new QLabel("", parent), m_devctrls, 0);
+
+        // add a checkable box (with device name) on the right hand side
+        QCheckBox *cb = new QCheckBox(name, parent);
+        connect(cb, SIGNAL(stateChanged(int)),
+                this, SLOT(onDeviceControlCheckStateChanged(int)));
+
+        m_dev_to_id.insert(cb, id);
+        m_id_to_dev.insert(id, cb);
+        gl->addWidget(cb, m_devctrls, 1);
+    }
+    else if (type == "int")
+    {
+        // add the device control name on the left hand side
+        gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
+
+        // put a slider of the specified range on the right hand side
+        QSlider *slider = new QSlider(Qt::Horizontal, parent);
+        slider->setRange(minimum, maximum);
+        slider->setSingleStep(step);
+        connect(slider, SIGNAL(valueChanged(int)),
+                this, SLOT(onDeviceControlSliderValueChanged(int)));
+
+        m_dev_to_id.insert(slider, id);
+        m_id_to_dev.insert(id, slider);
+        gl->addWidget(slider, m_devctrls, 1);
+    }
+    else if (type == "menu")
+    {
+        // add the device control name on the left hand side
+        gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
+
+        // put a drop down menu on the right hand side
+        QComboBox *cb = new QComboBox(parent);
+        connect(cb, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(onDeviceControlMenuItemChanged(int)));
+
+        m_dev_to_id.insert(cb, id);
+        m_id_to_dev.insert(id, cb);
+        gl->addWidget(cb, m_devctrls, 1);
+    }
+
+    m_devctrls++;
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onDeviceMenuUpdate(const QString &name, int id, int index)
+{
+    if (!m_id_to_dev.contains(id))
+    {
+        Logger::fail("onDeviceMenuUpdate: device control id doesn't exist\n");
+        return;
+    }
+
+    QComboBox *cb = (QComboBox *)m_id_to_dev.value(id);
+    cb->insertItem(index, name);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onDeviceControlCheckStateChanged(int state)
+{
+    if (!m_dev_to_id.contains(sender()))
+    {
+        Logger::fail("onDeviceControlCheckStateChanged: invalid sender\n");
+        return;
+    }
+
+    int id = m_dev_to_id.value(sender());
+    emit updateDeviceControl(id, (state == Qt::Checked) ? 1 : 0);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onDeviceControlSliderValueChanged(int value)
+{
+    if (!m_dev_to_id.contains(sender()))
+    {
+        Logger::fail("onDeviceControlSliderValueChanged: invalid sender\n");
+        return;
+    }
+
+    int id = m_dev_to_id.value(sender());
+    emit updateDeviceControl(id, value);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onDeviceControlMenuItemChanged(int index)
+{
+    if (!m_dev_to_id.contains(sender()))
+    {
+        Logger::fail("onDeviceControlSliderValueChanged: invalid sender\n");
+        return;
+    }
+
+    int id = m_dev_to_id.value(sender());
+    emit updateDeviceControl(id, index);
 }
 
 // -----------------------------------------------------------------------------

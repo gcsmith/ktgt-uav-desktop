@@ -527,14 +527,18 @@ void ApplicationFrame::onEditSettingsTriggered()
                 m_controller,
                 SLOT(onUpdateTrackColor(int, int, int, int, int, int)));
 
-        connect(&sd, SIGNAL(updateExposure(int, int)),
-                m_controller, SLOT(onUpdateExposure(int, int)));
+        connect(&sd, SIGNAL(updateDeviceControl(int, int)),
+                m_controller, SLOT(onUpdateDeviceControl(int, int)));
 
-        connect(&sd, SIGNAL(updateFocus(int, int)),
-                m_controller, SLOT(onUpdateFocus(int, int)));
+        connect(m_controller, SIGNAL(deviceControlUpdate(const QString &,
+                        const QString &, int, int, int, int, int)),
+                &sd, SLOT(onDeviceControlUpdate(const QString &,
+                        const QString &, int, int, int, int, int)));
 
-        connect(&sd, SIGNAL(updateWhiteBalance(int)),
-                m_controller, SLOT(onUpdateWhiteBalance(int)));
+        connect(m_controller, SIGNAL(deviceMenuUpdate(const QString&,int,int)),
+                &sd, SLOT(onDeviceMenuUpdate(const QString &, int, int)));
+
+        m_controller->requestDeviceControls();
     }
     
     connect(&sd, SIGNAL(updateLogFile(const QString &, int)), this, 

@@ -37,11 +37,12 @@ public:
     virtual int currentAxes() const { return m_axes; }
     virtual TrackSettings currentTrackSettings() const { return m_track; }
 
-    bool requestTakeoff();
-    bool requestLanding();
-    bool requestManualOverride();
-    bool requestAutonomous();
-    bool requestKillswitch();
+    virtual bool requestDeviceControls() const;
+    virtual bool requestTakeoff() const;
+    virtual bool requestLanding() const;
+    virtual bool requestManualOverride() const;
+    virtual bool requestAutonomous() const;
+    virtual bool requestKillswitch() const;
     
     static const char *m_description;
     static const bool m_takesDevice;
@@ -56,15 +57,13 @@ public slots:
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
     void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
-    void onUpdateExposure(int automatic, int value);
-    void onUpdateFocus(int automatic, int value);
-    void onUpdateWhiteBalance(int automatic);
+    void onUpdateDeviceControl(int id, int value);
 
 protected:
     void startup();
     void shutdown();
-    bool sendPacket(uint32_t command);
-    bool sendPacket(uint32_t *buffer, int length);
+    bool sendPacket(uint32_t command) const;
+    bool sendPacket(uint32_t *buffer, int length) const;
 
     QString           m_device;
     QTcpSocket       *m_sock;

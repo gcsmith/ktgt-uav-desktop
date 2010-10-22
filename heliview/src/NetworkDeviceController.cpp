@@ -130,7 +130,7 @@ void NetworkDeviceController::shutdown()
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::sendPacket(uint32_t command)
+bool NetworkDeviceController::sendPacket(uint32_t command) const
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
@@ -140,7 +140,7 @@ bool NetworkDeviceController::sendPacket(uint32_t command)
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::sendPacket(uint32_t *buffer, int length)
+bool NetworkDeviceController::sendPacket(uint32_t *buffer, int length) const
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
@@ -149,19 +149,25 @@ bool NetworkDeviceController::sendPacket(uint32_t *buffer, int length)
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::requestTakeoff()
+bool NetworkDeviceController::requestDeviceControls() const
+{
+    return sendPacket(CLIENT_REQ_CAM_DCI);
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestTakeoff() const
 {
     return sendPacket(CLIENT_REQ_TAKEOFF);
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::requestLanding()
+bool NetworkDeviceController::requestLanding() const
 {
     return sendPacket(CLIENT_REQ_LANDING);
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::requestManualOverride()
+bool NetworkDeviceController::requestManualOverride() const
 {
     uint32_t cmd_buffer[4];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
@@ -172,7 +178,7 @@ bool NetworkDeviceController::requestManualOverride()
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::requestAutonomous()
+bool NetworkDeviceController::requestAutonomous() const
 {
     uint32_t cmd_buffer[4];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
@@ -183,7 +189,7 @@ bool NetworkDeviceController::requestAutonomous()
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::requestKillswitch()
+bool NetworkDeviceController::requestKillswitch() const
 {
     uint32_t cmd_buffer[4];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
@@ -323,7 +329,7 @@ void NetworkDeviceController::onSocketReadyRead()
     stream.setVersion(QDataStream::Qt_4_0);
     int32_t rssi, altitude, battery, aux, framesz;
     float x, y, z;
-    QString log_msg;
+    QString log_msg, type;
 
     if (0 == m_blocksz)
     {
@@ -375,16 +381,11 @@ void NetworkDeviceController::onSocketReadyRead()
         y = *(float *)&packet[PKT_VTI_PITCH];
         z = *(float *)&packet[PKT_VTI_ROLL];
        
-#if 0
-        fprintf(stderr, "Yaw   angle = %f, %f\n", x, x * 180 / 3.14159);
-        fprintf(stderr, "Pitch angle = %f, %f\n", y, y * 180 / 3.14159);
-        fprintf(stderr, "Roll  angle = %f, %f\n", z, z * 180 / 3.14159);
-#endif
-
         rssi     = packet[PKT_VTI_RSSI];
         altitude = packet[PKT_VTI_ALT];
         battery  = packet[PKT_VTI_BATT];
         aux      = packet[PKT_VTI_AUX];
+
         emit telemetryReady(-z, -y, x, altitude, rssi, battery, aux);
         break;
     case SERVER_ACK_MJPG_FRAME:
@@ -438,6 +439,27 @@ void NetworkDeviceController::onSocketReadyRead()
                 packet[PKT_CTS_STATE] == CTS_STATE_DETECTED,
                 (int)packet[PKT_CTS_X1], (int)packet[PKT_CTS_Y1], 
                 (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
+        break;
+    case SERVER_UPDATE_CAM_DCI:
+        // convert the type to a string for genericness
+        switch (packet[PKT_CAM_DCI_TYPE])
+        {
+        case CAM_DCI_TYPE_BOOL: type = "bool"; break;
+        case CAM_DCI_TYPE_INT:  type = "int"; break;
+        case CAM_DCI_TYPE_MENU: type = "menu"; break;
+        default:
+            // bad pie
+            return;
+        }
+
+        emit deviceControlUpdate(QString((char *)&packet[PKT_CAM_DCI_NAME]),
+                type, packet[PKT_CAM_DCI_ID],
+                packet[PKT_CAM_DCI_MIN], packet[PKT_CAM_DCI_MAX],
+                packet[PKT_CAM_DCI_STEP], packet[PKT_CAM_DCI_DEFAULT]);
+        break;
+    case SERVER_UPDATE_CAM_DCM:
+        emit deviceMenuUpdate(QString((char *)&packet[PKT_CAM_DCM_NAME]),
+                packet[PKT_CAM_DCM_ID], packet[PKT_CAM_DCM_INDEX]);
         break;
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
@@ -602,42 +624,17 @@ void NetworkDeviceController::onUpdateTrackColor(
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateExposure(int automatic, int value)
+void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
 {
     uint32_t cmd_buffer[8];
+    Logger::info(tr("onUpdateDeviceControl(%1, %2)\n").arg(id).arg(value));
 
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_EXP;
-    cmd_buffer[PKT_LENGTH]  = PKT_CAM_EXP_LENGTH;
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_DCC;
+    cmd_buffer[PKT_LENGTH]  = PKT_CAM_DCC_LENGTH;
 
-    cmd_buffer[PKT_CAM_EXP_AUTO]  = automatic;
-    cmd_buffer[PKT_CAM_EXP_VALUE] = value;
+    cmd_buffer[PKT_CAM_DCC_ID] = id;
+    cmd_buffer[PKT_CAM_DCC_VALUE] = value;
 
-    sendPacket(cmd_buffer, PKT_CAM_EXP_LENGTH);
-}
-
-// -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateFocus(int automatic, int value)
-{
-    uint32_t cmd_buffer[8];
-
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_FOC;
-    cmd_buffer[PKT_LENGTH]  = PKT_CAM_FOC_LENGTH;
-
-    cmd_buffer[PKT_CAM_FOC_AUTO]  = automatic;
-    cmd_buffer[PKT_CAM_FOC_VALUE] = value;
-
-    sendPacket(cmd_buffer, PKT_CAM_FOC_LENGTH);
-}
-
-// -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateWhiteBalance(int automatic)
-{
-    uint32_t cmd_buffer[8];
-
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_WHB;
-    cmd_buffer[PKT_LENGTH]  = PKT_CAM_WHB_LENGTH;
-    cmd_buffer[PKT_CAM_WHB_AUTO] = automatic;
-
-    sendPacket(cmd_buffer, PKT_CAM_WHB_LENGTH);
+    sendPacket(cmd_buffer, PKT_CAM_DCC_LENGTH);
 }
 

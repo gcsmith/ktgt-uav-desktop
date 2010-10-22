@@ -32,35 +32,42 @@ TrackSettings DeviceController::currentTrackSettings() const
 }
 
 // -----------------------------------------------------------------------------
-bool DeviceController::requestTakeoff()
+bool DeviceController::requestDeviceControls() const
+{
+    Logger::info("DeviceController::requestDeviceControls()\n");
+    return true;
+}
+
+// -----------------------------------------------------------------------------
+bool DeviceController::requestTakeoff() const
 {
     Logger::info("DeviceController::requestTakeoff()\n");
     return true;
 }
 
 // -----------------------------------------------------------------------------
-bool DeviceController::requestLanding()
+bool DeviceController::requestLanding() const
 {
     Logger::info("DeviceController::requestLanding()\n");
     return true;
 }
 
 // -----------------------------------------------------------------------------
-bool DeviceController::requestManualOverride()
+bool DeviceController::requestManualOverride() const
 {
     Logger::info("DeviceController::requestManualOverride()\n");
     return true;
 }
 
 // -----------------------------------------------------------------------------
-bool DeviceController::requestAutonomous()
+bool DeviceController::requestAutonomous() const
 {
     Logger::info("DeviceController::requestAutonomous()\n");
     return true;
 }
 
 // -----------------------------------------------------------------------------
-bool DeviceController::requestKillswitch()
+bool DeviceController::requestKillswitch() const
 {
     Logger::info("DeviceController::requestKillswitch()\n");
     return true;
@@ -82,24 +89,10 @@ void DeviceController::onUpdateTrackColor(int r, int g, int b,
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateExposure(int automatic, int value)
+void DeviceController::onUpdateDeviceControl(int id, int value)
 {
-    Logger::info(tr("DeviceController::onUpdateExposure(%1, %2)\n")
-            .arg(automatic).arg(value));
-}
-
-// -----------------------------------------------------------------------------
-void DeviceController::onUpdateFocus(int automatic, int value)
-{
-    Logger::info(tr("DeviceController::onUpdateFocus(%1, %2)\n")
-            .arg(automatic).arg(value));
-}
-
-// -----------------------------------------------------------------------------
-void DeviceController::onUpdateWhiteBalance(int automatic)
-{
-    Logger::info(tr("DeviceController::onUpdateWhiteBalance(%1)\n")
-            .arg(automatic));
+    Logger::info(tr("DeviceController::onUpdateDeviceControl(%1, %2)\n")
+            .arg(id).arg(value));
 }
 
 // -----------------------------------------------------------------------------

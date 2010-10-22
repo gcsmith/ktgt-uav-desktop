@@ -23,6 +23,7 @@ public:
     virtual ~SettingsDialog();
 
 signals:
+    void updateDeviceControl(int id, int value);
     void updateTracking(int r, int g, int b, int ht, int st, int ft);
     void updateExposure(int automatic, int value);
     void updateFocus(int automatic, int value);
@@ -30,6 +31,12 @@ signals:
     void updateLogFile(const QString &, int);
     
 public slots:
+    void onDeviceControlUpdate(const QString &name, const QString &type,
+            int id, int minimum, int maximum, int step, int default_value);
+    void onDeviceMenuUpdate(const QString &name, int id, int index);
+    void onDeviceControlCheckStateChanged(int state);
+    void onDeviceControlSliderValueChanged(int value);
+    void onDeviceControlMenuItemChanged(int index);
     void onBrowseClicked();
     void onCancelClicked();
     void onOkClicked();
@@ -42,6 +49,11 @@ public slots:
     void onManualWhiteBalanceEnabled(bool enabled);
     void onExposureSliderValueChanged(int value);
     void onFocusSliderValueChanged(int value);
+
+protected:
+    int m_devctrls;
+    QMap<QObject *, int> m_dev_to_id;
+    QMap<int, QObject *> m_id_to_dev;
 };
 
 #endif // _HELIVIEW_SETTINGSDIALOG__H_
