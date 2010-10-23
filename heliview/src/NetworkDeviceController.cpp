@@ -438,6 +438,15 @@ void NetworkDeviceController::onSocketReadyRead()
         if (packet[PKT_VCM_AXES] & VCM_AXIS_YAW)   m_axes |= AXIS_YAW;
         if (packet[PKT_VCM_AXES] & VCM_AXIS_PITCH) m_axes |= AXIS_PITCH;
         if (packet[PKT_VCM_AXES] & VCM_AXIS_ROLL)  m_axes |= AXIS_ROLL;
+
+        if (m_state == STATE_MIXED_CONTROL)
+        {
+            if ((m_axes & AXIS_ALT) && !m_throttle_timer->isActive())
+                m_throttle_timer->start(50);
+            else if (!(m_axes & AXIS_ALT) && m_throttle_timer->isActive())
+                m_throttle_timer->stop();
+        }
+        
         emit stateChanged((int)m_state);
         break;
     case SERVER_UPDATE_TRACKING:
