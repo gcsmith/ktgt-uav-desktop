@@ -65,10 +65,7 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
     {
         // add a checkable box (with device name) on the right hand side
         QCheckBox *cb = new QCheckBox(name, parent);
-        if(current_value == 1)
-            cb->setCheckState((Qt::CheckState)2);
-        else
-            cb->setCheckState((Qt::CheckState)current_value);
+        cb->setCheckState(current_value ? Qt::Checked : Qt::Unchecked);
         connect(cb, SIGNAL(stateChanged(int)),
                 this, SLOT(onDeviceControlCheckStateChanged(int)));
 
