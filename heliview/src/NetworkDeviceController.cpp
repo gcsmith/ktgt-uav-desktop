@@ -654,8 +654,8 @@ void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
 void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
 {
     uint32_t cmd_buffer[8];
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_TRIM;
-    cmd_buffer[PKT_LENGTH]  = PKT_TRIM_LENGTH;
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_STS;
+    cmd_buffer[PKT_LENGTH]  = PKT_STS_LENGTH;
 
     int vcm_axes = 0;
     if (axes & AXIS_ALT)   vcm_axes |= VCM_AXIS_ALT;
@@ -663,9 +663,9 @@ void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
     if (axes & AXIS_PITCH) vcm_axes |= VCM_AXIS_PITCH;
     if (axes & AXIS_ROLL)  vcm_axes |= VCM_AXIS_ROLL;
 
-    cmd_buffer[PKT_TRIM_AXIS] = vcm_axes;
-    cmd_buffer[PKT_TRIM_VALUE] = value;
-    sendPacket(cmd_buffer, PKT_TRIM_LENGTH);
+    cmd_buffer[PKT_STS_AXES] = vcm_axes;
+    cmd_buffer[PKT_STS_VALUE] = value;
+    sendPacket(cmd_buffer, PKT_STS_LENGTH);
 }
 
 // -----------------------------------------------------------------------------
