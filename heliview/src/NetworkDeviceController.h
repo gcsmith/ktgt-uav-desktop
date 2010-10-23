@@ -58,6 +58,7 @@ public slots:
     void onInputReady(GamepadEvent event, int index, float value);
     void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
     void onUpdateDeviceControl(int id, int value);
+    void onUpdateAxisTrim(int axes, int value);
 
 protected:
     void startup();

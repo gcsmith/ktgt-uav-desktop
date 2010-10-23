@@ -96,6 +96,13 @@ void DeviceController::onUpdateDeviceControl(int id, int value)
 }
 
 // -----------------------------------------------------------------------------
+void DeviceController::onUpdateAxisTrims(int axes, int value)
+{
+    Logger::info(tr("DeviceController::onUpdateAxisTrims(%1, %2)\n")
+            .arg(axes).arg(value));
+}
+
+// -----------------------------------------------------------------------------
 DeviceController *CreateDeviceController(
         const QString &name,
         const QString &device)

@@ -369,7 +369,7 @@ void NetworkDeviceController::onSocketReadyRead()
         packet[PKT_RCI_MAGIC]   = IDENT_MAGIC;
         packet[PKT_RCI_VERSION] = IDENT_VERSION;
         stream.writeRawData((char *)&packet[0], PKT_RCI_LENGTH);
-        m_telem_timer->start(50); // begin requesting telemetry
+        m_telem_timer->start(67); // begin requesting telemetry
         m_mjpeg_timer->start(67); // begin requesting frames
         m_controller_timer->start(50); // begin requesting flight control
         break;
@@ -634,8 +634,6 @@ void NetworkDeviceController::onUpdateTrackColor(
 void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
 {
     uint32_t cmd_buffer[8];
-    Logger::info(tr("onUpdateDeviceControl(%1, %2)\n").arg(id).arg(value));
-
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_DCC;
     cmd_buffer[PKT_LENGTH]  = PKT_CAM_DCC_LENGTH;
 
@@ -643,5 +641,18 @@ void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
     cmd_buffer[PKT_CAM_DCC_VALUE] = value;
 
     sendPacket(cmd_buffer, PKT_CAM_DCC_LENGTH);
+}
+
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
+{
+    uint32_t cmd_buffer[8];
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_TRIM;
+    cmd_buffer[PKT_LENGTH]  = PKT_TRIM_LENGTH;
+
+    cmd_buffer[PKT_TRIM_AXIS] = axes;
+    cmd_buffer[PKT_TRIM_VALUE] = value;
+
+    sendPacket(cmd_buffer, PKT_TRIM_LENGTH);
 }
 

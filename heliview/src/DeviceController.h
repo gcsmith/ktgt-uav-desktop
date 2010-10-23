@@ -70,6 +70,7 @@ public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
     virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
     virtual void onUpdateDeviceControl(int id, int value);
+    virtual void onUpdateAxisTrims(int axes, int value);
 
 signals:
     void telemetryReady(float x, float y, float z,
