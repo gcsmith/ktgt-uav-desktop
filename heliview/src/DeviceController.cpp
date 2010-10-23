@@ -103,6 +103,13 @@ void DeviceController::onUpdateAxisTrims(int axes, int value)
 }
 
 // -----------------------------------------------------------------------------
+void DeviceController::onUpdateSignalFilter(int signal, int samples)
+{
+    Logger::info(tr("DeviceController::onUpdateSignalFilter(%1, %2)\n")
+            .arg(signal).arg(samples));
+}
+
+// -----------------------------------------------------------------------------
 DeviceController *CreateDeviceController(
         const QString &name,
         const QString &device)

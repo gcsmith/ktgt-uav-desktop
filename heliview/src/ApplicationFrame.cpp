@@ -565,6 +565,9 @@ void ApplicationFrame::onEditSettingsTriggered()
         connect(&sd, SIGNAL(updateAxisTrim(int, int)),
                 m_controller, SLOT(onUpdateAxisTrim(int, int)));
 
+        connect(&sd, SIGNAL(updateSignalFilter(int, int)),
+                m_controller, SLOT(onUpdateSignalFilter(int, int)));
+
         connect(m_controller, SIGNAL(deviceControlUpdate(const QString &,
                         const QString &, int, int, int, int, int, int)),
                 &sd, SLOT(onDeviceControlUpdate(const QString &,

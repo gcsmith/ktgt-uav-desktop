@@ -236,10 +236,10 @@ void SettingsDialog::onTrimSliderChanged(int value)
 void SettingsDialog::onFilterSliderChanged(int value)
 {
     if (sender() == slideOrientationFilter)
-        emit updateSignalFilter(FILTER_ORIENTATION, value);
+        emit updateSignalFilter(SIGNAL_ORIENTATION, value);
     if (sender() == slideAltitudeFilter)
-        emit updateSignalFilter(FILTER_ALTITUDE, value);
+        emit updateSignalFilter(SIGNAL_ALTITUDE, value);
     if (sender() == slideBatteryFilter)
-        emit updateSignalFilter(FILTER_BATTERY, value);
+        emit updateSignalFilter(SIGNAL_BATTERY, value);
 }
 

@@ -24,9 +24,9 @@ enum DeviceState
 
 enum SignalFilters
 {
-    FILTER_ORIENTATION,
-    FILTER_ALTITUDE,
-    FILTER_BATTERY,
+    SIGNAL_ORIENTATION,
+    SIGNAL_ALTITUDE,
+    SIGNAL_BATTERY,
 };
 
 struct TrackSettings
@@ -71,6 +71,7 @@ public slots:
     virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
     virtual void onUpdateDeviceControl(int id, int value);
     virtual void onUpdateAxisTrims(int axes, int value);
+    virtual void onUpdateSignalFilter(int signal, int samples);
 
 signals:
     void telemetryReady(float x, float y, float z,

@@ -59,6 +59,7 @@ public slots:
     void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
     void onUpdateDeviceControl(int id, int value);
     void onUpdateAxisTrim(int axes, int value);
+    void onUpdateSignalFilter(int signal, int samples);
 
 protected:
     void startup();

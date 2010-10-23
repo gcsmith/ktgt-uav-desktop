@@ -662,3 +662,30 @@ void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
     sendPacket(cmd_buffer, PKT_TRIM_LENGTH);
 }
 
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateSignalFilter(int signal, int samples)
+{
+    uint32_t cmd_buffer[8];
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FILTER;
+    cmd_buffer[PKT_LENGTH]  = PKT_FILTER_LENGTH;
+
+    uint32_t filter_signal;
+    switch (signal)
+    {
+    case SIGNAL_ORIENTATION:
+        filter_signal = FILTER_ORIENTATION;
+        break;
+    case SIGNAL_ALTITUDE:
+        filter_signal = FILTER_ALTITUDE;
+        break;
+    case SIGNAL_BATTERY:
+        filter_signal = FILTER_BATTERY;
+        break;
+    }
+
+    cmd_buffer[PKT_FILTER_SIGNAL] = filter_signal;
+    cmd_buffer[PKT_FILTER_SAMPLES] = samples;
+
+    sendPacket(cmd_buffer, PKT_FILTER_LENGTH);
+}
+
