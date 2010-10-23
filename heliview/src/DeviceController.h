@@ -26,6 +26,7 @@ enum SignalFilters
 {
     SIGNAL_ORIENTATION,
     SIGNAL_ALTITUDE,
+    SIGNAL_AUXILIARY,
     SIGNAL_BATTERY,
 };
 
@@ -70,7 +71,7 @@ public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
     virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
     virtual void onUpdateDeviceControl(int id, int value);
-    virtual void onUpdateAxisTrims(int axes, int value);
+    virtual void onUpdateAxisTrim(int axes, int value);
     virtual void onUpdateSignalFilter(int signal, int samples);
 
 signals:

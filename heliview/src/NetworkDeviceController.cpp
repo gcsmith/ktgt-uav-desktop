@@ -645,10 +645,8 @@ void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
     uint32_t cmd_buffer[8];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_DCC;
     cmd_buffer[PKT_LENGTH]  = PKT_CAM_DCC_LENGTH;
-
     cmd_buffer[PKT_CAM_DCC_ID] = id;
     cmd_buffer[PKT_CAM_DCC_VALUE] = value;
-
     sendPacket(cmd_buffer, PKT_CAM_DCC_LENGTH);
 }
 
@@ -667,7 +665,6 @@ void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
 
     cmd_buffer[PKT_TRIM_AXIS] = vcm_axes;
     cmd_buffer[PKT_TRIM_VALUE] = value;
-
     sendPacket(cmd_buffer, PKT_TRIM_LENGTH);
 }
 
@@ -675,26 +672,28 @@ void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
 void NetworkDeviceController::onUpdateSignalFilter(int signal, int samples)
 {
     uint32_t cmd_buffer[8];
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FILTER;
-    cmd_buffer[PKT_LENGTH]  = PKT_FILTER_LENGTH;
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SFS;
+    cmd_buffer[PKT_LENGTH]  = PKT_SFS_LENGTH;
 
-    uint32_t filter_signal;
+    uint32_t sfs_sig;
     switch (signal)
     {
     case SIGNAL_ORIENTATION:
-        filter_signal = FILTER_ORIENTATION;
+        sfs_sig = SFS_IMU;
         break;
     case SIGNAL_ALTITUDE:
-        filter_signal = FILTER_ALTITUDE;
+        sfs_sig = SFS_ALT;
+        break;
+    case SIGNAL_AUXILIARY:
+        sfs_sig = SFS_AUX;
         break;
     case SIGNAL_BATTERY:
-        filter_signal = FILTER_BATTERY;
+        sfs_sig = SFS_BATT;
         break;
     }
 
-    cmd_buffer[PKT_FILTER_SIGNAL] = filter_signal;
-    cmd_buffer[PKT_FILTER_SAMPLES] = samples;
-
-    sendPacket(cmd_buffer, PKT_FILTER_LENGTH);
+    cmd_buffer[PKT_SFS_SIGNAL] = sfs_sig;
+    cmd_buffer[PKT_SFS_SAMPLES] = samples;
+    sendPacket(cmd_buffer, PKT_SFS_LENGTH);
 }
 

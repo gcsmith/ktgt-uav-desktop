@@ -237,9 +237,11 @@ void SettingsDialog::onFilterSliderChanged(int value)
 {
     if (sender() == slideOrientationFilter)
         emit updateSignalFilter(SIGNAL_ORIENTATION, value);
-    if (sender() == slideAltitudeFilter)
+    else if (sender() == slideAltitudeFilter)
         emit updateSignalFilter(SIGNAL_ALTITUDE, value);
-    if (sender() == slideBatteryFilter)
+    else if (sender() == slideAuxiliaryFilter)
+        emit updateSignalFilter(SIGNAL_AUXILIARY, value);
+    else if (sender() == slideBatteryFilter)
         emit updateSignalFilter(SIGNAL_BATTERY, value);
 }
 

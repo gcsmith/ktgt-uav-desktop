@@ -96,9 +96,9 @@ void DeviceController::onUpdateDeviceControl(int id, int value)
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateAxisTrims(int axes, int value)
+void DeviceController::onUpdateAxisTrim(int axes, int value)
 {
-    Logger::info(tr("DeviceController::onUpdateAxisTrims(%1, %2)\n")
+    Logger::info(tr("DeviceController::onUpdateAxisTrim(%1, %2)\n")
             .arg(axes).arg(value));
 }
 
