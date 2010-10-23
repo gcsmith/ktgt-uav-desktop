@@ -65,6 +65,10 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
     {
         // add a checkable box (with device name) on the right hand side
         QCheckBox *cb = new QCheckBox(name, parent);
+        if(current_value == 1)
+            cb->setCheckState((Qt::CheckState)2);
+        else
+            cb->setCheckState((Qt::CheckState)current_value);
         connect(cb, SIGNAL(stateChanged(int)),
                 this, SLOT(onDeviceControlCheckStateChanged(int)));
 
@@ -95,13 +99,16 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
     {
         // put a drop down menu on the right hand side
         QComboBox *cb = new QComboBox(parent);
+        for(int i=0; i <= maximum; i++){
+            cb->addItem("");
+        }
+        cb->setCurrentIndex(current_value);
         connect(cb, SIGNAL(currentIndexChanged(int)),
                 this, SLOT(onDeviceControlMenuItemChanged(int)));
 
         gl->addWidget(new QLabel(name, parent), m_devctrls, 0);
         gl->addWidget(cb, m_devctrls, 1);
         child = cb;
-        cb->setCurrentIndex(current_value);
     }
 
     m_dev_to_id.insert(child, id);
@@ -119,7 +126,7 @@ void SettingsDialog::onDeviceMenuUpdate(const QString &name, int id, int index)
     }
 
     QComboBox *cb = (QComboBox *)m_id_to_dev.value(id);
-    cb->insertItem(index, name);
+    cb->setItemText(index, name);
 }
 
 // -----------------------------------------------------------------------------
