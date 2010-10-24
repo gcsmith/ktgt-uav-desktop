@@ -15,7 +15,7 @@
 #include "Logger.h"
 
 // -----------------------------------------------------------------------------
-SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, 
+SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
         const TrackSettings &track, const QString &logfile, const int logbufsize)
 : QDialog(pp), m_devctrls(0), m_colortrack_en(track_en)
 {
@@ -26,6 +26,8 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en,
         btnToggleTracking->setText("Disable Tracking");
     else
         btnToggleTracking->setText("Enable Tracking");
+
+    btnToggleTracking->setEnabled(track_btn_en);
 
     // add a vertical spacer at some absurdly high row index
     ((QGridLayout *)deviceControlScrollAreaContents->layout())->addItem(

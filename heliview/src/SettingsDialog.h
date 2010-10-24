@@ -18,8 +18,8 @@ class SettingsDialog : public QDialog, protected Ui::SettingsDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent, bool track_en, const TrackSettings &track, 
-            const QString &logfile, const int logbufsize);
+    SettingsDialog(QWidget *parent, bool track_en, bool track_btn_en,
+            const TrackSettings &track, const QString &logfile, const int logbufsize);
     virtual ~SettingsDialog();
 
 signals:

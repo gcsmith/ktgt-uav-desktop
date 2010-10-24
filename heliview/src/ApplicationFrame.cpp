@@ -558,7 +558,7 @@ void ApplicationFrame::onEditSettingsTriggered()
 {
     QString filename = m_file ? m_file->fileName() : "";
     TrackSettings track;
-    bool track_en;
+    bool track_en, btn_track_en;
 
     if (m_controller)
     {
@@ -568,8 +568,9 @@ void ApplicationFrame::onEditSettingsTriggered()
     else 
         track_en = false;
 
-    Logger::dbg(QString("track_en is %1\n").arg(track_en));
-    SettingsDialog sd(this, track_en, track, filename, m_bufsize/1024);
+    btn_track_en = btnColorTrack->isEnabled();
+
+    SettingsDialog sd(this, track_en, btn_track_en, track, filename, m_bufsize/1024);
     if (m_controller)
     {
         // allow settings dialog to communicate data to device controller
