@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabPane">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabPaneCamera">
        <attribute name="icon">
@@ -50,218 +50,197 @@
        <attribute name="title">
         <string>Sensors</string>
        </attribute>
-       <layout class="QVBoxLayout" name="tabPaneSensorsLayout">
-        <item>
-         <widget class="QScrollArea" name="scrollArea">
-          <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAsNeeded</enum>
-          </property>
-          <property name="widgetResizable">
-           <bool>true</bool>
-          </property>
-          <widget class="QWidget" name="scrollAreaWidgetContents">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>96</width>
-             <height>26</height>
-            </rect>
+       <widget class="QScrollArea" name="scrollArea">
+        <property name="geometry">
+         <rect>
+          <x>9</x>
+          <y>9</y>
+          <width>16</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>16</width>
+           <height>16</height>
+          </rect>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QGroupBox" name="groupXAxis">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>458</y>
+          <width>151</width>
+          <height>74</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>X Axis</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="cbShowXF">
+           <property name="text">
+            <string>Acceleration</string>
            </property>
           </widget>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="axisControlLayout">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QGroupBox" name="groupXAxis">
-            <property name="title">
-             <string>X Axis</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <widget class="QCheckBox" name="cbShowXF">
-               <property name="text">
-                <string>Acceleration</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="cbShowXUF">
-               <property name="text">
-                <string>Raw Velocity</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="checkBox">
-               <property name="text">
-                <string>Filtered</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="checkBox_4">
-               <property name="text">
-                <string>Paused</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupYAxis">
-            <property name="title">
-             <string>Y Axis</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <item row="0" column="0">
-              <widget class="QCheckBox" name="cbShowYF">
-               <property name="text">
-                <string>Acceleration</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="cbShowYUF">
-               <property name="text">
-                <string>Raw Velocity</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="checkBox_2">
-               <property name="text">
-                <string>Filtered</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="checkBox_5">
-               <property name="text">
-                <string>Paused</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupZAxis">
-            <property name="title">
-             <string>Z Axis</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_3">
-             <item row="0" column="0">
-              <widget class="QCheckBox" name="cbShowZF">
-               <property name="text">
-                <string>Acceleration</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="cbShowZUF">
-               <property name="text">
-                <string>Raw Velocity</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="checkBox_3">
-               <property name="text">
-                <string>Filtered</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="checkBox_6">
-               <property name="text">
-                <string>Paused</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupTelemetry">
-            <property name="title">
-             <string>Telemetry</string>
-            </property>
-            <widget class="QCheckBox" name="cbConn">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>10</y>
-               <width>81</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Connection</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbBatt">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Battery</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbElev">
-             <property name="geometry">
-              <rect>
-               <x>100</x>
-               <y>10</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Elevation</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbAux">
-             <property name="geometry">
-              <rect>
-               <x>100</x>
-               <y>30</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Auxiliary</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbCpu">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>50</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>CPU</string>
-             </property>
-            </widget>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cbShowXUF">
+           <property name="text">
+            <string>Raw Velocity</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QGroupBox" name="groupTelemetry">
+        <property name="geometry">
+         <rect>
+          <x>500</x>
+          <y>458</y>
+          <width>221</width>
+          <height>74</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Telemetry</string>
+        </property>
+        <widget class="QCheckBox" name="cbConn">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>81</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Connection</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="cbBatt">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>72</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Battery</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="cbElev">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>10</y>
+           <width>72</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Elevation</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="cbAux">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>30</y>
+           <width>72</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Auxiliary</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="cbCpu">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>72</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>CPU</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QGroupBox" name="groupYAxis">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>458</y>
+          <width>151</width>
+          <height>74</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Y Axis</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="cbShowYF">
+           <property name="text">
+            <string>Acceleration</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cbShowYUF">
+           <property name="text">
+            <string>Raw Velocity</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QGroupBox" name="groupZAxis">
+        <property name="geometry">
+         <rect>
+          <x>340</x>
+          <y>458</y>
+          <width>151</width>
+          <height>74</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Z Axis</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="cbShowZF">
+           <property name="text">
+            <string>Acceleration</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cbShowZUF">
+           <property name="text">
+            <string>Raw Velocity</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QWidget" name="tabPaneVirtual">
        <attribute name="icon">
