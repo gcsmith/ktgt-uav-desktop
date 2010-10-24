@@ -47,7 +47,7 @@ public slots:
     void onConnectionStatusChanged(const QString &text, bool status);
 
     void onTelemetryReady(float yaw, float pitch, float roll,
-                          int alt, int rssi, int batt, int aux);
+                          int alt, int rssi, int batt, int aux, int cpu);
     void onStateChanged(int state);
 
     // menu action triggered event callbacks
@@ -77,6 +77,7 @@ public slots:
     void onShowBattChanged(bool flag);
     void onShowConnChanged(bool flag);
     void onShowElevChanged(bool flag);
+    void onShowCpuChanged(bool flag);
 
     void onTabChanged(int index);
     void onGraphsChanged();

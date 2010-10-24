@@ -91,6 +91,7 @@ void ApplicationFrame::setupSensorView()
     m_graphs[TRACKING]   = new LineGraph(graphArea, "Tracking",      100.0f);
     m_graphs[AUXILIARY]  = new LineGraph(graphArea, "Auxiliary",     100.0f);
     m_graphs[ELEVATION]  = new LineGraph(graphArea, "Elevation",      80.0f, 10.0f);
+    m_graphs[CPU]        = new LineGraph(graphArea, "CPU",           100.0f);
 
     for (int i = 0; i < AXIS_COUNT; ++i)
     {
@@ -132,9 +133,9 @@ void ApplicationFrame::setupStatusBar()
 void ApplicationFrame::connectDeviceController()
 {
     connect(m_controller,
-            SIGNAL(telemetryReady(float, float, float, int, int, int, int)),
+            SIGNAL(telemetryReady(float, float, float, int, int, int, int, int)),
             this,
-            SLOT(onTelemetryReady(float, float, float, int, int, int, int)));
+            SLOT(onTelemetryReady(float, float, float, int, int, int, int, int)));
 
     connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
             this, SLOT(onConnectionStatusChanged(const QString&, bool)));
@@ -402,7 +403,7 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onTelemetryReady(
-    float yaw, float pitch, float roll, int alt, int rssi, int batt, int aux)
+    float yaw, float pitch, float roll, int alt, int rssi, int batt, int aux, int cpu)
 {
     static float time = 0.0f;
 
@@ -423,6 +424,13 @@ void ApplicationFrame::onTelemetryReady(
 
     auxiliaryStatusBar->setValue(aux);
     auxiliaryStatusBar->setFormat(QString("%p%"));
+    
+    if(cpu < 0)
+    {
+        cpu = 0;
+    }
+    cpuStatusBar->setValue(cpu);    
+    cpuStatusBar->setFormat(QString("%p%"));    
 
     // add new data to their respective plots
     m_graphs[AXIS_X]->addDataPoint(time, yaw + 180.0f, 0.0f);
@@ -432,6 +440,7 @@ void ApplicationFrame::onTelemetryReady(
     m_graphs[BATTERY]->addDataPoint(time, batt, 0.0f);
     m_graphs[AUXILIARY]->addDataPoint(time, aux, 0.0f);
     m_graphs[ELEVATION]->addDataPoint(time, alt, 0.0f);
+    m_graphs[CPU]->addDataPoint(time, cpu, 0.0f);
 
     time += 0.5f;
 }
@@ -761,6 +770,13 @@ void ApplicationFrame::onShowConnChanged(bool flag)
 void ApplicationFrame::onShowElevChanged(bool flag)
 {
     m_graphs[ELEVATION]->togglePrimaryData(flag);
+    onGraphsChanged();
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onShowCpuChanged(bool flag)
+{
+    m_graphs[CPU]->togglePrimaryData(flag);
     onGraphsChanged();
 }
 

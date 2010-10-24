@@ -121,6 +121,6 @@ void SerialDeviceController::processSingleLine(const string &line)
     float y = ssplit[1].toFloat();
     float z = ssplit[2].toFloat();
 
-    emit telemetryReady(z, x, y, 0, 200, 100, 1500);
+    emit telemetryReady(z, x, y, 0, 200, 100, 1500, 0);
 }
 

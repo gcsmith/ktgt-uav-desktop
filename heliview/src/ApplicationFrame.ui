@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>956</width>
-    <height>738</height>
+    <height>752</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
              <x>0</x>
              <y>0</y>
              <width>713</width>
-             <height>424</height>
+             <height>438</height>
             </rect>
            </property>
           </widget>
@@ -195,8 +195,8 @@
             <widget class="QCheckBox" name="cbConn">
              <property name="geometry">
               <rect>
-               <x>11</x>
-               <y>23</y>
+               <x>10</x>
+               <y>10</y>
                <width>81</width>
                <height>17</height>
               </rect>
@@ -208,8 +208,8 @@
             <widget class="QCheckBox" name="cbBatt">
              <property name="geometry">
               <rect>
-               <x>11</x>
-               <y>46</y>
+               <x>10</x>
+               <y>30</y>
                <width>72</width>
                <height>17</height>
               </rect>
@@ -221,8 +221,8 @@
             <widget class="QCheckBox" name="cbElev">
              <property name="geometry">
               <rect>
-               <x>103</x>
-               <y>23</y>
+               <x>100</x>
+               <y>10</y>
                <width>72</width>
                <height>17</height>
               </rect>
@@ -234,14 +234,27 @@
             <widget class="QCheckBox" name="cbAux">
              <property name="geometry">
               <rect>
-               <x>103</x>
-               <y>46</y>
+               <x>100</x>
+               <y>30</y>
                <width>72</width>
                <height>17</height>
               </rect>
              </property>
              <property name="text">
               <string>Auxiliary</string>
+             </property>
+            </widget>
+            <widget class="QCheckBox" name="cbCpu">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>50</y>
+               <width>72</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>CPU</string>
              </property>
             </widget>
            </widget>
@@ -382,9 +395,13 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btnColortrack">
        <property name="text">
         <string>Enable Color Tracking</string>
+       </property>
+       <property name="icon">
+        <iconset resource="HeliView.qrc">
+         <normaloff>:/data/camera.png</normaloff>:/data/camera.png</iconset>
        </property>
       </widget>
      </item>
@@ -607,6 +624,39 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="format">
+          <string>NC</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="lbCpu">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>CPU:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="cpuStatusBar">
          <property name="value">
           <number>0</number>
          </property>
@@ -1154,6 +1204,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbCpu</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ApplicationFrame</receiver>
+   <slot>onShowCpuChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>566</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onShowXFChanged(bool)</slot>
@@ -1166,6 +1232,7 @@ p, li { white-space: pre-wrap; }
   <slot>onShowBattChanged(bool)</slot>
   <slot>onShowConnChanged(bool)</slot>
   <slot>onShowElevChanged(bool)</slot>
+  <slot>onShowCpuChanged(bool)</slot>
   <slot>onTabChanged(int)</slot>
   <slot>onTakeoffClicked()</slot>
   <slot>onLandingClicked()</slot>

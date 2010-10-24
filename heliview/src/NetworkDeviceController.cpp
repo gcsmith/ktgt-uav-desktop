@@ -333,7 +333,7 @@ void NetworkDeviceController::onSocketReadyRead()
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int32_t rssi, altitude, battery, aux, framesz;
+    int32_t rssi, altitude, battery, aux, framesz,cpu;
     float x, y, z;
     QString log_msg, type;
 
@@ -391,8 +391,9 @@ void NetworkDeviceController::onSocketReadyRead()
         altitude = packet[PKT_VTI_ALT];
         battery  = packet[PKT_VTI_BATT];
         aux      = packet[PKT_VTI_AUX];
+        cpu      = packet[PKT_VTI_CPU];
 
-        emit telemetryReady(-z, -y, x, altitude, rssi, battery, aux);
+        emit telemetryReady(-z, -y, x, altitude, rssi, battery, aux, cpu);
         break;
     case SERVER_ACK_MJPG_FRAME:
         framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;

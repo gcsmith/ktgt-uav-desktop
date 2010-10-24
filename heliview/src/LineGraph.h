@@ -23,6 +23,7 @@ enum GraphType
     ELEVATION,
     AUXILIARY,
     TRACKING,
+    CPU,
     AXIS_COUNT
 };
 
