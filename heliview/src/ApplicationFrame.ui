@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>956</width>
-    <height>802</height>
+    <width>972</width>
+    <height>795</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,8 +64,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>60</width>
-             <height>16</height>
+             <width>729</width>
+             <height>458</height>
             </rect>
            </property>
           </widget>
@@ -150,71 +150,50 @@
             <property name="title">
              <string>Telemetry</string>
             </property>
-            <widget class="QCheckBox" name="cbConn">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>10</y>
-               <width>81</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Connection</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbBatt">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Battery</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbElev">
-             <property name="geometry">
-              <rect>
-               <x>100</x>
-               <y>10</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Elevation</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbAux">
-             <property name="geometry">
-              <rect>
-               <x>100</x>
-               <y>30</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Auxiliary</string>
-             </property>
-            </widget>
-            <widget class="QCheckBox" name="cbCpu">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>50</y>
-               <width>72</width>
-               <height>17</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>CPU</string>
-             </property>
-            </widget>
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="cbConn">
+               <property name="text">
+                <string>Connection</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="cbBatt">
+               <property name="text">
+                <string>Battery</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="cbAux">
+               <property name="text">
+                <string>Auxiliary</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="cbElev">
+               <property name="text">
+                <string>Elevation</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="cbCpu">
+               <property name="text">
+                <string>CPU Usage</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QCheckBox" name="cbMem">
+               <property name="text">
+                <string>Mem Usage</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -240,8 +219,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>956</width>
-     <height>25</height>
+     <width>972</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -692,7 +671,7 @@
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Tahoma'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif'; font-size:9pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="tabStopWidth">
@@ -804,8 +783,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowXFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>111</y>
+     <x>148</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>193</x>
@@ -820,8 +799,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowXUFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>111</y>
+     <x>148</x>
+     <y>609</y>
     </hint>
     <hint type="destinationlabel">
      <x>149</x>
@@ -836,8 +815,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowYUFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>111</y>
+     <x>301</x>
+     <y>609</y>
     </hint>
     <hint type="destinationlabel">
      <x>389</x>
@@ -852,8 +831,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowYFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>111</y>
+     <x>301</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>425</x>
@@ -868,8 +847,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowZFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>111</y>
+     <x>453</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>676</x>
@@ -884,8 +863,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowZUFChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>111</y>
+     <x>453</x>
+     <y>609</y>
     </hint>
     <hint type="destinationlabel">
      <x>646</x>
@@ -948,8 +927,8 @@ p, li { white-space: pre-wrap; }
    <slot>onManualOverrideClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>946</x>
-     <y>135</y>
+     <x>962</x>
+     <y>183</y>
     </hint>
     <hint type="destinationlabel">
      <x>622</x>
@@ -964,8 +943,8 @@ p, li { white-space: pre-wrap; }
    <slot>onKillswitchClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>946</x>
-     <y>184</y>
+     <x>962</x>
+     <y>216</y>
     </hint>
     <hint type="destinationlabel">
      <x>621</x>
@@ -1108,8 +1087,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowAuxChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>702</x>
-     <y>548</y>
+     <x>655</x>
+     <y>609</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
@@ -1124,8 +1103,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowBattChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>610</x>
-     <y>548</y>
+     <x>577</x>
+     <y>609</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
@@ -1140,8 +1119,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowConnChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>615</x>
-     <y>525</y>
+     <x>577</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
@@ -1156,8 +1135,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowElevChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>702</x>
-     <y>525</y>
+     <x>655</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
@@ -1172,8 +1151,8 @@ p, li { white-space: pre-wrap; }
    <slot>onShowCpuChanged(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>609</x>
-     <y>566</y>
+     <x>742</x>
+     <y>584</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
@@ -1188,8 +1167,8 @@ p, li { white-space: pre-wrap; }
    <slot>onColorTrackingClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>859</x>
-     <y>186</y>
+     <x>962</x>
+     <y>150</y>
     </hint>
     <hint type="destinationlabel">
      <x>477</x>
