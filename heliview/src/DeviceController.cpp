@@ -103,10 +103,10 @@ void DeviceController::onInputReady(GamepadEvent event, int index, float value)
 
 // -----------------------------------------------------------------------------
 void DeviceController::updateTrackSettings(int r, int g, int b,
-        int ht, int st, int ft)
+        int ht, int st, int ft, int fps)
 {
     Logger::info(tr("DeviceController::updateTrackSettings(%1, %2, %3, %4, "
-                "%5, %6)\n").arg(r).arg(g).arg(b).arg(ht).arg(st).arg(ft));
+                "%5, %6)\n").arg(r).arg(g).arg(b).arg(ht).arg(st).arg(ft).arg(fps));
 }
 
 // -----------------------------------------------------------------------------

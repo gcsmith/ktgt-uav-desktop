@@ -37,7 +37,7 @@ struct TrackSettings
     TrackSettings(QColor _color, int _ht, int _st, int _ft)
     : color(_color), ht(_ht), st(_st), ft(_ft) { }
     QColor color;
-    int ht, st, ft;
+    int ht, st, ft, fps;
 };
 
 #define AXIS_ALT    0x01
@@ -74,7 +74,7 @@ public:
 public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
     virtual void onUpdateTrackEnabled(bool track_en);
-    virtual void updateTrackSettings(int r, int g, int b, int ht, int st, int ft);
+    virtual void updateTrackSettings(int r, int g, int b, int ht, int st, int ft, int fps);
     virtual void updateDeviceControl(int id, int value);
     virtual void updateTrimSettings(int axes, int value);
     virtual void updateFilterSettings(int signal, int samples);

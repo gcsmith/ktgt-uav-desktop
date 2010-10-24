@@ -48,6 +48,9 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
     sbHt->setValue(track.ht);
     sbSt->setValue(track.st);
     sbFt->setValue(track.ft);
+    
+    //Set Initial Tracking FPS
+    sbTrackingFps->setValue(10);
 
     //TODO: Set LogFile Value
     editLogFileName->setText(logfile);
@@ -221,7 +224,7 @@ void SettingsDialog::onOkClicked()
 void SettingsDialog::onApplyClicked()
 {
     emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
-            sbHt->value(), sbSt->value(), sbFt->value());
+            sbHt->value(), sbSt->value(), sbFt->value(),sbTrackingFps->value());
 
     emit logSettingsChanged(editLogFileName->text(), sbLogBuffer->value());
 }

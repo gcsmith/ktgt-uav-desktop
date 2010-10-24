@@ -641,12 +641,12 @@ void NetworkDeviceController::onUpdateTrackEnabled(bool track_en)
     // update tracking on helicopter by sending a CLIENT_REQ_CAM_TC packet
     // with m_track_en updated
     updateTrackSettings(m_track.color.red(), m_track.color.green(), 
-            m_track.color.blue(), m_track.ht, m_track.st, m_track.ft);
+            m_track.color.blue(), m_track.ht, m_track.st, m_track.ft, m_track.fps);
 }
 
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::updateTrackSettings(
-        int r, int g, int b, int ht, int st, int ft)
+        int r, int g, int b, int ht, int st, int ft, int fps)
 {
     uint32_t cmd_buffer[16];
 
@@ -654,6 +654,8 @@ void NetworkDeviceController::updateTrackSettings(
     if (ht > 0) m_track.ht = ht;
     if (st > 0) m_track.st = st;
     if (ft > 0) m_track.ft = ft;
+    
+    m_track.fps = fps;
 
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_TC;
     cmd_buffer[PKT_LENGTH]  = PKT_CAM_TC_LENGTH;
@@ -669,9 +671,11 @@ void NetworkDeviceController::updateTrackSettings(
     cmd_buffer[PKT_CAM_TC_TH1] = m_track.st;
     cmd_buffer[PKT_CAM_TC_TH2] = 0;
     cmd_buffer[PKT_CAM_TC_FILTER] = m_track.ft;
+    
+    cmd_buffer[PKT_CAM_TC_FPS] = m_track.fps;
 
-    Logger::info(tr("request track color [%1 %2 %3] with threshold [%4 %5]\n")
-            .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st));
+    Logger::info(tr("request track color [%1 %2 %3] with threshold [%4 %5] with FPS %6\n")
+            .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st).arg(m_track.fps));
 
     sendPacket(cmd_buffer, PKT_CAM_TC_LENGTH);
 }

@@ -574,9 +574,9 @@ void ApplicationFrame::onEditSettingsTriggered()
     if (m_controller)
     {
         // allow settings dialog to communicate data to device controller
-        connect(&sd, SIGNAL(trackSettingsChanged(int, int, int, int, int, int)),
+        connect(&sd, SIGNAL(trackSettingsChanged(int, int, int, int, int, int, int)),
                 m_controller,
-                SLOT(updateTrackSettings(int, int, int, int, int, int)));
+                SLOT(updateTrackSettings(int, int, int, int, int, int, int)));
 
         connect(&sd, SIGNAL(updateTrackEnabled(bool)), m_controller, 
                 SLOT(onUpdateTrackEnabled(bool)));
