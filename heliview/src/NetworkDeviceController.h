@@ -36,6 +36,7 @@ public:
     virtual DeviceState currentState() const { return m_state; }
     virtual int currentAxes() const { return m_axes; }
     virtual TrackSettings currentTrackSettings() const { return m_track; }
+    virtual bool getTrackEnable() const { return m_track_en; }
 
     virtual bool requestDeviceControls() const;
     virtual bool requestFilterSettings() const;
@@ -46,7 +47,7 @@ public:
     virtual bool requestManualOverride() const;
     virtual bool requestAutonomous() const;
     virtual bool requestKillswitch() const;
-    
+
     static const char *m_description;
     static const bool m_takesDevice;
 
@@ -59,7 +60,9 @@ public slots:
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
+    
     void updateTrackSettings(int r, int g, int b, int ht, int st, int ft);
+    void onUpdateTrackEnabled(bool track_en);
     void updateDeviceControl(int id, int value);
     void updateTrimSettings(int axes, int value);
     void updateFilterSettings(int signal, int samples);
@@ -83,6 +86,7 @@ protected:
     int               m_axes;
     float             m_prev_alt;
     TrackSettings     m_track;
+    bool              m_track_en;
 };
 
 #endif // _HELIVIEW_NETWORKDEVICECONTROLLER__H_

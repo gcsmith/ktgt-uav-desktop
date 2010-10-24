@@ -225,7 +225,7 @@
           <bool>false</bool>
          </property>
          <property name="checkable">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="1" column="0">
@@ -417,6 +417,13 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="8">
+           <widget class="QPushButton" name="btnToggleTracking">
+            <property name="text">
+             <string>Enable Tracking</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -454,8 +461,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>623</width>
-               <height>144</height>
+               <width>627</width>
+               <height>161</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_9">
@@ -493,8 +500,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>613</width>
-            <height>378</height>
+            <width>161</width>
+            <height>302</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1110,22 +1117,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>groupColorTracking</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>onColorTrackingEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>101</x>
-     <y>49</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>338</x>
-     <y>53</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>slideThrottleTrim</sender>
    <signal>valueChanged(int)</signal>
    <receiver>lblThrottleTrim</receiver>
@@ -1381,6 +1372,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btnToggleTracking</sender>
+   <signal>clicked()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onColorTrackingClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>491</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>updateYawTrim(int)</signal>
@@ -1388,7 +1395,7 @@
   <slot>onApplyClicked()</slot>
   <slot>onCancelClicked()</slot>
   <slot>onOkClicked()</slot>
-  <slot>onColorTrackingEnabled(bool)</slot>
+  <slot>onColorTrackingClicked()</slot>
   <slot>onManualExposureEnabled(bool)</slot>
   <slot>onManualFocusEnabled(bool)</slot>
   <slot>onSetCurrentWhiteBalanceClicked()</slot>

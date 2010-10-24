@@ -15,11 +15,17 @@
 #include "Logger.h"
 
 // -----------------------------------------------------------------------------
-SettingsDialog::SettingsDialog(QWidget *pp, const TrackSettings &track, 
-        const QString &logfile, const int logbufsize)
-: QDialog(pp), m_devctrls(0)
+SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, 
+        const TrackSettings &track, const QString &logfile, const int logbufsize)
+: QDialog(pp), m_devctrls(0), m_colortrack_en(track_en)
 {
     setupUi(this);
+
+    // label the color tracking button appropriately
+    if (m_colortrack_en)
+        btnToggleTracking->setText("Disable Color Tracking");
+    else
+        btnToggleTracking->setText("Enable Color Tracking");
 
     // add a vertical spacer at some absurdly high row index
     ((QGridLayout *)deviceControlScrollAreaContents->layout())->addItem(
@@ -233,8 +239,15 @@ void SettingsDialog::onNewColorClicked()
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onColorTrackingEnabled(bool enabled)
+void SettingsDialog::onColorTrackingClicked()
 {
+    m_colortrack_en = !m_colortrack_en;
+    if (m_colortrack_en)
+        btnToggleTracking->setText("Disable Color Tracking");
+    else
+        btnToggleTracking->setText("Enable Color Tracking");
+
+    emit updateTrackEnabled(m_colortrack_en);
 }
 
 // -----------------------------------------------------------------------------

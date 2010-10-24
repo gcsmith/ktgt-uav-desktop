@@ -218,6 +218,7 @@ void ApplicationFrame::setEnabledButtons(int buttons)
     btnTakeoff->setEnabled(buttons & BUTTON_TAKEOFF);
     btnOverride->setEnabled(buttons & BUTTON_OVERRIDE);
     btnKillswitch->setEnabled(buttons & BUTTON_KILLSWITCH);
+    btnColorTrack->setEnabled(buttons & BUTTON_TRACKING);
 }
   
 // -----------------------------------------------------------------------------
@@ -557,16 +558,27 @@ void ApplicationFrame::onEditSettingsTriggered()
 {
     QString filename = m_file ? m_file->fileName() : "";
     TrackSettings track;
-    if (m_controller)
-        track = m_controller->currentTrackSettings();
+    bool track_en;
 
-    SettingsDialog sd(this, track, filename, m_bufsize/1024);
+    if (m_controller)
+    {
+        track     = m_controller->currentTrackSettings();
+        track_en  = m_controller->getTrackEnabled();
+    }
+    else 
+        track_en = false;
+
+    Logger::dbg(QString("track_en is %1\n").arg(track_en));
+    SettingsDialog sd(this, track_en, track, filename, m_bufsize/1024);
     if (m_controller)
     {
         // allow settings dialog to communicate data to device controller
         connect(&sd, SIGNAL(trackSettingsChanged(int, int, int, int, int, int)),
                 m_controller,
                 SLOT(updateTrackSettings(int, int, int, int, int, int)));
+
+        connect(&sd, SIGNAL(updateTrackEnabled(bool)), m_controller, 
+                SLOT(onUpdateTrackEnabled(bool)));
 
         connect(&sd, SIGNAL(deviceControlChanged(int, int)),
                 m_controller, SLOT(updateDeviceControl(int, int)));
@@ -603,7 +615,9 @@ void ApplicationFrame::onEditSettingsTriggered()
     
     connect(&sd, SIGNAL(logSettingsChanged(const QString &, int)), this, 
                 SLOT(onUpdateLogFile(const QString &, int)));
-
+        
+    connect(&sd, SIGNAL(updateTrackEnabled(bool)), this, 
+                SLOT(onUpdateTrackEnabled(bool)));
     sd.exec();
 }
 
@@ -717,6 +731,35 @@ void ApplicationFrame::onKillswitchClicked()
 }
 
 // -----------------------------------------------------------------------------
+void ApplicationFrame::onColorTrackingClicked()
+{
+    TrackSettings curTS;
+    bool track_en;
+
+    // get current track settings
+    curTS    = m_controller->currentTrackSettings();
+    track_en = !m_controller->getTrackEnabled();
+
+    // update button label
+    if (track_en)
+        btnColorTrack->setText("Disable Color Tracking");
+    else
+        btnColorTrack->setText("Enable Color Tracking");
+
+    m_controller->onUpdateTrackEnabled(track_en);
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onUpdateTrackEnabled(bool track_en)
+{
+    // update button label
+    if (track_en)
+        btnColorTrack->setText("Disable Color Tracking");
+    else
+        btnColorTrack->setText("Enable Color Tracking");
+}
+
+// ----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)
 {
     m_graphs[AXIS_X]->togglePrimaryData(flag);

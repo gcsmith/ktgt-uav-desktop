@@ -18,11 +18,12 @@ class SettingsDialog : public QDialog, protected Ui::SettingsDialog
     Q_OBJECT
 
 public:
-    SettingsDialog(QWidget *parent, const TrackSettings &track, 
+    SettingsDialog(QWidget *parent, bool track_en, const TrackSettings &track, 
             const QString &logfile, const int logbufsize);
     virtual ~SettingsDialog();
 
 signals:
+    void updateTrackEnabled(bool track_en);
     void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft);
     void logSettingsChanged(const QString &, int);
     void deviceControlChanged(int id, int value);
@@ -48,7 +49,7 @@ public slots:
     void onOkClicked();
     void onApplyClicked();
     void onNewColorClicked();
-    void onColorTrackingEnabled(bool enabled);
+    void onColorTrackingClicked();
 
     // slider track events
     void onTrimSliderChanged(int value);
@@ -58,6 +59,7 @@ protected:
     int m_devctrls;
     QMap<QObject *, int> m_dev_to_id;
     QMap<int, QObject *> m_id_to_dev;
+    bool                 m_colortrack_en;
 };
 
 #endif // _HELIVIEW_SETTINGSDIALOG__H_

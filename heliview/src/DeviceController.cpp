@@ -32,6 +32,12 @@ TrackSettings DeviceController::currentTrackSettings() const
 }
 
 // -----------------------------------------------------------------------------
+bool DeviceController::getTrackEnabled() const
+{
+    return true;
+}
+
+// -----------------------------------------------------------------------------
 bool DeviceController::requestDeviceControls() const
 {
     Logger::info("DeviceController::requestDeviceControls()\n");
@@ -100,6 +106,12 @@ void DeviceController::updateTrackSettings(int r, int g, int b,
 {
     Logger::info(tr("DeviceController::updateTrackSettings(%1, %2, %3, %4, "
                 "%5, %6)\n").arg(r).arg(g).arg(b).arg(ht).arg(st).arg(ft));
+}
+
+// -----------------------------------------------------------------------------
+void DeviceController::onUpdateTrackEnabled(bool track_en)
+{
+    Logger::info(tr("DeviceController::updateTrackEnabled(%1)\n").arg(track_en));
 }
 
 // -----------------------------------------------------------------------------

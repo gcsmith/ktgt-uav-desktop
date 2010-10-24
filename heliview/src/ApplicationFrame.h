@@ -23,6 +23,7 @@
 #define BUTTON_TAKEOFF    0x02
 #define BUTTON_OVERRIDE   0x04
 #define BUTTON_KILLSWITCH 0x08
+#define BUTTON_TRACKING   0x10
 #define BUTTON_NONE       0x00
 #define BUTTON_ALL        0xFF
 
@@ -49,6 +50,7 @@ public slots:
     void onTelemetryReady(float yaw, float pitch, float roll,
                           int alt, int rssi, int batt, int aux, int cpu);
     void onStateChanged(int state);
+    void onUpdateTrackEnabled(bool track_en);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
@@ -65,6 +67,7 @@ public slots:
     void onLandingClicked();
     void onManualOverrideClicked();
     void onKillswitchClicked();
+    void onColorTrackingClicked();
 
     // sensor pane checkbox event callbacks
     void onShowXFChanged(bool flag);

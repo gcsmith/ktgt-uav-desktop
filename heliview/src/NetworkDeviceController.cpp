@@ -17,7 +17,8 @@ const bool NetworkDeviceController::m_takesDevice = true;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10)
+  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10), 
+  m_track_en(false)
 {
 }
 
@@ -628,6 +629,21 @@ void NetworkDeviceController::onInputReady(
 }
 
 // -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateTrackEnabled(bool track_en)
+{
+    m_track_en = track_en;
+
+    if (m_track_en)
+        Logger::info(QString("NetworkController: tracking enabled\n"));
+    else
+        Logger::info(QString("NetworkController: tracking disabled\n"));
+
+    // update tracking on helicopter by sending a CLIENT_REQ_CAM_TC packet
+    // with m_track_en updated
+    updateTrackSettings(m_track.color.red(), m_track.color.green(), 
+            m_track.color.blue(), m_track.ht, m_track.st, m_track.ft);
+}
+
 void NetworkDeviceController::updateTrackSettings(
         int r, int g, int b, int ht, int st, int ft)
 {
@@ -641,7 +657,7 @@ void NetworkDeviceController::updateTrackSettings(
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_TC;
     cmd_buffer[PKT_LENGTH]  = PKT_CAM_TC_LENGTH;
 
-    cmd_buffer[PKT_CAM_TC_ENABLE] = 1;
+    cmd_buffer[PKT_CAM_TC_ENABLE] = (uint32_t)m_track_en;
     cmd_buffer[PKT_CAM_TC_FMT]    = CAM_TC_FMT_RGB;
 
     cmd_buffer[PKT_CAM_TC_CH0] = m_track.color.red();

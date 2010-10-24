@@ -59,6 +59,7 @@ public:
     virtual DeviceState currentState() const;
     virtual int currentAxes() const;
     virtual TrackSettings currentTrackSettings() const;
+    virtual bool getTrackEnabled() const;
 
     virtual bool requestDeviceControls() const;
     virtual bool requestTrimSettings() const;
@@ -72,6 +73,7 @@ public:
 
 public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
+    virtual void onUpdateTrackEnabled(bool track_en);
     virtual void updateTrackSettings(int r, int g, int b, int ht, int st, int ft);
     virtual void updateDeviceControl(int id, int value);
     virtual void updateTrimSettings(int axes, int value);
