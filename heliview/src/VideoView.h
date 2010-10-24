@@ -28,7 +28,7 @@ public:
     bool saveFrame();
 
 signals:
-    void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft);
+    void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft, int fps);
 
 public slots:
     void setDragBoxColor(int r, int g, int b, int a);

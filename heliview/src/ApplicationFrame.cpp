@@ -149,9 +149,9 @@ void ApplicationFrame::connectDeviceController()
     connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
             m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
 
-    connect(m_video, SIGNAL(trackSettingsChanged(int, int, int, int, int, int)),
+    connect(m_video, SIGNAL(trackSettingsChanged(int, int, int, int, int, int, int)),
             m_controller,
-            SLOT(updateTrackSettings(int, int, int, int, int, int)));
+            SLOT(updateTrackSettings(int, int, int, int, int, int, int)));
 }
 
 // -----------------------------------------------------------------------------
