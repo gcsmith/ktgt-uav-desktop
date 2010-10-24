@@ -161,6 +161,18 @@ bool NetworkDeviceController::requestDeviceControls() const
 }
 
 // -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestTrimSettings() const
+{
+    return sendPacket(CLIENT_REQ_GTS);
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestFilterSettings() const
+{
+    return sendPacket(CLIENT_REQ_GFS);
+}
+
+// -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestTakeoff() const
 {
     return sendPacket(CLIENT_REQ_TAKEOFF);
@@ -467,16 +479,23 @@ void NetworkDeviceController::onSocketReadyRead()
             // bad pie
             return;
         }
-
-        emit deviceControlUpdate(QString((char *)&packet[PKT_CAM_DCI_NAME]),
+        emit deviceControlUpdated(QString((char *)&packet[PKT_CAM_DCI_NAME]),
                 type, packet[PKT_CAM_DCI_ID],
                 packet[PKT_CAM_DCI_MIN], packet[PKT_CAM_DCI_MAX],
                 packet[PKT_CAM_DCI_STEP], packet[PKT_CAM_DCI_DEFAULT], 
                 packet[PKT_CAM_DCI_CURRENT]);
         break;
     case SERVER_UPDATE_CAM_DCM:
-        emit deviceMenuUpdate(QString((char *)&packet[PKT_CAM_DCM_NAME]),
+        emit deviceMenuUpdated(QString((char *)&packet[PKT_CAM_DCM_NAME]),
                 packet[PKT_CAM_DCM_ID], packet[PKT_CAM_DCM_INDEX]);
+        break;
+    case SERVER_ACK_GTS:
+        emit trimSettingsUpdated(packet[PKT_GTS_YAW], packet[PKT_GTS_PITCH],
+                packet[PKT_GTS_ROLL], packet[PKT_GTS_ALT]);
+        break;
+    case SERVER_ACK_GFS:
+        emit filterSettingsUpdated(packet[PKT_GFS_IMU], packet[PKT_GFS_ALT],
+                packet[PKT_GFS_AUX], packet[PKT_GFS_BATT]);
         break;
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
@@ -609,7 +628,7 @@ void NetworkDeviceController::onInputReady(
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateTrackColor(
+void NetworkDeviceController::updateTrackSettings(
         int r, int g, int b, int ht, int st, int ft)
 {
     uint32_t cmd_buffer[16];
@@ -641,7 +660,7 @@ void NetworkDeviceController::onUpdateTrackColor(
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
+void NetworkDeviceController::updateDeviceControl(int id, int value)
 {
     uint32_t cmd_buffer[8];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_DCC;
@@ -652,7 +671,7 @@ void NetworkDeviceController::onUpdateDeviceControl(int id, int value)
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
+void NetworkDeviceController::updateTrimSettings(int axes, int value)
 {
     uint32_t cmd_buffer[8];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_STS;
@@ -670,7 +689,7 @@ void NetworkDeviceController::onUpdateAxisTrim(int axes, int value)
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateSignalFilter(int signal, int samples)
+void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 {
     uint32_t cmd_buffer[8];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SFS;

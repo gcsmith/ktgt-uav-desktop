@@ -61,6 +61,9 @@ public:
     virtual TrackSettings currentTrackSettings() const;
 
     virtual bool requestDeviceControls() const;
+    virtual bool requestTrimSettings() const;
+    virtual bool requestFilterSettings() const;
+
     virtual bool requestTakeoff() const;
     virtual bool requestLanding() const;
     virtual bool requestManualOverride() const;
@@ -69,10 +72,10 @@ public:
 
 public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
-    virtual void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
-    virtual void onUpdateDeviceControl(int id, int value);
-    virtual void onUpdateAxisTrim(int axes, int value);
-    virtual void onUpdateSignalFilter(int signal, int samples);
+    virtual void updateTrackSettings(int r, int g, int b, int ht, int st, int ft);
+    virtual void updateDeviceControl(int id, int value);
+    virtual void updateTrimSettings(int axes, int value);
+    virtual void updateFilterSettings(int signal, int samples);
 
 signals:
     void telemetryReady(float x, float y, float z,
@@ -80,10 +83,12 @@ signals:
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
     void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
-    void deviceControlUpdate(const QString &name, const QString &type,
+    void deviceControlUpdated(const QString &name, const QString &type,
             int id, int minimum, int maximum, int step, int default_value, 
             int current_value) const;
-    void deviceMenuUpdate(const QString &name, int id, int index) const;
+    void deviceMenuUpdated(const QString &name, int id, int index) const;
+    void trimSettingsUpdated(int yaw, int pitch, int roll, int thro) const;
+    void filterSettingsUpdated(int imu, int alt, int aux, int batt) const;
     void stateChanged(int state) const;
     void takeoff();
     void landing();

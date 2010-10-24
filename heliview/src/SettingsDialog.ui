@@ -535,7 +535,7 @@
                  <enum>QSlider::TicksBelow</enum>
                 </property>
                 <property name="tickInterval">
-                 <number>100</number>
+                 <number>1000</number>
                 </property>
                </widget>
               </item>
@@ -570,7 +570,7 @@
                  <enum>QSlider::TicksBelow</enum>
                 </property>
                 <property name="tickInterval">
-                 <number>100</number>
+                 <number>1000</number>
                 </property>
                </widget>
               </item>
@@ -604,6 +604,9 @@
                 <property name="tickPosition">
                  <enum>QSlider::TicksBelow</enum>
                 </property>
+                <property name="tickInterval">
+                 <number>1000</number>
+                </property>
                </widget>
               </item>
               <item row="3" column="0">
@@ -635,6 +638,9 @@
                 </property>
                 <property name="tickPosition">
                  <enum>QSlider::TicksBelow</enum>
+                </property>
+                <property name="tickInterval">
+                 <number>1000</number>
                 </property>
                </widget>
               </item>

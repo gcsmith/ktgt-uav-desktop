@@ -15,10 +15,10 @@
 #include "DeviceController.h"
 #include "Utility.h"
 
-typedef struct _ctrl_signals
+typedef struct ctl_sigs
 {
     float alt, pitch, roll, yaw;
-} ctrl_sigs;
+} ctl_sigs_t;
 
 class NetworkDeviceController: public DeviceController
 {
@@ -38,6 +38,9 @@ public:
     virtual TrackSettings currentTrackSettings() const { return m_track; }
 
     virtual bool requestDeviceControls() const;
+    virtual bool requestFilterSettings() const;
+    virtual bool requestTrimSettings() const;
+
     virtual bool requestTakeoff() const;
     virtual bool requestLanding() const;
     virtual bool requestManualOverride() const;
@@ -56,10 +59,10 @@ public slots:
     void onSocketDisconnected();
     void onSocketError(QAbstractSocket::SocketError error);
     void onInputReady(GamepadEvent event, int index, float value);
-    void onUpdateTrackColor(int r, int g, int b, int ht, int st, int ft);
-    void onUpdateDeviceControl(int id, int value);
-    void onUpdateAxisTrim(int axes, int value);
-    void onUpdateSignalFilter(int signal, int samples);
+    void updateTrackSettings(int r, int g, int b, int ht, int st, int ft);
+    void updateDeviceControl(int id, int value);
+    void updateTrimSettings(int axes, int value);
+    void updateFilterSettings(int signal, int samples);
 
 protected:
     void startup();
@@ -75,7 +78,7 @@ protected:
     QTimer           *m_throttle_timer;
     uint32_t          m_blocksz;
     std::vector<char> m_buffer;
-    ctrl_sigs         m_ctl;
+    ctl_sigs_t        m_ctl;
     DeviceState       m_state;
     int               m_axes;
     float             m_prev_alt;

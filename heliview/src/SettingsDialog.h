@@ -23,18 +23,21 @@ public:
     virtual ~SettingsDialog();
 
 signals:
-    void updateDeviceControl(int id, int value);
-    void updateTracking(int r, int g, int b, int ht, int st, int ft);
-    void updateLogFile(const QString &, int);
-    void updateAxisTrim(int axes, int value);
-    void updateSignalFilter(int filter, int samples);
+    void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft);
+    void logSettingsChanged(const QString &, int);
+    void deviceControlChanged(int id, int value);
+    void trimSettingsChanged(int axis, int value);
+    void filterSettingsChanged(int signal, int samples);
     
 public slots:
     // device control related events
-    void onDeviceControlUpdate(const QString &name, const QString &type,
+    void onDeviceControlUpdated(const QString &name, const QString &type,
             int id, int minimum, int maximum, int step, int default_value,
             int current_value);
-    void onDeviceMenuUpdate(const QString &name, int id, int index);
+    void onDeviceMenuUpdated(const QString &name, int id, int index);
+    void onTrimSettingsUpdated(int yaw, int pitch, int roll, int thro);
+    void onFilterSettingsUpdated(int imu, int alt, int aux, int batt);
+
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);
     void onDeviceControlMenuItemChanged(int index);

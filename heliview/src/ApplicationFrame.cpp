@@ -149,9 +149,9 @@ void ApplicationFrame::connectDeviceController()
     connect(m_controller, SIGNAL(trackStatusUpdate(bool, int, int, int, int)),
             m_video, SLOT(onTrackStatusUpdate(bool, int, int, int, int)));
 
-    connect(m_video, SIGNAL(updateTracking(int, int, int, int, int, int)),
+    connect(m_video, SIGNAL(trackSettingsChanged(int, int, int, int, int, int)),
             m_controller,
-            SLOT(onUpdateTrackColor(int, int, int, int, int, int)));
+            SLOT(updateTrackSettings(int, int, int, int, int, int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -564,31 +564,44 @@ void ApplicationFrame::onEditSettingsTriggered()
     if (m_controller)
     {
         // allow settings dialog to communicate data to device controller
-        connect(&sd, SIGNAL(updateTracking(int, int, int, int, int, int)),
+        connect(&sd, SIGNAL(trackSettingsChanged(int, int, int, int, int, int)),
                 m_controller,
-                SLOT(onUpdateTrackColor(int, int, int, int, int, int)));
+                SLOT(updateTrackSettings(int, int, int, int, int, int)));
 
-        connect(&sd, SIGNAL(updateDeviceControl(int, int)),
-                m_controller, SLOT(onUpdateDeviceControl(int, int)));
+        connect(&sd, SIGNAL(deviceControlChanged(int, int)),
+                m_controller, SLOT(updateDeviceControl(int, int)));
 
-        connect(&sd, SIGNAL(updateAxisTrim(int, int)),
-                m_controller, SLOT(onUpdateAxisTrim(int, int)));
+        connect(&sd, SIGNAL(trimSettingsChanged(int, int)),
+                m_controller, SLOT(updateTrimSettings(int, int)));
 
-        connect(&sd, SIGNAL(updateSignalFilter(int, int)),
-                m_controller, SLOT(onUpdateSignalFilter(int, int)));
+        connect(&sd, SIGNAL(filterSettingsChanged(int, int)),
+                m_controller, SLOT(updateFilterSettings(int, int)));
 
-        connect(m_controller, SIGNAL(deviceControlUpdate(const QString &,
+        // populate the video device control pane
+        connect(m_controller, SIGNAL(deviceControlUpdated(const QString &,
                         const QString &, int, int, int, int, int, int)),
-                &sd, SLOT(onDeviceControlUpdate(const QString &,
+                &sd, SLOT(onDeviceControlUpdated(const QString &,
                         const QString &, int, int, int, int, int, int)));
 
-        connect(m_controller, SIGNAL(deviceMenuUpdate(const QString&,int,int)),
-                &sd, SLOT(onDeviceMenuUpdate(const QString &, int, int)));
+        connect(m_controller, SIGNAL(deviceMenuUpdated(const QString&,int,int)),
+                &sd, SLOT(onDeviceMenuUpdated(const QString &, int, int)));
 
         m_controller->requestDeviceControls();
+
+        // initialize the trim settings sliders
+        connect(m_controller, SIGNAL(trimSettingsUpdated(int, int, int, int)),
+                &sd, SLOT(onTrimSettingsUpdated(int, int, int, int)));
+
+        m_controller->requestTrimSettings();
+
+        // initialize the filter settings sliders
+        connect(m_controller, SIGNAL(filterSettingsUpdated(int, int, int, int)),
+                &sd, SLOT(onFilterSettingsUpdated(int, int, int, int)));
+
+        m_controller->requestFilterSettings();
     }
     
-    connect(&sd, SIGNAL(updateLogFile(const QString &, int)), this, 
+    connect(&sd, SIGNAL(logSettingsChanged(const QString &, int)), this, 
                 SLOT(onUpdateLogFile(const QString &, int)));
 
     sd.exec();

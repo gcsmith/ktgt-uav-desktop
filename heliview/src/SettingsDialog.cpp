@@ -52,7 +52,7 @@ SettingsDialog::~SettingsDialog()
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onDeviceControlUpdate(const QString &name,
+void SettingsDialog::onDeviceControlUpdated(const QString &name,
         const QString &type, int id, int minimum, int maximum, int step,
         int default_value, int current_value)
 {
@@ -114,16 +114,34 @@ void SettingsDialog::onDeviceControlUpdate(const QString &name,
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onDeviceMenuUpdate(const QString &name, int id, int index)
+void SettingsDialog::onDeviceMenuUpdated(const QString &name, int id, int index)
 {
     if (!m_id_to_dev.contains(id))
     {
-        Logger::fail("onDeviceMenuUpdate: device control id doesn't exist\n");
+        Logger::fail("onDeviceMenuUpdated: device control id doesn't exist\n");
         return;
     }
 
     QComboBox *cb = (QComboBox *)m_id_to_dev.value(id);
     cb->setItemText(index, name);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onTrimSettingsUpdated(int yaw, int pitch, int roll, int thro)
+{
+    slideYawTrim->setSliderPosition(yaw);
+    slidePitchTrim->setSliderPosition(pitch);
+    slideRollTrim->setSliderPosition(roll);
+    slideThrottleTrim->setSliderPosition(thro);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onFilterSettingsUpdated(int imu, int alt, int aux, int batt)
+{
+    slideOrientationFilter->setSliderPosition(imu);
+    slideAltitudeFilter->setSliderPosition(alt);
+    slideAuxiliaryFilter->setSliderPosition(aux);
+    slideBatteryFilter->setSliderPosition(batt);
 }
 
 // -----------------------------------------------------------------------------
@@ -136,7 +154,7 @@ void SettingsDialog::onDeviceControlCheckStateChanged(int state)
     }
 
     int id = m_dev_to_id.value(sender());
-    emit updateDeviceControl(id, (state == Qt::Checked) ? 1 : 0);
+    emit deviceControlChanged(id, (state == Qt::Checked) ? 1 : 0);
 }
 
 // -----------------------------------------------------------------------------
@@ -149,7 +167,7 @@ void SettingsDialog::onDeviceControlSliderValueChanged(int value)
     }
 
     int id = m_dev_to_id.value(sender());
-    emit updateDeviceControl(id, value);
+    emit deviceControlChanged(id, value);
 }
 
 // -----------------------------------------------------------------------------
@@ -162,7 +180,7 @@ void SettingsDialog::onDeviceControlMenuItemChanged(int index)
     }
 
     int id = m_dev_to_id.value(sender());
-    emit updateDeviceControl(id, index);
+    emit deviceControlChanged(id, index);
 }
 
 // -----------------------------------------------------------------------------
@@ -194,10 +212,10 @@ void SettingsDialog::onOkClicked()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onApplyClicked()
 {
-    emit updateTracking(sbR->value(), sbG->value(), sbB->value(),
+    emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
             sbHt->value(), sbSt->value(), sbFt->value());
 
-    emit updateLogFile(editLogFileName->text(), sbLogBuffer->value());
+    emit logSettingsChanged(editLogFileName->text(), sbLogBuffer->value());
 }
 
 // -----------------------------------------------------------------------------
@@ -223,25 +241,25 @@ void SettingsDialog::onColorTrackingEnabled(bool enabled)
 void SettingsDialog::onTrimSliderChanged(int value)
 {
     if (sender() == slideThrottleTrim)
-        emit updateAxisTrim(AXIS_ALT, value);
+        emit trimSettingsChanged(AXIS_ALT, value);
     else if (sender() == slideYawTrim)
-        emit updateAxisTrim(AXIS_YAW, value);
+        emit trimSettingsChanged(AXIS_YAW, value);
     else if (sender() == slidePitchTrim)
-        emit updateAxisTrim(AXIS_PITCH, value);
+        emit trimSettingsChanged(AXIS_PITCH, value);
     else if (sender() == slideRollTrim)
-        emit updateAxisTrim(AXIS_ROLL, value);
+        emit trimSettingsChanged(AXIS_ROLL, value);
 }
 
 // -----------------------------------------------------------------------------
 void SettingsDialog::onFilterSliderChanged(int value)
 {
     if (sender() == slideOrientationFilter)
-        emit updateSignalFilter(SIGNAL_ORIENTATION, value);
+        emit filterSettingsChanged(SIGNAL_ORIENTATION, value);
     else if (sender() == slideAltitudeFilter)
-        emit updateSignalFilter(SIGNAL_ALTITUDE, value);
+        emit filterSettingsChanged(SIGNAL_ALTITUDE, value);
     else if (sender() == slideAuxiliaryFilter)
-        emit updateSignalFilter(SIGNAL_AUXILIARY, value);
+        emit filterSettingsChanged(SIGNAL_AUXILIARY, value);
     else if (sender() == slideBatteryFilter)
-        emit updateSignalFilter(SIGNAL_BATTERY, value);
+        emit filterSettingsChanged(SIGNAL_BATTERY, value);
 }
 

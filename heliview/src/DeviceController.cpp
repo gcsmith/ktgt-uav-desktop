@@ -39,6 +39,20 @@ bool DeviceController::requestDeviceControls() const
 }
 
 // -----------------------------------------------------------------------------
+bool DeviceController::requestFilterSettings() const
+{
+    Logger::info("DeviceController::requestFilterSettings()\n");
+    return true;
+}
+
+// -----------------------------------------------------------------------------
+bool DeviceController::requestTrimSettings() const
+{
+    Logger::info("DeviceController::requestTrimSettings()\n");
+    return true;
+}
+
+// -----------------------------------------------------------------------------
 bool DeviceController::requestTakeoff() const
 {
     Logger::info("DeviceController::requestTakeoff()\n");
@@ -81,31 +95,31 @@ void DeviceController::onInputReady(GamepadEvent event, int index, float value)
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateTrackColor(int r, int g, int b,
+void DeviceController::updateTrackSettings(int r, int g, int b,
         int ht, int st, int ft)
 {
-    Logger::info(tr("DeviceController::onUpdateTrackColor(%1, %2, %3, %4, "
+    Logger::info(tr("DeviceController::updateTrackSettings(%1, %2, %3, %4, "
                 "%5, %6)\n").arg(r).arg(g).arg(b).arg(ht).arg(st).arg(ft));
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateDeviceControl(int id, int value)
+void DeviceController::updateDeviceControl(int id, int value)
 {
-    Logger::info(tr("DeviceController::onUpdateDeviceControl(%1, %2)\n")
+    Logger::info(tr("DeviceController::updateDeviceControl(%1, %2)\n")
             .arg(id).arg(value));
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateAxisTrim(int axes, int value)
+void DeviceController::updateTrimSettings(int axes, int value)
 {
-    Logger::info(tr("DeviceController::onUpdateAxisTrim(%1, %2)\n")
+    Logger::info(tr("DeviceController::updateTrimSettings(%1, %2)\n")
             .arg(axes).arg(value));
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateSignalFilter(int signal, int samples)
+void DeviceController::updateFilterSettings(int signal, int samples)
 {
-    Logger::info(tr("DeviceController::onUpdateSignalFilter(%1, %2)\n")
+    Logger::info(tr("DeviceController::updateFilterSettings(%1, %2)\n")
             .arg(signal).arg(samples));
 }
 
