@@ -36,7 +36,7 @@ public:
     virtual DeviceState currentState() const { return m_state; }
     virtual int currentAxes() const { return m_axes; }
     virtual TrackSettings currentTrackSettings() const { return m_track; }
-    virtual bool getTrackEnable() const { return m_track_en; }
+    virtual bool getTrackEnabled() const { return m_track_en; }
 
     virtual bool requestDeviceControls() const;
     virtual bool requestFilterSettings() const;

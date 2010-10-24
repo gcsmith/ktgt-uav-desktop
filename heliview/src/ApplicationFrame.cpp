@@ -733,18 +733,16 @@ void ApplicationFrame::onKillswitchClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onColorTrackingClicked()
 {
-    TrackSettings curTS;
     bool track_en;
 
     // get current track settings
-    curTS    = m_controller->currentTrackSettings();
     track_en = !m_controller->getTrackEnabled();
 
     // update button label
     if (track_en)
-        btnColorTrack->setText("Disable Color Tracking");
+        btnColorTrack->setText("Disable Tracking");
     else
-        btnColorTrack->setText("Enable Color Tracking");
+        btnColorTrack->setText("Enable Tracking");
 
     m_controller->onUpdateTrackEnabled(track_en);
 }
@@ -754,9 +752,9 @@ void ApplicationFrame::onUpdateTrackEnabled(bool track_en)
 {
     // update button label
     if (track_en)
-        btnColorTrack->setText("Disable Color Tracking");
+        btnColorTrack->setText("Disable Tracking");
     else
-        btnColorTrack->setText("Enable Color Tracking");
+        btnColorTrack->setText("Enable Tracking");
 }
 
 // ----------------------------------------------------------------------------

@@ -23,9 +23,9 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en,
 
     // label the color tracking button appropriately
     if (m_colortrack_en)
-        btnToggleTracking->setText("Disable Color Tracking");
+        btnToggleTracking->setText("Disable Tracking");
     else
-        btnToggleTracking->setText("Enable Color Tracking");
+        btnToggleTracking->setText("Enable Tracking");
 
     // add a vertical spacer at some absurdly high row index
     ((QGridLayout *)deviceControlScrollAreaContents->layout())->addItem(
@@ -243,9 +243,9 @@ void SettingsDialog::onColorTrackingClicked()
 {
     m_colortrack_en = !m_colortrack_en;
     if (m_colortrack_en)
-        btnToggleTracking->setText("Disable Color Tracking");
+        btnToggleTracking->setText("Disable Tracking");
     else
-        btnToggleTracking->setText("Enable Color Tracking");
+        btnToggleTracking->setText("Enable Tracking");
 
     emit updateTrackEnabled(m_colortrack_en);
 }

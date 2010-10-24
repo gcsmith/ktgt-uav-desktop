@@ -644,6 +644,7 @@ void NetworkDeviceController::onUpdateTrackEnabled(bool track_en)
             m_track.color.blue(), m_track.ht, m_track.st, m_track.ft);
 }
 
+// -----------------------------------------------------------------------------
 void NetworkDeviceController::updateTrackSettings(
         int r, int g, int b, int ht, int st, int ft)
 {

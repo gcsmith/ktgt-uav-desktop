@@ -34,6 +34,7 @@ TrackSettings DeviceController::currentTrackSettings() const
 // -----------------------------------------------------------------------------
 bool DeviceController::getTrackEnabled() const
 {
+    Logger::info("DeviceController::getTrackEnabled()\n");
     return true;
 }
 
