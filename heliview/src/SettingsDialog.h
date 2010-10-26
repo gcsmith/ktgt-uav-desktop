@@ -59,7 +59,7 @@ public slots:
     void onPIDSliderChanged(int value);
 
     // double spin box events
-    void onPIDSpinBoxChanged(double value);
+    void onPIDSpinBoxChanged();
     
 protected:
     // PID settings changed event handler

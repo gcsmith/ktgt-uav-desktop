@@ -320,32 +320,35 @@ void SettingsDialog::onPIDSliderChanged(int value)
         spinKd->setValue(value_f);
     }
 
-    //onPIDSettingsChanged(signal, value_f);
+    onPIDSettingsChanged(signal, value_f);
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onPIDSpinBoxChanged(double value)
+void SettingsDialog::onPIDSpinBoxChanged()
 {
-    int value_int = value * 10000;
+    int value_int;// = value * 10000;
     int signal;
 
     if (sender() == spinKp)
     {
         signal = SIGNAL_KP;
+        value_int = spinKp->value() * 10000;
         slideKp->setValue(value_int);
     }
     else if (sender() == spinKi)
     {
         signal = SIGNAL_KI;
+        value_int = spinKi->value() * 10000;
         slideKi->setValue(value_int);
     }
     else if (sender() == spinKd)
     {
         signal = SIGNAL_KD;
+        value_int = spinKd->value() * 10000;
         slideKd->setValue(value_int);
     }
 
-    onPIDSettingsChanged(signal, (float)value);
+    //onPIDSettingsChanged(signal, (float)value);
 }
 
 // -----------------------------------------------------------------------------
