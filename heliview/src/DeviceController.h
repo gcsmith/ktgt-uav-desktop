@@ -33,9 +33,9 @@ enum SignalFilters
 struct TrackSettings
 {
     TrackSettings()
-    : color(0, 0, 0), ht(0), st(0), ft(0) { }
-    TrackSettings(QColor _color, int _ht, int _st, int _ft)
-    : color(_color), ht(_ht), st(_st), ft(_ft) { }
+    : color(0, 0, 0), ht(0), st(0), ft(0), fps(0) { }
+    TrackSettings(QColor _color, int _ht, int _st, int _ft, int _fps)
+    : color(_color), ht(_ht), st(_st), ft(_ft), fps(_fps) { }
     QColor color;
     int ht, st, ft, fps;
 };
@@ -70,6 +70,7 @@ public:
     virtual bool requestManualOverride() const;
     virtual bool requestAutonomous() const;
     virtual bool requestKillswitch() const;
+    virtual bool requestColors() const;
 
 public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
@@ -85,6 +86,7 @@ signals:
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
     void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
+    void colorValuesUpdate(TrackSettings track);
     void deviceControlUpdated(const QString &name, const QString &type,
             int id, int minimum, int maximum, int step, int default_value, 
             int current_value) const;

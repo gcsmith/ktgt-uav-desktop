@@ -21,7 +21,7 @@ const bool SimulatedDeviceController::m_takesDevice = false;
 // -----------------------------------------------------------------------------
 SimulatedDeviceController::SimulatedDeviceController(const QString &device)
 : m_device(device), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
-  m_manual(false), m_track(QColor(0, 0, 0), 15, 15, 10)
+  m_manual(false), m_track(QColor(0, 0, 0), 15, 15, 10, 12)
 {
 }
 

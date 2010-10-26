@@ -47,6 +47,7 @@ public:
     virtual bool requestManualOverride() const;
     virtual bool requestAutonomous() const;
     virtual bool requestKillswitch() const;
+    virtual bool requestColors() const;
 
     static const char *m_description;
     static const bool m_takesDevice;

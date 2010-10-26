@@ -38,6 +38,7 @@ public slots:
     void onDeviceMenuUpdated(const QString &name, int id, int index);
     void onTrimSettingsUpdated(int yaw, int pitch, int roll, int thro);
     void onFilterSettingsUpdated(int imu, int alt, int aux, int batt);
+    void onColorValuesUpdated(TrackSettings track);
 
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);
@@ -54,6 +55,7 @@ public slots:
     // slider track events
     void onTrimSliderChanged(int value);
     void onFilterSliderChanged(int value);
+    
 
 protected:
     int m_devctrls;

@@ -17,7 +17,7 @@ const bool NetworkDeviceController::m_takesDevice = true;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10), 
+  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10, 13), 
   m_track_en(false)
 {
 }
@@ -159,6 +159,12 @@ bool NetworkDeviceController::sendPacket(uint32_t *buffer, int length) const
 bool NetworkDeviceController::requestDeviceControls() const
 {
     return sendPacket(CLIENT_REQ_CAM_DCI);
+}
+
+// -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestColors() const
+{    
+    return sendPacket(CLIENT_REQ_CAM_COLORS);
 }
 
 // -----------------------------------------------------------------------------
@@ -468,6 +474,18 @@ void NetworkDeviceController::onSocketReadyRead()
                 packet[PKT_CTS_STATE] == CTS_STATE_DETECTED,
                 (int)packet[PKT_CTS_X1], (int)packet[PKT_CTS_Y1], 
                 (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
+        break;
+    case SERVER_UPDATE_COLOR:
+        //Logger::info("NETWORK: RECEIVED Update color\n");
+        //R G B, ht, st, ft, fps
+        emit colorValuesUpdate(TrackSettings(
+            QColor((int)packet[PKT_CAM_TC_CH0], 
+                    (int)packet[PKT_CAM_TC_CH1], 
+                    (int)packet[PKT_CAM_TC_CH2]),
+             (int)packet[PKT_CAM_TC_TH0], 
+             (int)packet[PKT_CAM_TC_TH1], 
+             (int)packet[PKT_CAM_TC_FILTER], 
+             (int)packet[PKT_CAM_TC_FPS]));
         break;
     case SERVER_UPDATE_CAM_DCI:
         // convert the type to a string for genericness

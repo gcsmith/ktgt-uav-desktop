@@ -563,7 +563,7 @@ void ApplicationFrame::onEditSettingsTriggered()
     if (m_controller)
     {
         track     = m_controller->currentTrackSettings();
-        track_en  = m_controller->getTrackEnabled();
+        track_en  = m_controller->getTrackEnabled();        
     }
     else 
         track_en = false;
@@ -610,8 +610,15 @@ void ApplicationFrame::onEditSettingsTriggered()
         // initialize the filter settings sliders
         connect(m_controller, SIGNAL(filterSettingsUpdated(int, int, int, int)),
                 &sd, SLOT(onFilterSettingsUpdated(int, int, int, int)));
+                
+        // initialize the color tracking values
+        connect(m_controller, SIGNAL(colorValuesUpdate(TrackSettings)),
+                &sd, SLOT(onColorValuesUpdated(TrackSettings)));
 
         m_controller->requestFilterSettings();
+        if(!m_controller->requestColors()){
+            Logger::warn("SETTINGS: Failed To send requestColors");
+        }
     }
     
     connect(&sd, SIGNAL(logSettingsChanged(const QString &, int)), this, 

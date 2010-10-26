@@ -28,7 +28,7 @@ int DeviceController::currentAxes() const
 // -----------------------------------------------------------------------------
 TrackSettings DeviceController::currentTrackSettings() const
 {
-    return TrackSettings(QColor(255, 255, 255), 10, 10, 10);
+    return TrackSettings(QColor(255, 255, 255), 10, 10, 10, 12);
 }
 
 // -----------------------------------------------------------------------------
@@ -42,6 +42,12 @@ bool DeviceController::getTrackEnabled() const
 bool DeviceController::requestDeviceControls() const
 {
     Logger::info("DeviceController::requestDeviceControls()\n");
+    return true;
+}
+// -----------------------------------------------------------------------------
+bool DeviceController::requestColors() const
+{
+    Logger::info("DeviceController::requestColors()\n");
     return true;
 }
 

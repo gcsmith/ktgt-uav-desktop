@@ -42,6 +42,7 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
     connect(btnNewColor, SIGNAL(released()), this, SLOT(onNewColorClicked()));
 
     // assign specified color and threshold values to dialog widgets
+    /*
     sbR->setValue(track.color.red());
     sbG->setValue(track.color.green());
     sbB->setValue(track.color.blue());
@@ -51,7 +52,7 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
     
     //Set Initial Tracking FPS
     sbTrackingFps->setValue(10);
-
+    */
     //TODO: Set LogFile Value
     editLogFileName->setText(logfile);
     sbLogBuffer->setValue(logbufsize);
@@ -154,6 +155,22 @@ void SettingsDialog::onFilterSettingsUpdated(int imu, int alt, int aux, int batt
     slideAuxiliaryFilter->setSliderPosition(aux);
     slideBatteryFilter->setSliderPosition(batt);
 }
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onColorValuesUpdated(TrackSettings track)
+{
+    sbR->setValue(track.color.red());
+    sbG->setValue(track.color.green());
+    sbB->setValue(track.color.blue());
+    sbHt->setValue(track.ht);
+    sbSt->setValue(track.st);
+    sbFt->setValue(track.ft);
+    
+    //Set Initial Tracking FPS
+    sbTrackingFps->setValue(track.fps);
+   //Logger::info("SETTINGS: Color values updated\n");
+}
+
 
 // -----------------------------------------------------------------------------
 void SettingsDialog::onDeviceControlCheckStateChanged(int state)
