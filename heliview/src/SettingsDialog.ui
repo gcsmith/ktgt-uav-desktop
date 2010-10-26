@@ -861,7 +861,7 @@
               <item row="0" column="1">
                <widget class="QSlider" name="slideKp">
                 <property name="maximum">
-                 <number>10000</number>
+                 <number>100000</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -878,7 +878,7 @@
               <item row="1" column="1">
                <widget class="QSlider" name="slideKi">
                 <property name="maximum">
-                 <number>10000</number>
+                 <number>100000</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -888,7 +888,7 @@
               <item row="2" column="1">
                <widget class="QSlider" name="slideKd">
                 <property name="maximum">
-                 <number>10000</number>
+                 <number>100000</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -912,30 +912,30 @@
               <item row="0" column="2">
                <widget class="QDoubleSpinBox" name="spinKp">
                 <property name="decimals">
-                 <number>4</number>
+                 <number>5</number>
                 </property>
                 <property name="singleStep">
-                 <double>0.000100000000000</double>
+                 <double>0.000010000000000</double>
                 </property>
                </widget>
               </item>
               <item row="1" column="2">
                <widget class="QDoubleSpinBox" name="spinKi">
                 <property name="decimals">
-                 <number>4</number>
+                 <number>5</number>
                 </property>
                 <property name="singleStep">
-                 <double>0.000100000000000</double>
+                 <double>0.000010000000000</double>
                 </property>
                </widget>
               </item>
               <item row="2" column="2">
                <widget class="QDoubleSpinBox" name="spinKd">
                 <property name="decimals">
-                 <number>4</number>
+                 <number>5</number>
                 </property>
                 <property name="singleStep">
-                 <double>0.000100000000000</double>
+                 <double>0.000010000000000</double>
                 </property>
                </widget>
               </item>

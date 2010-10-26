@@ -301,7 +301,7 @@ void SettingsDialog::onFilterSliderChanged(int value)
 // -----------------------------------------------------------------------------
 void SettingsDialog::onPIDSliderChanged(int value)
 {
-    float value_f = value / 10000.0f;
+    float value_f = value / 100000.0f;
     int signal;
 
     if (sender() == slideKp)
@@ -326,25 +326,25 @@ void SettingsDialog::onPIDSliderChanged(int value)
 // -----------------------------------------------------------------------------
 void SettingsDialog::onPIDSpinBoxChanged()
 {
-    int value_int;// = value * 10000;
+    int value_int;
     int signal;
 
     if (sender() == spinKp)
     {
         signal = SIGNAL_KP;
-        value_int = spinKp->value() * 10000;
+        value_int = spinKp->value() * 100000;
         slideKp->setValue(value_int);
     }
     else if (sender() == spinKi)
     {
         signal = SIGNAL_KI;
-        value_int = spinKi->value() * 10000;
+        value_int = spinKi->value() * 100000;
         slideKi->setValue(value_int);
     }
     else if (sender() == spinKd)
     {
         signal = SIGNAL_KD;
-        value_int = spinKd->value() * 10000;
+        value_int = spinKd->value() * 100000;
         slideKd->setValue(value_int);
     }
 }
@@ -352,7 +352,7 @@ void SettingsDialog::onPIDSpinBoxChanged()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onPIDSettingsUpdated(float p, float i, float d)
 {
-    int p_int = p * 10000, i_int  = i * 10000, d_int = d * 10000;
+    int p_int = p * 100000, i_int  = i * 100000, d_int = d * 100000;
 
     // update sliders
     slideKp->setValue(p_int);
