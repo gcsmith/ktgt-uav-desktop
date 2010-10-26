@@ -128,11 +128,12 @@ void SimulatedDeviceController::onInputReady(
 
 // -----------------------------------------------------------------------------
 void SimulatedDeviceController::updateTrackSettings(
-        int r, int g, int b, int ht, int st, int ft)
+        int r, int g, int b, int ht, int st, int ft, int fps)
 {
     m_track.color = QColor(r, g, b);
     if (ht > 0) m_track.ht = ht;
     if (st > 0) m_track.st = st;
     if (ft > 0) m_track.ft = ft;
+    if (fps >= 0) m_track.fps = fps;
 }
 
