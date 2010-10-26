@@ -320,7 +320,7 @@ void SettingsDialog::onPIDSliderChanged(int value)
         spinKd->setValue(value_f);
     }
 
-    onPIDSettingsChanged(signal, value_f);
+    //onPIDSettingsChanged(signal, value_f);
 }
 
 // -----------------------------------------------------------------------------
