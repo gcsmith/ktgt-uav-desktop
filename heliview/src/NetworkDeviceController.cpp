@@ -358,8 +358,8 @@ void NetworkDeviceController::onSocketReadyRead()
 {
     QDataStream stream(m_sock);
     stream.setVersion(QDataStream::Qt_4_0);
-    int32_t rssi, altitude, battery, aux, framesz,cpu;
-    float x, y, z;
+    int32_t rssi, battery, aux, framesz,cpu;
+    float x, y, z, h;
     QString log_msg, type;
 
     if (0 == m_blocksz)
@@ -411,14 +411,14 @@ void NetworkDeviceController::onSocketReadyRead()
         x = *(float *)&packet[PKT_VTI_YAW];
         y = *(float *)&packet[PKT_VTI_PITCH];
         z = *(float *)&packet[PKT_VTI_ROLL];
+        h = *(float *)&packet[PKT_VTI_ALT];
        
-        rssi     = packet[PKT_VTI_RSSI];
-        altitude = packet[PKT_VTI_ALT];
-        battery  = packet[PKT_VTI_BATT];
-        aux      = packet[PKT_VTI_AUX];
-        cpu      = packet[PKT_VTI_CPU];
+        rssi    = packet[PKT_VTI_RSSI];
+        battery = packet[PKT_VTI_BATT];
+        aux     = packet[PKT_VTI_AUX];
+        cpu     = packet[PKT_VTI_CPU];
 
-        emit telemetryReady(-z, -y, x, altitude, rssi, battery, aux, cpu);
+        emit telemetryReady(-z, -y, x, h, rssi, battery, aux, cpu);
         break;
     case SERVER_ACK_MJPG_FRAME:
         framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;
