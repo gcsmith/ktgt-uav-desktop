@@ -759,29 +759,30 @@ void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::updatePIDSettings(int signal, float value)
 {
-    fprintf(stderr, "NDC: getting pid settings %d, %f\n", signal, value);
-    /*
     uint32_t cmd_buffer[8];
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SFS;
+    union { int i; float f; } temp;
+
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SPIDS;
     cmd_buffer[PKT_LENGTH]  = PKT_SPIDS_LENGTH;
 
-    uint32_t sfs_sig;
+    uint32_t spids_sig;
     switch (signal)
     {
     case SIGNAL_KP:
-        sfs_sig = SPIDS_IMU;
+        spids_sig = SPIDS_KP;
         break;
     case SIGNAL_KI:
-        sfs_sig = SPIDS_ALT;
+        spids_sig = SPIDS_KI;
         break;
     case SIGNAL_KD:
-        sfs_sig = SPIDS_AUX;
+        spids_sig = SPIDS_KD;
         break;
     }
 
-    cmd_buffer[PKT_SPIDS_SIGNAL] = sfs_sig;
-    cmd_buffer[PKT_SPIDS_PARAM] = value;
-    sendPacket(cmd_buffer, PKT_SFS_LENGTH);
-    */
+    temp.f = value;
+
+    cmd_buffer[PKT_SPIDS_PARAM] = spids_sig;
+    cmd_buffer[PKT_SPIDS_VALUE] = temp.i;
+    sendPacket(cmd_buffer, PKT_SPIDS_LENGTH);
 }
 
