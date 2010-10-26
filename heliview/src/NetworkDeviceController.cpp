@@ -756,3 +756,32 @@ void NetworkDeviceController::updateFilterSettings(int signal, int samples)
     sendPacket(cmd_buffer, PKT_SFS_LENGTH);
 }
 
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::updatePIDSettings(int signal, float value)
+{
+    fprintf(stderr, "NDC: getting pid settings %d, %f\n", signal, value);
+    /*
+    uint32_t cmd_buffer[8];
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SFS;
+    cmd_buffer[PKT_LENGTH]  = PKT_SPIDS_LENGTH;
+
+    uint32_t sfs_sig;
+    switch (signal)
+    {
+    case SIGNAL_KP:
+        sfs_sig = SPIDS_IMU;
+        break;
+    case SIGNAL_KI:
+        sfs_sig = SPIDS_ALT;
+        break;
+    case SIGNAL_KD:
+        sfs_sig = SPIDS_AUX;
+        break;
+    }
+
+    cmd_buffer[PKT_SPIDS_SIGNAL] = sfs_sig;
+    cmd_buffer[PKT_SPIDS_PARAM] = value;
+    sendPacket(cmd_buffer, PKT_SFS_LENGTH);
+    */
+}
+

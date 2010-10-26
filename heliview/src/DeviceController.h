@@ -28,6 +28,9 @@ enum SignalFilters
     SIGNAL_ALTITUDE,
     SIGNAL_AUXILIARY,
     SIGNAL_BATTERY,
+    SIGNAL_KP,
+    SIGNAL_KI,
+    SIGNAL_KD,
 };
 
 struct TrackSettings
@@ -79,6 +82,7 @@ public slots:
     virtual void updateDeviceControl(int id, int value);
     virtual void updateTrimSettings(int axes, int value);
     virtual void updateFilterSettings(int signal, int samples);
+    virtual void updatePIDSettings(int signal, float Kd);
 
 signals:
     void telemetryReady(float x, float y, float z,

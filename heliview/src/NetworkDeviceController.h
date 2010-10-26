@@ -67,6 +67,7 @@ public slots:
     void updateDeviceControl(int id, int value);
     void updateTrimSettings(int axes, int value);
     void updateFilterSettings(int signal, int samples);
+    void updatePIDSettings(int signal, float value);
 
 protected:
     void startup();

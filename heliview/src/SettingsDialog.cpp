@@ -298,3 +298,59 @@ void SettingsDialog::onFilterSliderChanged(int value)
         emit filterSettingsChanged(SIGNAL_BATTERY, value);
 }
 
+// -----------------------------------------------------------------------------
+void SettingsDialog::onPIDSliderChanged(int value)
+{
+    float value_f = value / 10000.0f;
+    int signal;
+
+    if (sender() == slideKp)
+    {
+        signal = SIGNAL_KP;
+        spinKp->setValue(value_f);
+    }
+    else if (sender() == slideKi)
+    {
+        signal = SIGNAL_KI;
+        spinKi->setValue(value_f);
+    }
+    else if (sender() == slideKd)
+    {
+        signal = SIGNAL_KD; 
+        spinKd->setValue(value_f);
+    }
+
+    onPIDSettingsChanged(signal, value_f);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onPIDSpinBoxChanged(double value)
+{
+    int value_int = value * 10000;
+    int signal;
+
+    if (sender() == spinKp)
+    {
+        signal = SIGNAL_KP;
+        slideKp->setValue(value_int);
+    }
+    else if (sender() == spinKi)
+    {
+        signal = SIGNAL_KI;
+        slideKi->setValue(value_int);
+    }
+    else if (sender() == spinKd)
+    {
+        signal = SIGNAL_KD;
+        slideKd->setValue(value_int);
+    }
+
+    onPIDSettingsChanged(signal, (float)value);
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onPIDSettingsChanged(int signal, float value)
+{
+    emit pidSettingsChanged(signal, value);
+}
+

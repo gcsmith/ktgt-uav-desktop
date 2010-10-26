@@ -29,6 +29,7 @@ signals:
     void deviceControlChanged(int id, int value);
     void trimSettingsChanged(int axis, int value);
     void filterSettingsChanged(int signal, int samples);
+    void pidSettingsChanged(int signal, float value);
     
 public slots:
     // device control related events
@@ -55,9 +56,15 @@ public slots:
     // slider track events
     void onTrimSliderChanged(int value);
     void onFilterSliderChanged(int value);
-    
+    void onPIDSliderChanged(int value);
 
+    // double spin box events
+    void onPIDSpinBoxChanged(double value);
+    
 protected:
+    // PID settings changed event handler
+    void onPIDSettingsChanged(int signal, float value);
+
     int m_devctrls;
     QMap<QObject *, int> m_dev_to_id;
     QMap<int, QObject *> m_id_to_dev;

@@ -143,6 +143,13 @@ void DeviceController::updateFilterSettings(int signal, int samples)
 }
 
 // -----------------------------------------------------------------------------
+void DeviceController::updatePIDSettings(int signal, float value)
+{
+    Logger::info(tr("DeviceController::updatePIDSettings(%1, %2)\n")
+            .arg(signal).arg(value));
+}
+
+// -----------------------------------------------------------------------------
 DeviceController *CreateDeviceController(
         const QString &name,
         const QString &device)

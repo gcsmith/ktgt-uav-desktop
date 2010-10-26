@@ -478,8 +478,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>150</width>
-               <height>32</height>
+               <width>155</width>
+               <height>30</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_9">
@@ -507,7 +507,7 @@
        <string>Flight Control</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QScrollArea" name="scrollArea">
          <property name="widgetResizable">
           <bool>true</bool>
@@ -517,8 +517,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>613</width>
-            <height>378</height>
+            <width>615</width>
+            <height>414</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -846,6 +846,96 @@
                <widget class="QSpinBox" name="spinBatteryFilter">
                 <property name="maximum">
                  <number>64</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_6">
+             <property name="title">
+              <string>GroupBox</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_12">
+              <item row="0" column="1">
+               <widget class="QSlider" name="slideKp">
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="lblKp">
+                <property name="text">
+                 <string>Proportional:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSlider" name="slideKi">
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSlider" name="slideKd">
+                <property name="maximum">
+                 <number>10000</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="lblKi">
+                <property name="text">
+                 <string>Integration:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="lblKd">
+                <property name="text">
+                 <string>Derivative:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QDoubleSpinBox" name="spinKp">
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+                <property name="singleStep">
+                 <double>0.000100000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QDoubleSpinBox" name="spinKi">
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+                <property name="singleStep">
+                 <double>0.000100000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QDoubleSpinBox" name="spinKd">
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+                <property name="singleStep">
+                 <double>0.000100000000000</double>
                 </property>
                </widget>
               </item>
@@ -1497,6 +1587,102 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>slideKp</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slideKi</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>259</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slideKd</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>285</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinKp</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>584</x>
+     <y>365</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinKi</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>584</x>
+     <y>391</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinKd</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>584</x>
+     <y>417</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>updateYawTrim(int)</signal>
@@ -1513,5 +1699,7 @@
   <slot>onManualWhiteBalanceEnabled(bool)</slot>
   <slot>onTrimSliderChanged(int)</slot>
   <slot>onFilterSliderChanged(int)</slot>
+  <slot>onPIDSliderChanged(int)</slot>
+  <slot>onPIDSpinBoxChanged(double)</slot>
  </slots>
 </ui>

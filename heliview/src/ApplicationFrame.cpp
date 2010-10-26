@@ -590,6 +590,9 @@ void ApplicationFrame::onEditSettingsTriggered()
         connect(&sd, SIGNAL(filterSettingsChanged(int, int)),
                 m_controller, SLOT(updateFilterSettings(int, int)));
 
+        connect(&sd, SIGNAL(pidSettingsChanged(int, float)), 
+            m_controller, SLOT(updatePIDSettings(int, float)));
+
         // populate the video device control pane
         connect(m_controller, SIGNAL(deviceControlUpdated(const QString &,
                         const QString &, int, int, int, int, int, int)),
