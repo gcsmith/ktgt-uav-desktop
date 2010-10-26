@@ -618,6 +618,12 @@ void ApplicationFrame::onEditSettingsTriggered()
         connect(m_controller, SIGNAL(colorValuesUpdate(TrackSettings)),
                 &sd, SLOT(onColorValuesUpdated(TrackSettings)));
 
+        // initialize the PID parameters
+        connect(m_controller, SIGNAL(pidSettingsUpdated(float, float, float)),
+                &sd, SLOT(onPIDSettingsUpdated(float, float, float)));
+
+        m_controller->requestPIDSettings();
+
         m_controller->requestFilterSettings();
         if(!m_controller->requestColors()){
             Logger::warn("SETTINGS: Failed To send requestColors");

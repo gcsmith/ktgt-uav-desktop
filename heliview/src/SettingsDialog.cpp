@@ -320,7 +320,7 @@ void SettingsDialog::onPIDSliderChanged(int value)
         spinKd->setValue(value_f);
     }
 
-    onPIDSettingsChanged(signal, value_f);
+    emit pidSettingsChanged(signal, value_f);
 }
 
 // -----------------------------------------------------------------------------
@@ -347,13 +347,21 @@ void SettingsDialog::onPIDSpinBoxChanged()
         value_int = spinKd->value() * 10000;
         slideKd->setValue(value_int);
     }
-
-    //onPIDSettingsChanged(signal, (float)value);
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onPIDSettingsChanged(int signal, float value)
+void SettingsDialog::onPIDSettingsUpdated(float p, float i, float d)
 {
-    emit pidSettingsChanged(signal, value);
+    int p_int = p * 10000, i_int  = i * 10000, d_int = d * 10000;
+
+    // update sliders
+    slideKp->setValue(p_int);
+    slideKi->setValue(i_int);
+    slideKd->setValue(d_int);
+
+    // update double spin boxes
+    spinKp->setValue(p);
+    spinKi->setValue(i);
+    spinKd->setValue(d);
 }
 

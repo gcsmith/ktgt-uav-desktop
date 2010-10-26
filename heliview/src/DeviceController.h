@@ -67,6 +67,7 @@ public:
     virtual bool requestDeviceControls() const;
     virtual bool requestTrimSettings() const;
     virtual bool requestFilterSettings() const;
+    virtual bool requestPIDSettings() const;
 
     virtual bool requestTakeoff() const;
     virtual bool requestLanding() const;
@@ -97,6 +98,7 @@ signals:
     void deviceMenuUpdated(const QString &name, int id, int index) const;
     void trimSettingsUpdated(int yaw, int pitch, int roll, int thro) const;
     void filterSettingsUpdated(int imu, int alt, int aux, int batt) const;
+    void pidSettingsUpdated(float p, float i, float d);
     void stateChanged(int state) const;
     void takeoff();
     void landing();

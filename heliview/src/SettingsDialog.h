@@ -40,6 +40,7 @@ public slots:
     void onTrimSettingsUpdated(int yaw, int pitch, int roll, int thro);
     void onFilterSettingsUpdated(int imu, int alt, int aux, int batt);
     void onColorValuesUpdated(TrackSettings track);
+    void onPIDSettingsUpdated(float p, float i, float d);
 
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);
@@ -62,9 +63,6 @@ public slots:
     void onPIDSpinBoxChanged();
     
 protected:
-    // PID settings changed event handler
-    void onPIDSettingsChanged(int signal, float value);
-
     int m_devctrls;
     QMap<QObject *, int> m_dev_to_id;
     QMap<int, QObject *> m_id_to_dev;

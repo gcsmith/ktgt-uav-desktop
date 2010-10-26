@@ -66,6 +66,13 @@ bool DeviceController::requestTrimSettings() const
 }
 
 // -----------------------------------------------------------------------------
+bool DeviceController::requestPIDSettings() const
+{
+    Logger::info("DeviceController::requestPIDSettings()\n");
+    return true;
+}
+
+// -----------------------------------------------------------------------------
 bool DeviceController::requestTakeoff() const
 {
     Logger::info("DeviceController::requestTakeoff()\n");

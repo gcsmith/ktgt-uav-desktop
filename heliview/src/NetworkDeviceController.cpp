@@ -180,6 +180,12 @@ bool NetworkDeviceController::requestFilterSettings() const
 }
 
 // -----------------------------------------------------------------------------
+bool NetworkDeviceController::requestPIDSettings() const
+{
+    return sendPacket(CLIENT_REQ_GPIDS);
+}
+
+// -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestTakeoff() const
 {
     return sendPacket(CLIENT_REQ_TAKEOFF);
@@ -516,6 +522,23 @@ void NetworkDeviceController::onSocketReadyRead()
         emit filterSettingsUpdated(packet[PKT_GFS_IMU], packet[PKT_GFS_ALT],
                 packet[PKT_GFS_AUX], packet[PKT_GFS_BATT]);
         break;
+    case SERVER_ACK_GPIDS:
+        union { int i; float f; } temp;
+        float p, i, d;
+
+        // get PID Kp
+        temp.i = packet[PKT_GPIDS_KP];
+        p = temp.f;
+
+        // get PID Ki
+        temp.i = packet[PKT_GPIDS_KI];
+        i = temp.f;
+
+        // get PID Kd
+        temp.i = packet[PKT_GPIDS_KD];
+        d = temp.f;
+
+        emit pidSettingsUpdated(p, i, d);
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
         break;
