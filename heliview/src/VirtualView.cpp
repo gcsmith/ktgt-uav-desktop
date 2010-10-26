@@ -16,7 +16,7 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 VirtualView::VirtualView(QWidget *parent)
-: QWidget(parent), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
+: QWidget(parent), m_time(0), m_yaw(0), m_pitch(0), m_roll(0), m_alt(0),
   m_root(NULL), m_window(NULL), m_camera(NULL), m_view(NULL), m_scene(NULL)
 {
     m_timer = new QTimer(this);
@@ -52,9 +52,10 @@ void VirtualView::initialize()
     m_scene = m_root->createSceneManager(Ogre::ST_GENERIC, "HeliViewScene");
 
     m_camera = m_scene->createCamera("PlayerCam");
-    m_camera->setPosition(Ogre::Vector3(0, 40, 50));
-    m_camera->lookAt(Ogre::Vector3(0, 40, 0));
     m_camera->setNearClipDistance(5);
+
+    m_camera->setPosition(Ogre::Vector3(0, 8, 40));
+    m_camera->lookAt(Ogre::Vector3(0, 8, 0));
 
     m_view = m_window->addViewport(m_camera);
     m_view->setBackgroundColour(Ogre::ColourValue(1, 1, 0.8f));
@@ -88,8 +89,8 @@ void VirtualView::initialize()
     // create and attach a helicopter entity and scene node
     e_heli = m_scene->createEntity("Apache", "apache_body.mesh");
     n_heli = n_root->createChildSceneNode("Apache");
-    n_heli->setPosition(Ogre::Vector3(0, 40, 0));
-    n_heli->setScale(Ogre::Vector3(3, 3, 3));
+    n_heli->setPosition(Ogre::Vector3(0, 10, 0));
+    n_heli->setScale(Ogre::Vector3(2, 2, 2));
     n_heli->attachObject(e_heli);
 
     e_main_rotor = m_scene->createEntity("Apache_MRotor", "main_rotor.mesh");
@@ -211,7 +212,7 @@ void VirtualView::setupRenderSystem()
 }
 
 // -----------------------------------------------------------------------------
-void VirtualView::setAngles(float yaw, float pitch, float roll)
+void VirtualView::setOrientation(float yaw, float pitch, float roll)
 {
     // update current yaw/pitch/roll
     m_yaw   = yaw;
@@ -230,6 +231,15 @@ void VirtualView::setAngles(float yaw, float pitch, float roll)
 
     // update helicopter orientation and render the next frame
     n_heli->setOrientation(q);
+}
+
+// -----------------------------------------------------------------------------
+void VirtualView::setAltitude(float inches)
+{
+    // convert to meters, add half of the helicoptor's height for model offset
+    m_alt = inches * 0.0254 * 15;
+    m_camera->lookAt(Ogre::Vector3(0, m_alt + 2.0f, 0));
+    n_heli->setPosition(Ogre::Vector3(0, m_alt + 2.0f, 0));
 }
 
 // -----------------------------------------------------------------------------

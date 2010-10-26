@@ -108,7 +108,7 @@ void SettingsDialog::onDeviceControlUpdated(const QString &name,
     {
         // put a drop down menu on the right hand side
         QComboBox *cb = new QComboBox(parent);
-        for(int i=0; i <= maximum; i++){
+        for(int i = 0; i <= maximum; i++){
             cb->addItem("");
         }
         cb->setCurrentIndex(current_value);

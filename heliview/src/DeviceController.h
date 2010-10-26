@@ -86,8 +86,8 @@ public slots:
     virtual void updatePIDSettings(int signal, float Kd);
 
 signals:
-    void telemetryReady(float x, float y, float z,
-                        int alt, int rssi, int batt, int aux, int cpu);
+    void telemetryReady(float x, float y, float z, float alt,
+            int rssi, int batt, int aux, int cpu);
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
     void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);

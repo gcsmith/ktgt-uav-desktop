@@ -28,7 +28,8 @@ public:
     virtual QPaintEngine *paintEngine() const;
 
     void setRunning(bool flag);
-    void setAngles(float yaw, float pitch, float roll);
+    void setOrientation(float yaw, float pitch, float roll);
+    void setAltitude(float altitude);
 
 protected slots:
     void onPaintTick();
@@ -42,6 +43,7 @@ protected:
     QTimer *m_timer;
     float m_time;
     float m_yaw, m_pitch, m_roll;
+    float m_alt;
 
     Ogre::Root         *m_root;
     Ogre::RenderWindow *m_window;

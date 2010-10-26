@@ -133,9 +133,9 @@ void ApplicationFrame::setupStatusBar()
 void ApplicationFrame::connectDeviceController()
 {
     connect(m_controller,
-            SIGNAL(telemetryReady(float, float, float, int, int, int, int, int)),
+            SIGNAL(telemetryReady(float, float, float, float, int, int, int, int)),
             this,
-            SLOT(onTelemetryReady(float, float, float, int, int, int, int, int)));
+            SLOT(onTelemetryReady(float, float, float, float, int, int, int, int)));
 
     connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
             this, SLOT(onConnectionStatusChanged(const QString&, bool)));
@@ -403,13 +403,16 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onTelemetryReady(
-    float yaw, float pitch, float roll, int alt, int rssi, int batt, int aux, int cpu)
+void ApplicationFrame::onTelemetryReady( float yaw, float pitch, float roll,
+        float alt, int rssi, int batt, int aux, int cpu)
 {
     static float time = 0.0f;
 
     if (m_virtual)
-        m_virtual->setAngles(yaw, pitch, roll);
+    {
+        m_virtual->setOrientation(yaw, pitch, roll);
+        m_virtual->setAltitude(alt);
+    }
 
     connectionStatusBar->setValue(rssi);
     connectionStatusBar->setFormat(QString("%1 dBm").arg(rssi));
@@ -418,7 +421,7 @@ void ApplicationFrame::onTelemetryReady(
     batteryStatusBar->setFormat(QString("%p%"));
 
     elevationStatusBar->setValue(alt);
-    elevationStatusBar->setFormat(QString("%1 inches").arg(alt));
+    elevationStatusBar->setFormat(QString("%1 inches").arg((int)alt));
 
     aux = (int)(100.0f * ((aux - 900.0f) / 1150.0f));
     aux = min(max(0, aux), 100);

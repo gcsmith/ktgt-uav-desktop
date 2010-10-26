@@ -20,7 +20,7 @@ const bool SimulatedDeviceController::m_takesDevice = false;
 
 // -----------------------------------------------------------------------------
 SimulatedDeviceController::SimulatedDeviceController(const QString &device)
-: m_device(device), m_time(0.0f), m_yaw(0.0f), m_pitch(0.0f), m_roll(0.0f),
+: m_device(device), m_time(0.0f), m_yaw(0), m_pitch(0), m_roll(0), m_alt(0),
   m_manual(false), m_track(QColor(0, 0, 0), 15, 15, 10, 12)
 {
 }
@@ -43,6 +43,7 @@ bool SimulatedDeviceController::open()
         connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateTick()));
     timer->start(20);
 
+    emit stateChanged(STATE_AUTONOMOUS);
     emit connectionStatusChanged(QString("Simulated connection opened"), true);
     return true;
 }
@@ -86,15 +87,16 @@ void SimulatedDeviceController::onSimulateTick()
         m_yaw += m_dyaw;
         m_pitch += m_dpitch;
         m_roll += m_droll;
-        m_throttle += m_dthrottle;
+        m_alt += m_dthrottle;
     }
     else
     {
         m_yaw += 0.25;
         m_pitch = 7.0f * sin(m_time);
         m_roll = 5.0f * sin(m_time * 2.0f);
+        m_alt = 21.0f + 21.0f * sin(m_time);
     }
-    emit telemetryReady(m_yaw, m_pitch, m_roll, 0, 200, 100, 1500,0);
+    emit telemetryReady(m_yaw, m_pitch, m_roll, m_alt, 200, 100, 1000, 0);
 }
 
 // -----------------------------------------------------------------------------

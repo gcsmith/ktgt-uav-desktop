@@ -47,8 +47,8 @@ public slots:
     void onUpdateLog(int type, const QString &msg);
     void onConnectionStatusChanged(const QString &text, bool status);
 
-    void onTelemetryReady(float yaw, float pitch, float roll,
-                          int alt, int rssi, int batt, int aux, int cpu);
+    void onTelemetryReady(float yaw, float pitch, float roll, float alt,
+            int rssi, int batt, int aux, int cpu);
     void onStateChanged(int state);
     void onUpdateTrackEnabled(bool track_en);
 

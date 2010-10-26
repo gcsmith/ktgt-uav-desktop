@@ -40,7 +40,7 @@ public slots:
 protected:
     QString       m_device;
     float         m_time;
-    float         m_yaw, m_pitch, m_roll, m_throttle;
+    float         m_yaw, m_pitch, m_roll, m_alt;
     float         m_dyaw, m_dpitch, m_droll, m_dthrottle;
     bool          m_manual;
     TrackSettings m_track;
