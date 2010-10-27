@@ -29,7 +29,7 @@ signals:
     void deviceControlChanged(int id, int value);
     void trimSettingsChanged(int axis, int value);
     void filterSettingsChanged(int signal, int samples);
-    void pidSettingsChanged(int signal, float value);
+    void pidSettingsChanged(int axis, int signal, float value);
     
 public slots:
     // device control related events

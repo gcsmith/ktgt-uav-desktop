@@ -81,9 +81,9 @@ public slots:
     virtual void onUpdateTrackEnabled(bool track_en);
     virtual void updateTrackSettings(int r, int g, int b, int ht, int st, int ft, int fps);
     virtual void updateDeviceControl(int id, int value);
-    virtual void updateTrimSettings(int axes, int value);
+    virtual void updateTrimSettings(int axis, int value);
     virtual void updateFilterSettings(int signal, int samples);
-    virtual void updatePIDSettings(int signal, float Kd);
+    virtual void updatePIDSettings(int axis, int signal, float Kd);
 
 signals:
     void telemetryReady(float x, float y, float z, float alt,

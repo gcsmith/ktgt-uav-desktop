@@ -13,6 +13,7 @@
 #include "SettingsDialog.h"
 #include "DeviceController.h"
 #include "Logger.h"
+#include "uav_protocol.h"
 
 // -----------------------------------------------------------------------------
 SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
@@ -240,8 +241,8 @@ void SettingsDialog::onOkClicked()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onApplyClicked()
 {
-    emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
-            sbHt->value(), sbSt->value(), sbFt->value(),sbTrackingFps->value());
+    //emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
+    //        sbHt->value(), sbSt->value(), sbFt->value(),sbTrackingFps->value());
 
     emit logSettingsChanged(editLogFileName->text(), sbLogBuffer->value());
 }
@@ -303,6 +304,7 @@ void SettingsDialog::onPIDSliderChanged(int value)
 {
     float value_f = value / 100000.0f;
     int signal;
+    int axis = VCM_AXIS_ALT;
 
     if (sender() == slideKp)
     {
@@ -320,7 +322,7 @@ void SettingsDialog::onPIDSliderChanged(int value)
         spinKd->setValue(value_f);
     }
 
-    emit pidSettingsChanged(signal, value_f);
+    emit pidSettingsChanged(axis, signal, value_f);
 }
 
 // -----------------------------------------------------------------------------

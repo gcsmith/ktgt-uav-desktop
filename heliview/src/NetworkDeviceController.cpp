@@ -181,8 +181,12 @@ bool NetworkDeviceController::requestFilterSettings() const
 
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestPIDSettings() const
-{
-    return sendPacket(CLIENT_REQ_GPIDS);
+{    
+    uint32_t cmd_buffer[PKT_GPIDS_LENGTH];
+    cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_GPIDS;
+    cmd_buffer[PKT_LENGTH]   = PKT_GPIDS_LENGTH;
+    cmd_buffer[PKT_GPIDS_AXIS] = VCM_AXIS_ALT;
+    return sendPacket(cmd_buffer, PKT_GPIDS_LENGTH);
 }
 
 // -----------------------------------------------------------------------------
@@ -539,6 +543,7 @@ void NetworkDeviceController::onSocketReadyRead()
         d = temp.f;
 
         emit pidSettingsUpdated(p, i, d);
+        break;
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
         break;
@@ -780,7 +785,7 @@ void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::updatePIDSettings(int signal, float value)
+void NetworkDeviceController::updatePIDSettings(int axis, int signal, float value)
 {
     uint32_t cmd_buffer[8];
     union { int i; float f; } temp;
@@ -806,6 +811,7 @@ void NetworkDeviceController::updatePIDSettings(int signal, float value)
 
     cmd_buffer[PKT_SPIDS_PARAM] = spids_sig;
     cmd_buffer[PKT_SPIDS_VALUE] = temp.i;
+    cmd_buffer[PKT_SPIDS_AXIS] = axis;
     sendPacket(cmd_buffer, PKT_SPIDS_LENGTH);
 }
 
