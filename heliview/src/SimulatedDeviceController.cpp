@@ -97,6 +97,8 @@ void SimulatedDeviceController::onSimulateTick()
         m_alt = 21.0f + 21.0f * sin(m_time);
     }
     emit telemetryReady(m_yaw, m_pitch, m_roll, m_alt, 200, 100, 1000, 0);
+    Logger::telemetry(tr("%1 %2 %3 %4 %5 %6 %7 %8\n").arg(m_yaw).arg(m_pitch)
+                    .arg(m_roll).arg(m_alt).arg(200).arg(100).arg(1000).arg(0));
 }
 
 // -----------------------------------------------------------------------------

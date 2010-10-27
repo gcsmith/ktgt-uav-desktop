@@ -121,6 +121,8 @@ void SerialDeviceController::processSingleLine(const string &line)
     float y = ssplit[1].toFloat();
     float z = ssplit[2].toFloat();
 
-    emit telemetryReady(z, x, y, 0, 200, 100, 1500, 0);
+    emit telemetryReady(z, y, x, 0, 200, 100, 1500, 0);
+    Logger::telemetry(tr("%1 %2 %3 %4 %5 %6 %7 %8\n").arg(z).arg(y).arg(x)
+                     .arg(0).arg(200).arg(100).arg(1500).arg(0));
 }
 
