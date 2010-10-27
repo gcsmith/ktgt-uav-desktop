@@ -503,9 +503,9 @@ void ApplicationFrame::onTelemetryReady( float yaw, float pitch, float roll,
     cpuStatusBar->setFormat(QString("%p%"));    
 
     // add new data to their respective plots
-    m_graphs[AXIS_X]->addDataPoint(time, yaw + 180.0f, 0.0f);
+    m_graphs[AXIS_Z]->addDataPoint(time, yaw + 180.0f, 0.0f);
     m_graphs[AXIS_Y]->addDataPoint(time, pitch + 180.0f, 0.0f);
-    m_graphs[AXIS_Z]->addDataPoint(time, roll + 180.0f, 0.0f);
+    m_graphs[AXIS_X]->addDataPoint(time, roll + 180.0f, 0.0f);
     m_graphs[CONNECTION]->addDataPoint(time, rssi, 0.0f);
     m_graphs[BATTERY]->addDataPoint(time, batt, 0.0f);
     m_graphs[AUXILIARY]->addDataPoint(time, aux, 0.0f);
