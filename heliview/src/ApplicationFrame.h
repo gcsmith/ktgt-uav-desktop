@@ -37,13 +37,13 @@ public:
     ApplicationFrame(bool noVirtualView);
     virtual ~ApplicationFrame();
 
-    void openLogFile(const QString &logfile);
+    void openLogFile(const QString &logfile, const QString &tlogfile);
     void closeLogFile();
     bool enableLogging(bool enable, const QString &verbosity);
 
 public slots:
     bool connectTo(const QString &source, const QString &device);
-    void onUpdateLogFile(const QString &file, int bufsize);
+    void onUpdateLogFile(const QString &file, const QString &tfile, int bufsize);
     void onUpdateLog(int type, const QString &msg);
     void onConnectionStatusChanged(const QString &text, bool status);
 
@@ -97,15 +97,18 @@ protected:
 
     bool openDevice();
     void setEnabledButtons(int buttons);
-    void writeToLog(const QString &plain, const QString &rich);
+    void writeToLog(const QString &plain, const QString &rich, int log);
 
     LineGraph        *m_graphs[AXIS_COUNT];
     VirtualView      *m_virtual;
     VideoView        *m_video;
     QFile            *m_file;
+    QFile            *m_tele_file;
     QLabel           *m_connStat;
     QTextStream      *m_log;
     QByteArray       *m_logbuffer;
+    QTextStream      *m_tele_log;
+    QByteArray       *m_tele_logbuffer;
     int               m_bufsize;
     bool              m_logging;
     DeviceController *m_controller;

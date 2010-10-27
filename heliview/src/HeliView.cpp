@@ -21,7 +21,8 @@ namespace po = boost::program_options;
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    string source, logfile("heliview.log"), device, log_verbosity;
+    string source, logfile("heliview.log"), tlogfile("telemetry.log"), device, 
+        log_verbosity;
 
     bool show_usage = false;
     bool disable_virtual_view = false;
@@ -75,7 +76,8 @@ int main(int argc, char *argv[])
                 cerr << "invalid logging mode '" << log_verbosity << "' specified\n";
                 cerr << "defaulted logging mode to normal\n";
             }
-            frame.openLogFile(QString::fromStdString(logfile));
+            frame.openLogFile(QString::fromStdString(logfile),
+                                QString::fromStdString(tlogfile));
         }
 
         // optionally connect to a device if specified

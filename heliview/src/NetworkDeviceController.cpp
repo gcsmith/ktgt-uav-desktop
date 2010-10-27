@@ -423,6 +423,8 @@ void NetworkDeviceController::onSocketReadyRead()
         cpu     = packet[PKT_VTI_CPU];
 
         emit telemetryReady(-z, -y, x, h, rssi, battery, aux, cpu);
+        Logger::telemetry(tr("%1 %2 %3 %4 %5 %6 %7 %8\n").arg(-z).arg(-y).arg(x)
+                            .arg(h).arg(rssi).arg(battery).arg(aux).arg(cpu));
         break;
     case SERVER_ACK_MJPG_FRAME:
         framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;

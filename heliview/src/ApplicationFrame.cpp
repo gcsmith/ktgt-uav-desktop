@@ -21,8 +21,9 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 ApplicationFrame::ApplicationFrame(bool noVirtualView)
-: m_virtual(NULL), m_video(NULL), m_file(NULL), m_log(NULL), m_logbuffer(NULL),
-  m_bufsize(1024), m_logging(false), m_controller(NULL), m_gamepad(NULL)
+: m_virtual(NULL), m_video(NULL), m_file(NULL), m_tele_file(NULL), m_log(NULL), 
+  m_logbuffer(NULL), m_tele_log(NULL), m_tele_logbuffer(NULL), m_bufsize(1024),
+  m_logging(false), m_controller(NULL), m_gamepad(NULL)
 {
     setupUi(this);
 
@@ -35,6 +36,7 @@ ApplicationFrame::ApplicationFrame(bool noVirtualView)
         setupVirtualView();
 
     m_logbuffer = new QByteArray();
+    m_tele_logbuffer = new QByteArray();
 
     connect(Logger::instance(), SIGNAL(updateLog(int, const QString &)), this,
             SLOT(onUpdateLog(int, const QString &)));
@@ -222,12 +224,22 @@ void ApplicationFrame::setEnabledButtons(int buttons)
 }
   
 // -----------------------------------------------------------------------------
-void ApplicationFrame::openLogFile(const QString &logfile)
+void ApplicationFrame::openLogFile(const QString &logfile, const QString &tlogfile)
 {
     if (!m_file)
     {
         m_file = new QFile(logfile);
         if (!m_file)
+        {
+            Logger::fail("failed to allocate file object\n");
+            return;
+        }
+    }
+    
+        if (!m_tele_file)
+    {
+        m_tele_file = new QFile(tlogfile);
+        if (!m_tele_file)
         {
             Logger::fail("failed to allocate file object\n");
             return;
@@ -240,6 +252,14 @@ void ApplicationFrame::openLogFile(const QString &logfile)
         return;
     }
     Logger::info(tr("successfully opened log '%1'\n").arg(m_file->fileName()));
+    
+    if (!m_tele_file->open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        Logger::err("could not open new log file\n");
+        return;
+    }
+    Logger::info(tr("successfully opened telemetry log '%1'\n").arg(
+                                                    m_tele_file->fileName()));
 
     if (!m_log)
     {
@@ -251,6 +271,17 @@ void ApplicationFrame::openLogFile(const QString &logfile)
         }
     }
     m_log->setDevice(m_file);
+    
+    if (!m_tele_log)
+    {
+        m_tele_log = new QTextStream();
+        if (!m_tele_log)
+        {
+            Logger::fail("failed to allocate telemetry log stream\n");
+            return;
+        }
+    }
+    m_tele_log->setDevice(m_tele_file);
 }
 
 // -----------------------------------------------------------------------------
@@ -262,6 +293,14 @@ void ApplicationFrame::closeLogFile()
         m_file->close();
         SafeDelete(m_file);
         SafeDelete(m_log);
+    }
+    
+    if (m_tele_file)
+    {
+        m_tele_log->flush();
+        m_tele_file->close();
+        SafeDelete(m_tele_file);
+        SafeDelete(m_tele_log);
     }
 }
 
@@ -288,7 +327,8 @@ bool ApplicationFrame::enableLogging(bool enable, const QString &verbosity)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::writeToLog(const QString &plain, const QString &rich)
+void ApplicationFrame::writeToLog(const QString &plain, const QString &rich, 
+                                    int log)
 {
     txtCommandLog->textCursor().insertHtml(rich);
    
@@ -296,33 +336,55 @@ void ApplicationFrame::writeToLog(const QString &plain, const QString &rich)
     c.movePosition(QTextCursor::End);
     txtCommandLog->setTextCursor(c);
 
-    m_logbuffer->append(plain);
-    if (m_logbuffer->size() >= m_bufsize)
-    {
-        if (m_log)
+    if(log == 0){
+        m_logbuffer->append(plain);
+        if (m_logbuffer->size() >= m_bufsize)
         {
-            // only write to file when we reach bufsize limit
-            *m_log << *m_logbuffer;
-            m_log->flush();
+            if (m_log)
+            {
+                // only write to file when we reach bufsize limit
+                *m_log << *m_logbuffer;
+                m_log->flush();
+            }
+            m_logbuffer->clear();
         }
-        m_logbuffer->clear();
+    }
+    else if(log == 1){
+        m_tele_logbuffer->append(plain);
+        if (m_tele_logbuffer->size() >= m_bufsize)
+        {
+            if (m_tele_log)
+            {
+                // only write to file when we reach bufsize limit
+                *m_tele_log << *m_tele_logbuffer;
+                m_tele_log->flush();
+            }
+            m_tele_logbuffer->clear();
+        }
     }
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onUpdateLogFile(const QString &file, int bufsize)
+void ApplicationFrame::onUpdateLogFile(const QString &file, const QString &tfile,
+                                        int bufsize)
 {
     // close last file opened
     m_log->flush();
     m_file->flush();
     m_file->close();
     SafeDelete(m_file);
+    
+    m_tele_log->flush();
+    m_tele_file->flush();
+    m_tele_file->close();
+    SafeDelete(m_tele_file);
 
     // clear buffer to start fresh
     m_logbuffer->clear();
-
+    m_tele_logbuffer->clear();
+    
     // open lof file and set buffer size limit
-    openLogFile(file);
+    openLogFile(file, tfile);
     m_bufsize = bufsize * 1024;
 }
 
@@ -334,6 +396,7 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
 
     QString plain_msg = msg; // copy for plain text
     QString rich_msg = msg;  // copy for rich text
+    int log = 0;
 
     rich_msg.replace(QString("\n"), QString("<br>"));
     rich_msg.replace(QString(" "), QString("&nbsp;"));
@@ -363,6 +426,8 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
             rich_msg.append("</font>");
             plain_msg.prepend("debug: ");
             break;
+        case LOG_TYPE_TELEMETRY:
+            log = 1;
         default:
             // type is comprised of multiple flags
             break;
@@ -378,7 +443,7 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
             cerr << plain_msg.toAscii().constData() << endl;
         }
         
-        writeToLog(plain_msg, rich_msg);
+        writeToLog(plain_msg, rich_msg, log);
         break;
         case LOG_MODE_NORMAL_DEBUG:
         // log debug messages plus normal messages
@@ -389,12 +454,12 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
             (type & LOG_TYPE_WARN) ||
             (type & LOG_TYPE_INFO))
         {
-            writeToLog(plain_msg, rich_msg);
+            writeToLog(plain_msg, rich_msg, log);
         }
         else if ((m_verbosity == LOG_MODE_NORMAL_DEBUG) && (type & LOG_TYPE_DBG))
         {
             cerr << plain_msg.toAscii().constData() << endl;
-            writeToLog(plain_msg, rich_msg);
+            writeToLog(plain_msg, rich_msg, log);
         }
         break;
         default:

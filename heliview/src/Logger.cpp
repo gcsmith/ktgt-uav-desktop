@@ -58,3 +58,8 @@ void Logger::fail(const QString &msg)
     emit Logger::instance()->updateLog(LOG_TYPE_FAIL, msg);
 }
 
+// -----------------------------------------------------------------------------
+void Logger::telemetry(const QString &msg)
+{
+    emit Logger::instance()->updateLog(LOG_TYPE_TELEMETRY, msg);
+}
