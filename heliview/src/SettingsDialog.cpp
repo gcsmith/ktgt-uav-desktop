@@ -241,8 +241,8 @@ void SettingsDialog::onOkClicked()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onApplyClicked()
 {
-    //emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
-    //        sbHt->value(), sbSt->value(), sbFt->value(),sbTrackingFps->value());
+    emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
+            sbHt->value(), sbSt->value(), sbFt->value(),sbTrackingFps->value());
 
     emit logSettingsChanged(editLogFileName->text(), sbLogBuffer->value());
 }
@@ -300,70 +300,80 @@ void SettingsDialog::onFilterSliderChanged(int value)
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onPIDSliderChanged(int value)
-{
-    float value_f = value / 100000.0f;
-    int signal;
-    int axis = VCM_AXIS_ALT;
-
-    if (sender() == slideKp)
-    {
-        signal = SIGNAL_KP;
-        spinKp->setValue(value_f);
-    }
-    else if (sender() == slideKi)
-    {
-        signal = SIGNAL_KI;
-        spinKi->setValue(value_f);
-    }
-    else if (sender() == slideKd)
-    {
-        signal = SIGNAL_KD; 
-        spinKd->setValue(value_f);
-    }
-
-    emit pidSettingsChanged(axis, signal, value_f);
-}
-
-// -----------------------------------------------------------------------------
 void SettingsDialog::onPIDSpinBoxChanged()
 {
-    int value_int;
-    int signal;
+    int axis    = VCM_AXIS_ALT;
+    int signal  = SIGNAL_KP;
 
-    if (sender() == spinKp)
-    {
+    //Determine Signal
+    if (sender() == spin_alt_kp     || sender() == spin_yaw_kp ||
+        sender() == spin_pitch_kp   || sender() == spin_roll_kp){
         signal = SIGNAL_KP;
-        value_int = spinKp->value() * 100000;
-        slideKp->setValue(value_int);
-    }
-    else if (sender() == spinKi)
-    {
+    } else if ( sender() == spin_alt_ki     || sender() == spin_yaw_ki ||
+                sender() == spin_pitch_ki   || sender() == spin_roll_ki){
         signal = SIGNAL_KI;
-        value_int = spinKi->value() * 100000;
-        slideKi->setValue(value_int);
-    }
-    else if (sender() == spinKd)
-    {
+    } else if ( sender() == spin_alt_kd     || sender() == spin_yaw_kd ||
+                sender() == spin_pitch_kd   || sender() == spin_roll_kd){
         signal = SIGNAL_KD;
-        value_int = spinKd->value() * 100000;
-        slideKd->setValue(value_int);
     }
+    
+    //Determine Axis
+    if (    sender() == spin_alt_kp || 
+            sender() == spin_alt_ki ||
+            sender() == spin_alt_kd )
+    {
+        axis    = VCM_AXIS_ALT;
+    } else if ( sender() == spin_yaw_kp || 
+                sender() == spin_yaw_ki ||
+                sender() == spin_yaw_kd )
+    {
+        axis    = VCM_AXIS_YAW;
+    } else if ( sender() == spin_pitch_kp || 
+                sender() == spin_pitch_ki ||
+                sender() == spin_pitch_kd )
+    {
+        axis    = VCM_AXIS_PITCH;
+    } else if ( sender() == spin_roll_kp || 
+                sender() == spin_roll_ki ||
+                sender() == spin_roll_kd )
+    {
+        axis    = VCM_AXIS_ROLL;
+    }
+    
+    emit pidSettingsChanged(axis, signal, ((QDoubleSpinBox*)sender())->value());
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onPIDSettingsUpdated(float p, float i, float d)
-{
-    int p_int = p * 100000, i_int  = i * 100000, d_int = d * 100000;
-
-    // update sliders
-    slideKp->setValue(p_int);
-    slideKi->setValue(i_int);
-    slideKd->setValue(d_int);
-
-    // update double spin boxes
-    spinKp->setValue(p);
-    spinKi->setValue(i);
-    spinKd->setValue(d);
+void SettingsDialog::onPIDSettingsUpdated(int axis, float p, float i, float d)
+{   
+    switch (axis) {
+        case VCM_AXIS_YAW:
+            // update double spin boxes
+            spin_yaw_kp->setValue(p);
+            spin_yaw_ki->setValue(i);
+            spin_yaw_kd->setValue(d);
+            break;
+        case VCM_AXIS_PITCH:
+            // update double spin boxes
+            spin_pitch_kp->setValue(p);
+            spin_pitch_ki->setValue(i);
+            spin_pitch_kd->setValue(d);
+            break;
+        case VCM_AXIS_ROLL:
+            // update double spin boxes
+            spin_roll_kp->setValue(p);
+            spin_roll_ki->setValue(i);
+            spin_roll_kd->setValue(d);
+            break;
+        case VCM_AXIS_ALT:
+            // update double spin boxes
+            spin_alt_kp->setValue(p);
+            spin_alt_ki->setValue(i);
+            spin_alt_kd->setValue(d);
+            break;
+        default:
+            Logger::fail(
+                tr("onPIDSettingsUpdated: invalid axis: %1\n").arg(axis));          
+    }
 }
 

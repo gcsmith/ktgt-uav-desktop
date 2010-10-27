@@ -16,6 +16,7 @@
 #include "Logger.h"
 #include "SettingsDialog.h"
 #include "Utility.h"
+#include "uav_protocol.h"
 
 using namespace std;
 
@@ -687,10 +688,13 @@ void ApplicationFrame::onEditSettingsTriggered()
                 &sd, SLOT(onColorValuesUpdated(TrackSettings)));
 
         // initialize the PID parameters
-        connect(m_controller, SIGNAL(pidSettingsUpdated(float, float, float)),
-                &sd, SLOT(onPIDSettingsUpdated(float, float, float)));
+        connect(m_controller, SIGNAL(pidSettingsUpdated(int, float, float, float)),
+                &sd, SLOT(onPIDSettingsUpdated(int, float, float, float)));
 
-        m_controller->requestPIDSettings();
+        m_controller->requestPIDSettings(VCM_AXIS_YAW);
+        m_controller->requestPIDSettings(VCM_AXIS_PITCH);
+        m_controller->requestPIDSettings(VCM_AXIS_ROLL);
+        m_controller->requestPIDSettings(VCM_AXIS_ALT);
 
         m_controller->requestFilterSettings();
         if(!m_controller->requestColors()){

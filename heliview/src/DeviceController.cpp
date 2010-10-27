@@ -66,7 +66,7 @@ bool DeviceController::requestTrimSettings() const
 }
 
 // -----------------------------------------------------------------------------
-bool DeviceController::requestPIDSettings() const
+bool DeviceController::requestPIDSettings(int axis) const
 {
     Logger::info("DeviceController::requestPIDSettings()\n");
     return true;

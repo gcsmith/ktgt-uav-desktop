@@ -180,12 +180,12 @@ bool NetworkDeviceController::requestFilterSettings() const
 }
 
 // -----------------------------------------------------------------------------
-bool NetworkDeviceController::requestPIDSettings() const
+bool NetworkDeviceController::requestPIDSettings(int axis) const
 {    
     uint32_t cmd_buffer[PKT_GPIDS_LENGTH];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_GPIDS;
     cmd_buffer[PKT_LENGTH]   = PKT_GPIDS_LENGTH;
-    cmd_buffer[PKT_GPIDS_AXIS] = VCM_AXIS_ALT;
+    cmd_buffer[PKT_GPIDS_AXIS] = axis;
     return sendPacket(cmd_buffer, PKT_GPIDS_LENGTH);
 }
 
@@ -543,8 +543,10 @@ void NetworkDeviceController::onSocketReadyRead()
         // get PID Kd
         temp.i = packet[PKT_GPIDS_KD];
         d = temp.f;
-
-        emit pidSettingsUpdated(p, i, d);
+        
+        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1 P:%2 I:%3 D%4\n").arg(packet[PKT_GPIDS_AXIS]).arg(packet[PKT_GPIDS_KP]).arg(packet[PKT_GPIDS_KI]).arg(packet[PKT_GPIDS_KD]));
+        
+        emit pidSettingsUpdated(packet[PKT_GPIDS_AXIS], p, i, d);
         break;
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));

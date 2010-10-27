@@ -41,7 +41,7 @@ public:
     virtual bool requestDeviceControls() const;
     virtual bool requestFilterSettings() const;
     virtual bool requestTrimSettings() const;
-    virtual bool requestPIDSettings() const;
+    virtual bool requestPIDSettings(int axis) const;
 
     virtual bool requestTakeoff() const;
     virtual bool requestLanding() const;
