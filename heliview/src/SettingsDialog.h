@@ -25,7 +25,7 @@ public:
 signals:
     void updateTrackEnabled(bool track_en);
     void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft, int fps);
-    void logSettingsChanged(const QString &, int);
+    void logSettingsChanged(const QString &, const QString &, int);
     void deviceControlChanged(int id, int value);
     void trimSettingsChanged(int axis, int value);
     void filterSettingsChanged(int signal, int samples);

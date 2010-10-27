@@ -244,7 +244,7 @@ void SettingsDialog::onApplyClicked()
     emit trackSettingsChanged(sbR->value(), sbG->value(), sbB->value(),
             sbHt->value(), sbSt->value(), sbFt->value(),sbTrackingFps->value());
 
-    emit logSettingsChanged(editLogFileName->text(), sbLogBuffer->value());
+    emit logSettingsChanged(editLogFileName->text(), tr("telemetry.log"), sbLogBuffer->value());
 }
 
 // -----------------------------------------------------------------------------

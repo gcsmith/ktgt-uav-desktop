@@ -22,7 +22,7 @@
 #define LOG_TYPE_WARN       0x0004
 #define LOG_TYPE_INFO       0x0008
 #define LOG_TYPE_DBG        0x0010
-#define LOG_TYPE_TELEMETRY  0x0012
+#define LOG_TYPE_TELEMETRY  0x0040
 #define LOG_TYPE_EXTRADEBUG 0x0020
 
 class Logger : public QObject

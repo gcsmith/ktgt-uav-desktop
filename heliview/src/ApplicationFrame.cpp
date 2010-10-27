@@ -702,8 +702,8 @@ void ApplicationFrame::onEditSettingsTriggered()
         }
     }
     
-    connect(&sd, SIGNAL(logSettingsChanged(const QString &, int)), this, 
-                SLOT(onUpdateLogFile(const QString &, int)));
+    connect(&sd, SIGNAL(logSettingsChanged(const QString &, const QString &, int)), this, 
+                SLOT(onUpdateLogFile(const QString &, const QString &, int)));
         
     connect(&sd, SIGNAL(updateTrackEnabled(bool)), this, 
                 SLOT(onUpdateTrackEnabled(bool)));
