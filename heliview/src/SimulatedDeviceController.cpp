@@ -115,7 +115,7 @@ void SimulatedDeviceController::onInputReady(
         switch (index)
         {
         case 0: m_dyaw = -value; break;
-        case 1: m_dthrottle = value; break;
+        case 1: m_dthrottle = -value; break;
         case 2: m_droll = value; break;
         case 3: m_dpitch = -value; break;
         }
