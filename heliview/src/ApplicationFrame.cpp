@@ -544,7 +544,7 @@ void ApplicationFrame::onStateChanged(int state)
         m_ctlview->setEnabled(false);
         break;
     case STATE_MIXED_CONTROL:
-        setEnabledButtons(BUTTON_OVERRIDE | BUTTON_KILLSWITCH);
+        setEnabledButtons(BUTTON_ALL);
         btnOverride->setText("Release Mixed Control");
         m_ctlview->setEnabled(true);
         m_ctlview->setAxes(m_controller->currentAxes());
