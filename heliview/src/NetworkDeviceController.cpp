@@ -412,9 +412,9 @@ void NetworkDeviceController::onSocketReadyRead()
         Logger::info("NetworkDevice: SERVER_ACK_LANDING\n");
         break;
     case SERVER_ACK_TELEMETRY:
-        x = *(float *)&packet[PKT_VTI_ROLL];
+        x = *(float *)&packet[PKT_VTI_YAW];
         y = *(float *)&packet[PKT_VTI_PITCH];
-        z = *(float *)&packet[PKT_VTI_YAW];
+        z = *(float *)&packet[PKT_VTI_ROLL];
         h = *(float *)&packet[PKT_VTI_ALT];
        
         rssi    = packet[PKT_VTI_RSSI];
