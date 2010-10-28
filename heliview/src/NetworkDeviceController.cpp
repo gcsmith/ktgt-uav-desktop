@@ -545,7 +545,7 @@ void NetworkDeviceController::onSocketReadyRead()
         d = temp.f;
         
         // get PID set
-        temp.i = packet[PKT_GPIDS_SET];
+        temp.i = packet[PKT_GPIDS_SP];
         set = temp.f;
         
         Logger::info(tr("NetworkDevice: Recieved GPID axis:%1\tP:%2\tI:%3\tD:%4\tSetPoint:%5\n").arg(packet[PKT_GPIDS_AXIS]).arg(p).arg(i).arg(d).arg(set));
@@ -813,8 +813,8 @@ void NetworkDeviceController::updatePIDSettings(int axis, int signal, float valu
         case SIGNAL_KD:
             spids_sig = SPIDS_KD;
             break;
-        case SIGNAL_SET:
-            spids_sig = SPIDS_SET;
+        case SIGNAL_SP:
+            spids_sig = SPIDS_SP;
             break;
     }
 

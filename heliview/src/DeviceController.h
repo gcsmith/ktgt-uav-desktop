@@ -31,7 +31,7 @@ enum SignalFilters
     SIGNAL_KP,
     SIGNAL_KI,
     SIGNAL_KD,
-    SIGNAL_SET,
+    SIGNAL_SP,
 };
 
 struct TrackSettings

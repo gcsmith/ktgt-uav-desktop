@@ -317,7 +317,7 @@ void SettingsDialog::onPIDSpinBoxChanged()
         signal = SIGNAL_KD;
     } else if ( sender() == spin_alt_set     || sender() == spin_yaw_set ||
                 sender() == spin_pitch_set   || sender() == spin_roll_set){
-        signal = SIGNAL_SET;
+        signal = SIGNAL_SP;
     }
     
     //Determine Axis
