@@ -469,10 +469,12 @@ void ApplicationFrame::onUpdateLog(int type, const QString &msg)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onTelemetryReady( float yaw, float pitch, float roll,
+void ApplicationFrame::onTelemetryReady(float yaw, float pitch, float roll,
         float alt, int rssi, int batt, int aux, int cpu)
 {
     static float time = 0.0f;
+
+    Logger::info(tr("yaw %1 pitch %2 roll %3\n").arg(yaw).arg(pitch).arg(roll));
 
     if (m_virtual)
     {
