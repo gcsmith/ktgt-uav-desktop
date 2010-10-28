@@ -688,8 +688,8 @@ void ApplicationFrame::onEditSettingsTriggered()
                 &sd, SLOT(onColorValuesUpdated(TrackSettings)));
 
         // initialize the PID parameters
-        connect(m_controller, SIGNAL(pidSettingsUpdated(int, float, float, float)),
-                &sd, SLOT(onPIDSettingsUpdated(int, float, float, float)));
+        connect(m_controller, SIGNAL(pidSettingsUpdated(int, float, float, float, float)),
+                &sd, SLOT(onPIDSettingsUpdated(int, float, float, float, float)));
 
         m_controller->requestPIDSettings(VCM_AXIS_YAW);
         m_controller->requestPIDSettings(VCM_AXIS_PITCH);

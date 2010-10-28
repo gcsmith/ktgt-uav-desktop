@@ -478,8 +478,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>192</width>
-               <height>33</height>
+               <width>627</width>
+               <height>135</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_9">
@@ -516,9 +516,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>613</width>
-            <height>528</height>
+            <y>-86</y>
+            <width>615</width>
+            <height>458</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -913,6 +913,77 @@
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="lbl_pid_setpoints">
+                <property name="text">
+                 <string>Set Points:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QDoubleSpinBox" name="spin_alt_set">
+                <property name="decimals">
+                 <number>5</number>
+                </property>
+                <property name="minimum">
+                 <double>-999.990000000000009</double>
+                </property>
+                <property name="maximum">
+                 <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.000010000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QDoubleSpinBox" name="spin_yaw_set">
+                <property name="decimals">
+                 <number>5</number>
+                </property>
+                <property name="minimum">
+                 <double>-999.990000000000009</double>
+                </property>
+                <property name="maximum">
+                 <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.000010000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="3">
+               <widget class="QDoubleSpinBox" name="spin_pitch_set">
+                <property name="decimals">
+                 <number>5</number>
+                </property>
+                <property name="minimum">
+                 <double>-999.990000000000009</double>
+                </property>
+                <property name="maximum">
+                 <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.000010000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="4">
+               <widget class="QDoubleSpinBox" name="spin_roll_set">
+                <property name="decimals">
+                 <number>5</number>
+                </property>
+                <property name="minimum">
+                 <double>-999.990000000000009</double>
+                </property>
+                <property name="maximum">
+                 <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.000010000000000</double>
                 </property>
                </widget>
               </item>
@@ -1894,6 +1965,70 @@
     <hint type="destinationlabel">
      <x>337</x>
      <y>220</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spin_yaw_set</sender>
+   <signal>editingFinished()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spin_roll_set</sender>
+   <signal>editingFinished()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>555</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spin_pitch_set</sender>
+   <signal>editingFinished()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>427</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spin_alt_set</sender>
+   <signal>editingFinished()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onPIDSpinBoxChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>233</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>187</y>
     </hint>
    </hints>
   </connection>

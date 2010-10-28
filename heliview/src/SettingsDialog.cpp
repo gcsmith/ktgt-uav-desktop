@@ -315,27 +315,34 @@ void SettingsDialog::onPIDSpinBoxChanged()
     } else if ( sender() == spin_alt_kd     || sender() == spin_yaw_kd ||
                 sender() == spin_pitch_kd   || sender() == spin_roll_kd){
         signal = SIGNAL_KD;
+    } else if ( sender() == spin_alt_set     || sender() == spin_yaw_set ||
+                sender() == spin_pitch_set   || sender() == spin_roll_set){
+        signal = SIGNAL_SET;
     }
     
     //Determine Axis
     if (    sender() == spin_alt_kp || 
             sender() == spin_alt_ki ||
-            sender() == spin_alt_kd )
+            sender() == spin_alt_kd ||
+            sender() == spin_alt_set )
     {
         axis    = VCM_AXIS_ALT;
     } else if ( sender() == spin_yaw_kp || 
                 sender() == spin_yaw_ki ||
-                sender() == spin_yaw_kd )
+                sender() == spin_yaw_kd ||
+                sender() == spin_yaw_set )
     {
         axis    = VCM_AXIS_YAW;
     } else if ( sender() == spin_pitch_kp || 
                 sender() == spin_pitch_ki ||
-                sender() == spin_pitch_kd )
+                sender() == spin_pitch_kd ||
+                sender() == spin_pitch_set )
     {
         axis    = VCM_AXIS_PITCH;
     } else if ( sender() == spin_roll_kp || 
                 sender() == spin_roll_ki ||
-                sender() == spin_roll_kd )
+                sender() == spin_roll_kd ||
+                sender() == spin_roll_set )
     {
         axis    = VCM_AXIS_ROLL;
     }
@@ -344,7 +351,7 @@ void SettingsDialog::onPIDSpinBoxChanged()
 }
 
 // -----------------------------------------------------------------------------
-void SettingsDialog::onPIDSettingsUpdated(int axis, float p, float i, float d)
+void SettingsDialog::onPIDSettingsUpdated(int axis, float p, float i, float d, float set)
 {   
     switch (axis) {
         case VCM_AXIS_YAW:
@@ -352,24 +359,28 @@ void SettingsDialog::onPIDSettingsUpdated(int axis, float p, float i, float d)
             spin_yaw_kp->setValue(p);
             spin_yaw_ki->setValue(i);
             spin_yaw_kd->setValue(d);
+            spin_yaw_set->setValue(set);
             break;
         case VCM_AXIS_PITCH:
             // update double spin boxes
             spin_pitch_kp->setValue(p);
             spin_pitch_ki->setValue(i);
             spin_pitch_kd->setValue(d);
+            spin_pitch_set->setValue(set);
             break;
         case VCM_AXIS_ROLL:
             // update double spin boxes
             spin_roll_kp->setValue(p);
             spin_roll_ki->setValue(i);
             spin_roll_kd->setValue(d);
+            spin_roll_set->setValue(set);
             break;
         case VCM_AXIS_ALT:
             // update double spin boxes
             spin_alt_kp->setValue(p);
             spin_alt_ki->setValue(i);
             spin_alt_kd->setValue(d);
+            spin_alt_set->setValue(set);
             break;
         default:
             Logger::fail(

@@ -530,7 +530,7 @@ void NetworkDeviceController::onSocketReadyRead()
         break;
     case SERVER_ACK_GPIDS:
         union { int i; float f; } temp;
-        float p, i, d;
+        float p, i, d, set;
 
         // get PID Kp
         temp.i = packet[PKT_GPIDS_KP];
@@ -544,9 +544,13 @@ void NetworkDeviceController::onSocketReadyRead()
         temp.i = packet[PKT_GPIDS_KD];
         d = temp.f;
         
-        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1 P:%2 I:%3 D%4\n").arg(packet[PKT_GPIDS_AXIS]).arg(packet[PKT_GPIDS_KP]).arg(packet[PKT_GPIDS_KI]).arg(packet[PKT_GPIDS_KD]));
+        // get PID set
+        temp.i = packet[PKT_GPIDS_SET];
+        set = temp.f;
         
-        emit pidSettingsUpdated(packet[PKT_GPIDS_AXIS], p, i, d);
+        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1\tP:%2\tI:%3\tD:%4\tSetPoint:%5\n").arg(packet[PKT_GPIDS_AXIS]).arg(p).arg(i).arg(d).arg(set));
+        
+        emit pidSettingsUpdated(packet[PKT_GPIDS_AXIS], p, i, d, set);
         break;
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
@@ -791,7 +795,7 @@ void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::updatePIDSettings(int axis, int signal, float value)
 {
-    uint32_t cmd_buffer[8];
+    uint32_t cmd_buffer[PKT_SPIDS_LENGTH / 4];
     union { int i; float f; } temp;
 
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SPIDS;
@@ -800,15 +804,18 @@ void NetworkDeviceController::updatePIDSettings(int axis, int signal, float valu
     uint32_t spids_sig;
     switch (signal)
     {
-    case SIGNAL_KP:
-        spids_sig = SPIDS_KP;
-        break;
-    case SIGNAL_KI:
-        spids_sig = SPIDS_KI;
-        break;
-    case SIGNAL_KD:
-        spids_sig = SPIDS_KD;
-        break;
+        case SIGNAL_KP:
+            spids_sig = SPIDS_KP;
+            break;
+        case SIGNAL_KI:
+            spids_sig = SPIDS_KI;
+            break;
+        case SIGNAL_KD:
+            spids_sig = SPIDS_KD;
+            break;
+        case SIGNAL_SET:
+            spids_sig = SPIDS_SET;
+            break;
     }
 
     temp.f = value;

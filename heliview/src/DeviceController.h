@@ -31,6 +31,7 @@ enum SignalFilters
     SIGNAL_KP,
     SIGNAL_KI,
     SIGNAL_KD,
+    SIGNAL_SET,
 };
 
 struct TrackSettings
@@ -98,7 +99,7 @@ signals:
     void deviceMenuUpdated(const QString &name, int id, int index) const;
     void trimSettingsUpdated(int yaw, int pitch, int roll, int thro) const;
     void filterSettingsUpdated(int imu, int alt, int aux, int batt) const;
-    void pidSettingsUpdated(int axis, float p, float i, float d);
+    void pidSettingsUpdated(int axis, float p, float i, float d, float set);
     void stateChanged(int state) const;
     void takeoff();
     void landing();
