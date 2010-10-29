@@ -192,18 +192,21 @@ bool NetworkDeviceController::requestPIDSettings(int axis) const
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestTakeoff() const
 {
+    Logger::info("NetworkDevice: Request Takeoff\n");
     return sendPacket(CLIENT_REQ_TAKEOFF);
 }
 
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestLanding() const
 {
+    Logger::info("NetworkDevice: Request Landing\n");
     return sendPacket(CLIENT_REQ_LANDING);
 }
 
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestManualOverride() const
 {
+    Logger::info("NetworkDevice: Request Manual Override\n");
     uint32_t cmd_buffer[4];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
     cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
@@ -215,6 +218,7 @@ bool NetworkDeviceController::requestManualOverride() const
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestAutonomous() const
 {
+    Logger::info("NetworkDevice: Request Autonomous\n");
     uint32_t cmd_buffer[4];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
     cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
@@ -226,6 +230,7 @@ bool NetworkDeviceController::requestAutonomous() const
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestKillswitch() const
 {
+    Logger::info("NetworkDevice: Request Killswitch\n");
     uint32_t cmd_buffer[4];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
     cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
@@ -589,10 +594,19 @@ void NetworkDeviceController::onSocketError(QAbstractSocket::SocketError error)
 void NetworkDeviceController::onInputReady(
         GamepadEvent event, int index, float value)
 {
+    //Button 4 - A
+    //Button 5 - B
+    //Button 6 - X
+    //Button 7 - Y
+    //Button 8 - LB
+    //Button 9 - RB
+    //Button 10 - Back
+    //Button 11 - Start
     uint32_t cmd_buffer[32];
 
     if (GP_EVENT_BUTTON == event)
     {
+        
         if ((12 == index) && (value > 0.0))
         {
             int vcm_type;
@@ -644,7 +658,7 @@ void NetworkDeviceController::onInputReady(
                 vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
                 break;
             default:
-                Logger::warn("NetworkDevice: unknown controller button\n");
+                Logger::warn("NetworkDevice: unknown controller button - Axis\n");
                 break;
             }
 
@@ -654,6 +668,29 @@ void NetworkDeviceController::onInputReady(
             cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_MIXED;
             cmd_buffer[PKT_VCM_AXES] = vcm_axes;
             sendPacket(cmd_buffer, PKT_VCM_LENGTH);
+        }
+        else if ((value > 0.0) && (index >= 8) && (index <= 11))
+        {
+           
+
+            switch (index)
+            {
+            case 8: // LB - Take off
+                requestTakeoff();
+                break;
+            case 9: // RB - Land
+                requestLanding();
+                break;
+            case 10: // Back - Kill
+                requestKillswitch();
+                break;
+            case 11: // Start - Enable color tracking
+                Logger::info("Xbox - Enable Color Tracking\n");
+                break;
+            default:
+                Logger::warn("NetworkDevice: unknown controller button - Commands\n");
+                break;
+            }
         }
     }
     else if (GP_EVENT_AXIS == event)
