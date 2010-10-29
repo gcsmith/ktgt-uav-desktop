@@ -370,6 +370,9 @@ void NetworkDeviceController::onSocketReadyRead()
     int32_t rssi, battery, aux, framesz,cpu;
     float x, y, z, h;
     QString log_msg, type;
+    QRect bbox;
+    QPoint point;
+    bool enabled;
 
     if (0 == m_blocksz)
     {
@@ -487,10 +490,11 @@ void NetworkDeviceController::onSocketReadyRead()
         emit stateChanged((int)m_state);
         break;
     case SERVER_UPDATE_TRACKING:
-        emit trackStatusUpdate(
-                packet[PKT_CTS_STATE] == CTS_STATE_DETECTED,
-                (int)packet[PKT_CTS_X1], (int)packet[PKT_CTS_Y1], 
-                (int)packet[PKT_CTS_X2], (int)packet[PKT_CTS_Y2]);
+        bbox.setCoords(packet[PKT_CTS_X1], packet[PKT_CTS_Y1], 
+                       packet[PKT_CTS_X2], packet[PKT_CTS_Y2]);
+        point = QPoint(packet[PKT_CTS_XC], packet[PKT_CTS_YC]);
+        enabled = packet[PKT_CTS_STATE] == CTS_STATE_DETECTED;
+        emit trackStatusUpdate(enabled, bbox, point);
         break;
     case SERVER_UPDATE_COLOR:
         //Logger::info("NETWORK: RECEIVED Update color\n");
@@ -745,8 +749,7 @@ void NetworkDeviceController::updateTrackSettings(
     if (ht > 0) m_track.ht = ht;
     if (st > 0) m_track.st = st;
     if (ft > 0) m_track.ft = ft;
-    
-    m_track.fps = fps;
+    if (fps >= 0) m_track.fps = fps;
 
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_TC;
     cmd_buffer[PKT_LENGTH]  = PKT_CAM_TC_LENGTH;

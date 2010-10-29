@@ -35,7 +35,7 @@ public slots:
     void setBoundingBoxColor(int r, int g, int b, int a);
     void setTimeoutTicks(int ticks);
     void onImageReady(const char *data, size_t length);
-    void onTrackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
+    void onTrackStatusUpdate(bool track, const QRect &bb, const QPoint &cp);
     void onStatusTick();
 
 protected:
@@ -50,6 +50,7 @@ protected:
     int m_ticks, m_maxTicks;
     bool m_showBox, m_dragging;
     QRect m_bbox, m_dp;
+    QPoint m_center;
     QBrush m_dragBrush, m_bboxBrush;
     QPen m_dragPen, m_bboxPen;
 };

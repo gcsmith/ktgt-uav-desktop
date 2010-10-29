@@ -82,11 +82,16 @@ void VideoView::paintEvent(QPaintEvent *e)
         int y_s = (int)(m_bbox.y() * yscale);
         int w_s = (int)(m_bbox.width() * xscale);
         int h_s = (int)(m_bbox.height() * yscale);
+        int xc_s = (int)(m_center.x() * xscale);
+        int yc_s = (int)(m_center.y() * yscale);
+        int ln_m = std::min(w_s, h_s) / 20;
 
         // render a wireframe rectangle around the region of interest
         painter.setPen(m_bboxPen);
         painter.setBrush(m_bboxBrush);
         painter.drawRect(x_s, y_s, w_s, h_s);
+        painter.drawLine(xc_s - ln_m, yc_s - ln_m, xc_s + ln_m, yc_s + ln_m);
+        painter.drawLine(xc_s - ln_m, yc_s + ln_m, xc_s + ln_m, yc_s - ln_m);
     }
 
     if (m_dragging)
@@ -203,10 +208,11 @@ void VideoView::onImageReady(const char *data, size_t length)
 }
 
 // -----------------------------------------------------------------------------
-void VideoView::onTrackStatusUpdate(bool track, int x1, int y1, int x2, int y2)
+void VideoView::onTrackStatusUpdate(bool en, const QRect &bb, const QPoint &cp)
 {
-    m_showBox = track;
-    m_bbox.setCoords(x1, y1, x2, y2);
+    m_showBox = en;
+    m_bbox = bb;
+    m_center = cp;
 }
 
 // -----------------------------------------------------------------------------

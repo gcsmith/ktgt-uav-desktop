@@ -91,7 +91,7 @@ signals:
             int rssi, int batt, int aux, int cpu);
     void connectionStatusChanged(const QString &text, bool status);
     void videoFrameReady(const char *data, size_t length);
-    void trackStatusUpdate(bool track, int x1, int y1, int x2, int y2);
+    void trackStatusUpdate(bool en, const QRect &bb, const QPoint &cp);
     void colorValuesUpdate(TrackSettings track);
     void deviceControlUpdated(const QString &name, const QString &type,
             int id, int minimum, int maximum, int step, int default_value, 
