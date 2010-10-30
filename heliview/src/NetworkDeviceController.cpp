@@ -17,7 +17,7 @@ const bool NetworkDeviceController::m_takesDevice = true;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10, 13), 
+  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10, 5), 
   m_track_en(false)
 {
 }
@@ -746,9 +746,9 @@ void NetworkDeviceController::updateTrackSettings(
     uint32_t cmd_buffer[16];
 
     m_track.color = QColor(r, g, b);
-    if (ht > 0) m_track.ht = ht;
-    if (st > 0) m_track.st = st;
-    if (ft > 0) m_track.ft = ft;
+    if (ht >= 0) m_track.ht = ht;
+    if (st >= 0) m_track.st = st;
+    if (ft >= 0) m_track.ft = ft;
     if (fps >= 0) m_track.fps = fps;
 
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_TC;
