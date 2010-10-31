@@ -441,6 +441,30 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="5" colspan="3">
+           <widget class="QComboBox" name="cbRotation">
+            <item>
+             <property name="text">
+              <string>No Rotation</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>90 Degrees</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>180 Degrees</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>270 Degrees</string>
+             </property>
+            </item>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -478,8 +502,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>627</width>
-               <height>135</height>
+               <width>623</width>
+               <height>107</height>
               </rect>
              </property>
              <layout class="QGridLayout" name="gridLayout_9">
@@ -516,9 +540,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-86</y>
-            <width>615</width>
-            <height>458</height>
+            <y>0</y>
+            <width>545</width>
+            <height>559</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1310,6 +1334,72 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>editLogFileName</tabstop>
+  <tabstop>btnLogFile</tabstop>
+  <tabstop>sbLogBuffer</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>checkBox_3</tabstop>
+  <tabstop>checkBox_4</tabstop>
+  <tabstop>checkBox_5</tabstop>
+  <tabstop>btnApply</tabstop>
+  <tabstop>btnCancel</tabstop>
+  <tabstop>btnOK</tabstop>
+  <tabstop>sbR</tabstop>
+  <tabstop>sbG</tabstop>
+  <tabstop>sbB</tabstop>
+  <tabstop>btnNewColor</tabstop>
+  <tabstop>sbHt</tabstop>
+  <tabstop>sbSt</tabstop>
+  <tabstop>sbFt</tabstop>
+  <tabstop>btnToggleTracking</tabstop>
+  <tabstop>sbTrackingFps</tabstop>
+  <tabstop>cbRotation</tabstop>
+  <tabstop>deviceControlScrollArea</tabstop>
+  <tabstop>slideThrottleTrim</tabstop>
+  <tabstop>slideYawTrim</tabstop>
+  <tabstop>slidePitchTrim</tabstop>
+  <tabstop>slideRollTrim</tabstop>
+  <tabstop>spinThrottleTrim</tabstop>
+  <tabstop>spinYawTrim</tabstop>
+  <tabstop>spinPitchTrim</tabstop>
+  <tabstop>spinRollTrim</tabstop>
+  <tabstop>spin_alt_kp</tabstop>
+  <tabstop>spin_alt_ki</tabstop>
+  <tabstop>spin_alt_kd</tabstop>
+  <tabstop>spin_alt_set</tabstop>
+  <tabstop>spin_yaw_kp</tabstop>
+  <tabstop>spin_yaw_ki</tabstop>
+  <tabstop>spin_yaw_kd</tabstop>
+  <tabstop>spin_yaw_set</tabstop>
+  <tabstop>spin_pitch_kp</tabstop>
+  <tabstop>spin_pitch_ki</tabstop>
+  <tabstop>spin_pitch_kd</tabstop>
+  <tabstop>spin_pitch_set</tabstop>
+  <tabstop>spin_roll_kp</tabstop>
+  <tabstop>spin_roll_ki</tabstop>
+  <tabstop>spin_roll_kd</tabstop>
+  <tabstop>spin_roll_set</tabstop>
+  <tabstop>slideOrientationFilter</tabstop>
+  <tabstop>slideAltitudeFilter</tabstop>
+  <tabstop>slideAuxiliaryFilter</tabstop>
+  <tabstop>slideBatteryFilter</tabstop>
+  <tabstop>spinOrientationFilter</tabstop>
+  <tabstop>spinAltitudeFilter</tabstop>
+  <tabstop>spinAuxiliaryFilter</tabstop>
+  <tabstop>spinBatteryFilter</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>tabSettings</tabstop>
+  <tabstop>editThrottleAxis</tabstop>
+  <tabstop>editYawAxis</tabstop>
+  <tabstop>editPitchAxis</tabstop>
+  <tabstop>editRollAxis</tabstop>
+  <tabstop>editThrottleEnable</tabstop>
+  <tabstop>editYawEnable</tabstop>
+  <tabstop>editPitchEnable</tabstop>
+  <tabstop>editRollEnable</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -1335,7 +1425,7 @@
    <slot>onApplyClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>587</x>
+     <x>574</x>
      <y>365</y>
     </hint>
     <hint type="destinationlabel">
@@ -1351,7 +1441,7 @@
    <slot>onCancelClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>635</x>
+     <x>632</x>
      <y>365</y>
     </hint>
     <hint type="destinationlabel">
@@ -1447,8 +1537,8 @@
    <slot>onFilterSliderChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
-     <y>265</y>
+     <x>278</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>188</x>
@@ -1463,8 +1553,8 @@
    <slot>onFilterSliderChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
-     <y>299</y>
+     <x>278</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>189</x>
@@ -1479,8 +1569,8 @@
    <slot>onFilterSliderChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>166</x>
-     <y>375</y>
+     <x>274</x>
+     <y>552</y>
     </hint>
     <hint type="destinationlabel">
      <x>190</x>
@@ -1495,8 +1585,8 @@
    <slot>onFilterSliderChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>166</x>
-     <y>340</y>
+     <x>274</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>190</x>
@@ -1511,8 +1601,8 @@
    <slot>onColorTrackingClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>75</y>
+     <x>520</x>
+     <y>131</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -1527,8 +1617,8 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>111</y>
+     <x>539</x>
+     <y>112</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
@@ -1543,8 +1633,8 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>147</y>
+     <x>539</x>
+     <y>148</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
@@ -1559,8 +1649,8 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>183</y>
+     <x>539</x>
+     <y>184</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
@@ -1575,8 +1665,8 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>219</y>
+     <x>539</x>
+     <y>220</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
@@ -1591,12 +1681,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>565</x>
-     <y>291</y>
+     <x>555</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
-     <y>288</y>
+     <y>446</y>
     </hint>
    </hints>
   </connection>
@@ -1607,12 +1697,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>565</x>
-     <y>327</y>
+     <x>555</x>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
-     <y>324</y>
+     <y>482</y>
     </hint>
    </hints>
   </connection>
@@ -1623,12 +1713,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>565</x>
-     <y>363</y>
+     <x>555</x>
+     <y>516</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
-     <y>360</y>
+     <y>518</y>
     </hint>
    </hints>
   </connection>
@@ -1639,12 +1729,12 @@
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>565</x>
-     <y>399</y>
+     <x>555</x>
+     <y>570</y>
     </hint>
     <hint type="destinationlabel">
      <x>616</x>
-     <y>396</y>
+     <y>569</y>
     </hint>
    </hints>
   </connection>
@@ -1659,8 +1749,8 @@
      <y>108</y>
     </hint>
     <hint type="destinationlabel">
-     <x>552</x>
-     <y>111</y>
+     <x>539</x>
+     <y>112</y>
     </hint>
    </hints>
   </connection>
@@ -1675,8 +1765,8 @@
      <y>144</y>
     </hint>
     <hint type="destinationlabel">
-     <x>552</x>
-     <y>147</y>
+     <x>539</x>
+     <y>148</y>
     </hint>
    </hints>
   </connection>
@@ -1691,8 +1781,8 @@
      <y>180</y>
     </hint>
     <hint type="destinationlabel">
-     <x>552</x>
-     <y>183</y>
+     <x>539</x>
+     <y>184</y>
     </hint>
    </hints>
   </connection>
@@ -1707,8 +1797,8 @@
      <y>216</y>
     </hint>
     <hint type="destinationlabel">
-     <x>552</x>
-     <y>219</y>
+     <x>539</x>
+     <y>220</y>
     </hint>
    </hints>
   </connection>
@@ -1720,11 +1810,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>616</x>
-     <y>288</y>
+     <y>446</y>
     </hint>
     <hint type="destinationlabel">
-     <x>565</x>
-     <y>291</y>
+     <x>555</x>
+     <y>444</y>
     </hint>
    </hints>
   </connection>
@@ -1736,11 +1826,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>616</x>
-     <y>324</y>
+     <y>482</y>
     </hint>
     <hint type="destinationlabel">
-     <x>565</x>
-     <y>327</y>
+     <x>555</x>
+     <y>480</y>
     </hint>
    </hints>
   </connection>
@@ -1752,11 +1842,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>616</x>
-     <y>360</y>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
-     <x>565</x>
-     <y>363</y>
+     <x>555</x>
+     <y>516</y>
     </hint>
    </hints>
   </connection>
@@ -1768,11 +1858,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>616</x>
-     <y>396</y>
+     <y>569</y>
     </hint>
     <hint type="destinationlabel">
-     <x>565</x>
-     <y>399</y>
+     <x>555</x>
+     <y>570</y>
     </hint>
    </hints>
   </connection>
@@ -1783,8 +1873,8 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>584</x>
-     <y>365</y>
+     <x>250</x>
+     <y>308</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -1799,8 +1889,8 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>584</x>
-     <y>391</y>
+     <x>250</x>
+     <y>339</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -1815,8 +1905,8 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>584</x>
-     <y>417</y>
+     <x>250</x>
+     <y>370</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -1975,8 +2065,8 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>299</x>
-     <y>233</y>
+     <x>372</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -1991,8 +2081,8 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>555</x>
-     <y>233</y>
+     <x>616</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -2007,8 +2097,8 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>427</x>
-     <y>233</y>
+     <x>494</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
@@ -2023,12 +2113,28 @@
    <slot>onPIDSpinBoxChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>171</x>
-     <y>233</y>
+     <x>250</x>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>337</x>
      <y>187</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbRotation</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onRotationIndexChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>339</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>177</x>
+     <y>336</y>
     </hint>
    </hints>
   </connection>
@@ -2050,5 +2156,6 @@
   <slot>onFilterSliderChanged(int)</slot>
   <slot>onPIDSliderChanged(int)</slot>
   <slot>onPIDSpinBoxChanged()</slot>
+  <slot>onRotationIndexChanged(int)</slot>
  </slots>
 </ui>

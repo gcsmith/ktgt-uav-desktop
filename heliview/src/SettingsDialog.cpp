@@ -18,7 +18,7 @@
 // -----------------------------------------------------------------------------
 SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
         const TrackSettings &track, const QString &logfile, const int logbufsize)
-: QDialog(pp), m_devctrls(0), m_colortrack_en(track_en)
+: QDialog(pp), m_devctrls(0), m_rotation(90), m_colortrack_en(track_en)
 {
     setupUi(this);
 
@@ -402,5 +402,18 @@ void SettingsDialog::onPIDSettingsUpdated(int axis, float p, float i, float d, f
             Logger::fail(
                 tr("onPIDSettingsUpdated: invalid axis: %1\n").arg(axis));          
     }
+}
+
+// -----------------------------------------------------------------------------
+void SettingsDialog::onRotationIndexChanged(int index)
+{
+    switch (index)
+    {
+    case 0: m_rotation = 0; break;
+    case 1: m_rotation = 90; break;
+    case 2: m_rotation = 180; break;
+    case 3: m_rotation = 270; break;
+    }
+    emit videoRotationChanged(m_rotation);
 }
 

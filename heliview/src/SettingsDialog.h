@@ -30,6 +30,7 @@ signals:
     void trimSettingsChanged(int axis, int value);
     void filterSettingsChanged(int signal, int samples);
     void pidSettingsChanged(int axis, int signal, float value);
+    void videoRotationChanged(int angle);
     
 public slots:
     // device control related events
@@ -42,6 +43,7 @@ public slots:
     void onColorValuesUpdated(TrackSettings track);
     void onPIDSettingsUpdated(int axis, float p, float i, float d, float set);
     void onUpdateColorTrackEnable(int enabled);
+    void onRotationIndexChanged(int index);
 
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);
@@ -64,6 +66,7 @@ public slots:
     
 protected:
     int m_devctrls;
+    int m_rotation;
     QMap<QObject *, int> m_dev_to_id;
     QMap<int, QObject *> m_id_to_dev;
     bool                 m_colortrack_en;

@@ -25,17 +25,23 @@ public:
     VideoView(QWidget *parent);
     virtual ~VideoView();
 
+    QColor dragBoxColor();
+    QColor boundingBoxColor();
+    int timeoutTicks();
+    int rotation();
     bool saveFrame();
 
 signals:
-    void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft, int fps);
+    void trackSettingsChanged(int r, int g, int b,
+            int ht, int st, int ft, int fps);
 
 public slots:
     void setDragBoxColor(int r, int g, int b, int a);
     void setBoundingBoxColor(int r, int g, int b, int a);
     void setTimeoutTicks(int ticks);
-    void onImageReady(const char *data, size_t length);
-    void onTrackStatusUpdate(bool track, const QRect &bb, const QPoint &cp);
+    void setVideoFrame(const char *data, size_t length);
+    void setTrackStatus(bool track, const QRect &bb, const QPoint &cp);
+    void setRotation(int angle);
     void onStatusTick();
     void onUpdateTrackControlEnable(int enable);
 
@@ -46,9 +52,9 @@ protected:
     virtual void mousePressEvent(QMouseEvent *e);
     virtual void mouseReleaseEvent(QMouseEvent *e);
 
-    QImage *m_image;
+    QImage m_image;
     QTimer *m_timer;
-    int m_ticks, m_maxTicks;
+    int m_angle, m_ticks, m_maxTicks;
     bool m_showBox, m_dragging;
     QRect m_bbox, m_dp;
     QPoint m_center;

@@ -16,12 +16,10 @@
 
 // -----------------------------------------------------------------------------
 VideoView::VideoView(QWidget *parent)
-: QWidget(parent), m_ticks(0), m_maxTicks(25), m_showBox(false),
-  m_dragging(false), m_bbox(0, 0, 0, 0), m_dp(0, 0, 0, 0)
+: QWidget(parent), m_image(":/data/test_pattern.jpg"), m_angle(0), m_ticks(0),
+  m_maxTicks(25), m_showBox(false), m_dragging(false), m_bbox(0, 0, 0, 0),
+  m_dp(0, 0, 0, 0)
 {
-    // set default image at startup to test pattern
-    m_image = new QImage(":/data/test_pattern.jpg");
-
     // create a timer to serve as a simple video feed heartbeat check
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(onStatusTick()));
@@ -35,25 +33,35 @@ VideoView::VideoView(QWidget *parent)
 
     repaint();
 }
-// -----------------------------------------------------------------------------
 
-void VideoView::onUpdateTrackControlEnable(int enable)
-{
-    if(enable)
-    {
-        setBoundingBoxColor(0, 255, 0 , 0);
-        Logger::info(tr("Video: Box Set to GREEN\n"));
-    } else {
-        setBoundingBoxColor(255, 0, 0, 0);
-        Logger::info(tr("Video: Box Set to RED\n"));
-    }
-
-}
 // -----------------------------------------------------------------------------
 VideoView::~VideoView()
 {
-    SafeDelete(m_image);
     SafeDelete(m_timer);
+}
+
+// -----------------------------------------------------------------------------
+QColor VideoView::dragBoxColor()
+{
+    return m_dragBrush.color();
+}
+
+// -----------------------------------------------------------------------------
+QColor VideoView::boundingBoxColor()
+{
+    return m_bboxBrush.color();
+}
+
+// -----------------------------------------------------------------------------
+int VideoView::timeoutTicks()
+{
+    return m_maxTicks;
+}
+
+// -----------------------------------------------------------------------------
+int VideoView::rotation()
+{
+    return m_angle;
 }
 
 // -----------------------------------------------------------------------------
@@ -83,12 +91,12 @@ void VideoView::paintEvent(QPaintEvent *e)
     // first render the video feed (or test image) into the client area
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.drawImage(0, 0, m_image->scaled(width(), height()));
+    painter.drawImage(0, 0, m_image.scaled(width(), height()));
 
     if (m_showBox)
     {
-        float xscale = width() / (float)m_image->width();
-        float yscale = height() / (float)m_image->height();
+        float xscale = width() / (float)m_image.width();
+        float yscale = height() / (float)m_image.height();
 
         // scale coordinates from client to jpeg image dimensions
         int x_s = (int)(m_bbox.x() * xscale);
@@ -134,7 +142,7 @@ bool VideoView::saveFrame()
     QString filename = QString("heliview_%1.jpg").arg(tstamp);
     Logger::info(tr("Video: Attempting to save frame as %1\n").arg(filename));
 
-    return (m_image->save(QString(filename)));
+    return (m_image.save(QString(filename)));
 }
 
 // -----------------------------------------------------------------------------
@@ -170,8 +178,8 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
     {
         // determine the average color of the selected region
         long avg_r = 0, avg_b = 0, avg_g = 0;
-        float xscale = (float)m_image->width() / width();
-        float yscale = (float)m_image->height() / height();
+        float xscale = (float)m_image.width() / width();
+        float yscale = (float)m_image.height() / height();
 
         QRect coord = m_dp.normalized();
         int x1 = (int)(xscale * coord.left());
@@ -184,7 +192,7 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
         {
             for (int x = x1; x <= x2; ++x)
             {
-                QRgb rgb = m_image->pixel(x, y);
+                QRgb rgb = m_image.pixel(x, y);
                 avg_r += qRed(rgb);
                 avg_g += qGreen(rgb);
                 avg_b += qBlue(rgb);
@@ -204,11 +212,15 @@ void VideoView::mouseReleaseEvent(QMouseEvent *e)
 }
 
 // -----------------------------------------------------------------------------
-void VideoView::onImageReady(const char *data, size_t length)
+void VideoView::setVideoFrame(const char *data, size_t length)
 {
     Logger::extraDebug(tr("loading image size %1\n").arg(length));
-    if (m_image->loadFromData((const uchar *)data, (int)length))
+    if (m_image.loadFromData((const uchar *)data, (int)length))
     {
+        QTransform mRot;
+        mRot.rotate(m_angle);
+        m_image = m_image.transformed(mRot);
+
         // reset the heartbeat timeout and force a redraw of the client area
         m_ticks = 0;
         repaint();
@@ -221,11 +233,17 @@ void VideoView::onImageReady(const char *data, size_t length)
 }
 
 // -----------------------------------------------------------------------------
-void VideoView::onTrackStatusUpdate(bool en, const QRect &bb, const QPoint &cp)
+void VideoView::setTrackStatus(bool en, const QRect &bb, const QPoint &cp)
 {
     m_showBox = en;
     m_bbox = bb;
     m_center = cp;
+}
+
+// -----------------------------------------------------------------------------
+void VideoView::setRotation(int angle)
+{
+    m_angle = angle;
 }
 
 // -----------------------------------------------------------------------------
@@ -237,9 +255,24 @@ void VideoView::onStatusTick()
     // device, display a test image to bring attention to the operator
     if (m_ticks > m_maxTicks)
     {
-        m_image->load(":/data/test_pattern.jpg");
+        m_image.load(":/data/test_pattern.jpg");
         repaint();
         m_ticks = 0;
+    }
+}
+
+// -----------------------------------------------------------------------------
+void VideoView::onUpdateTrackControlEnable(int enable)
+{
+    if( enable)
+    {
+        setBoundingBoxColor(0, 255, 0 , 0);
+        Logger::info(tr("Video: Box Set to GREEN\n"));
+    }
+    else
+    {
+        setBoundingBoxColor(255, 0, 0, 0);
+        Logger::info(tr("Video: Box Set to RED\n"));
     }
 }
 

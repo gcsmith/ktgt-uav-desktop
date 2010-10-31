@@ -150,12 +150,12 @@ void ApplicationFrame::connectDeviceController()
             this, SLOT(onFlightStateChanged(int)));
 
     connect(m_controller, SIGNAL(videoFrameReady(const char *, size_t)),
-            m_video, SLOT(onImageReady(const char *, size_t)));
+            m_video, SLOT(setVideoFrame(const char *, size_t)));
 
     connect(m_controller,
             SIGNAL(trackStatusUpdate(bool, const QRect &, const QPoint &)),
             m_video,
-            SLOT(onTrackStatusUpdate(bool, const QRect &, const QPoint &)));
+            SLOT(setTrackStatus(bool, const QRect &, const QPoint &)));
 
     connect(m_video,
             SIGNAL(trackSettingsChanged(int, int, int, int, int, int, int)),
@@ -706,6 +706,9 @@ void ApplicationFrame::onEditSettingsTriggered()
 
         connect(&sd, SIGNAL(pidSettingsChanged(int, int, float)), 
             m_controller, SLOT(updatePIDSettings(int, int, float)));
+
+        connect(&sd, SIGNAL(videoRotationChanged(int)),
+                m_video, SLOT(setRotation(int)));
 
         // populate the video device control pane
         connect(m_controller, SIGNAL(deviceControlUpdated(const QString &,

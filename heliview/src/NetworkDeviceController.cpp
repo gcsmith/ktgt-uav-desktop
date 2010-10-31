@@ -733,18 +733,15 @@ void NetworkDeviceController::onUpdateTrackControlEnable(int track_en)
     cmd_buffer[PKT_LENGTH]  = PKT_TE_LENGTH ;
     
     switch (track_en) {
-        case 0:
-            Logger::info(QString("NetworkController: \
-                    Requesting Track Control disable\n"));
-            break;
-        case 1:
-            Logger::info(QString("NetworkController: \
-                    Requesting Track Control enable\n"));
-            break;
-        case 2:
-            Logger::info(QString("NetworkController: \
-                    Requesting Track Control Value\n"));
-            break;              
+    case 0:
+        Logger::info("NetworkController: requesting track control disable\n");
+        break;
+    case 1:
+        Logger::info("NetworkController: requesting track control enable\n");
+        break;
+    case 2:
+        Logger::info("NetworkController: requesting track control value\n");
+        break;              
     }
     
     cmd_buffer[PKT_TE_STATUS] = track_en;
@@ -758,19 +755,17 @@ void NetworkDeviceController::onUpdateColorTrackEnable(int track_en)
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CTE;
     cmd_buffer[PKT_LENGTH]  = PKT_TE_LENGTH ;
     
-    switch (track_en) {
-        case 0:
-            Logger::info(QString("NetworkController: \
-                    Requesting Color Track disable\n"));
-            break;
-        case 1:
-            Logger::info(QString("NetworkController: \
-                    Requesting Color Track enable\n"));
-            break;
-        case 2:
-            Logger::info(QString("NetworkController: \
-                    Requesting Color Track Value\n"));
-            break;              
+    switch (track_en)
+    {
+    case 0:
+        Logger::info("NetworkController: requesting color track disable\n");
+        break;
+    case 1:
+        Logger::info("NetworkController: requesting color track enable\n");
+        break;
+    case 2:
+        Logger::info("NetworkController: requesting color track value\n");
+        break;              
     }
     
     cmd_buffer[PKT_TE_STATUS] = track_en;
@@ -802,8 +797,7 @@ void NetworkDeviceController::updateTrackSettings(
     cmd_buffer[PKT_CAM_TC_FILTER] = m_track.ft;
     cmd_buffer[PKT_CAM_TC_FPS]    = m_track.fps;
 
-    Logger::info(tr("request track color [%1 %2 %3] with \
-            threshold [%4 %5] with FPS %6\n")
+    Logger::info(tr("req track color [%1 %2 %3], thresh [%4 %5], fps %6\n")
             .arg(r).arg(g).arg(b).arg(m_track.ht)
             .arg(m_track.st).arg(m_track.fps));
 
