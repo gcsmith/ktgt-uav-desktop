@@ -23,7 +23,7 @@ public:
     virtual ~SettingsDialog();
 
 signals:
-    void updateTrackEnabled(bool track_en);
+    void updateColorTrackEnable(int track_en);
     void trackSettingsChanged(int r, int g, int b, int ht, int st, int ft, int fps);
     void logSettingsChanged(const QString &, const QString &, int);
     void deviceControlChanged(int id, int value);
@@ -41,6 +41,7 @@ public slots:
     void onFilterSettingsUpdated(int imu, int alt, int aux, int batt);
     void onColorValuesUpdated(TrackSettings track);
     void onPIDSettingsUpdated(int axis, float p, float i, float d, float set);
+    void onUpdateColorTrackEnable(int enabled);
 
     void onDeviceControlCheckStateChanged(int state);
     void onDeviceControlSliderValueChanged(int value);

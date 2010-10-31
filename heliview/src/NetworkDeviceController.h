@@ -64,7 +64,8 @@ public slots:
     void onInputReady(GamepadEvent event, int index, float value);
     
     void updateTrackSettings(int r, int g, int b, int ht, int st, int ft, int fps);
-    void onUpdateTrackEnabled(bool track_en);
+    void onUpdateTrackControlEnable(int track_en);
+    void onUpdateColorTrackEnable(int track_en);
     void updateDeviceControl(int id, int value);
     void updateTrimSettings(int axes, int value);
     void updateFilterSettings(int signal, int samples);

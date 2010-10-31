@@ -37,11 +37,11 @@ enum SignalFilters
 struct TrackSettings
 {
     TrackSettings()
-    : color(0, 0, 0), ht(0), st(0), ft(0), fps(0) { }
-    TrackSettings(QColor _color, int _ht, int _st, int _ft, int _fps)
-    : color(_color), ht(_ht), st(_st), ft(_ft), fps(_fps) { }
+    : color(0, 0, 0), ht(0), st(0), ft(0), fps(0), enabled(0) { }
+    TrackSettings(QColor _color, int _ht, int _st, int _ft, int _fps, int _enabled)
+    : color(_color), ht(_ht), st(_st), ft(_ft), fps(_fps), enabled(_enabled) { }
     QColor color;
-    int ht, st, ft, fps;
+    int ht, st, ft, fps, enabled;
 };
 
 #define AXIS_ALT    0x01
@@ -79,7 +79,8 @@ public:
 
 public slots:
     virtual void onInputReady(GamepadEvent event, int index, float value);
-    virtual void onUpdateTrackEnabled(bool track_en);
+    virtual void onUpdateTrackControlEnable(int track_en);
+    virtual void onUpdateColorTrackEnable(int track_en);
     virtual void updateTrackSettings(int r, int g, int b, int ht, int st, int ft, int fps);
     virtual void updateDeviceControl(int id, int value);
     virtual void updateTrimSettings(int axis, int value);
@@ -98,6 +99,8 @@ signals:
             int current_value) const;
     void deviceMenuUpdated(const QString &name, int id, int index) const;
     void trimSettingsUpdated(int yaw, int pitch, int roll, int thro) const;
+    void updateTrackControlEnable(int track_en) const;
+    void updateColorTrackEnable(int track_en) const;
     void filterSettingsUpdated(int imu, int alt, int aux, int batt) const;
     void pidSettingsUpdated(int axis, float p, float i, float d, float set);
     void stateChanged(int state) const;

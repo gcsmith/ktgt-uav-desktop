@@ -35,7 +35,20 @@ VideoView::VideoView(QWidget *parent)
 
     repaint();
 }
+// -----------------------------------------------------------------------------
 
+void VideoView::onUpdateTrackControlEnable(int enable)
+{
+    if(enable)
+    {
+        setBoundingBoxColor(0, 255, 0 , 0);
+        Logger::info(tr("Video: Box Set to GREEN\n"));
+    } else {
+        setBoundingBoxColor(255, 0, 0, 0);
+        Logger::info(tr("Video: Box Set to RED\n"));
+    }
+
+}
 // -----------------------------------------------------------------------------
 VideoView::~VideoView()
 {

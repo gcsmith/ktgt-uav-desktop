@@ -37,6 +37,7 @@ public slots:
     void onImageReady(const char *data, size_t length);
     void onTrackStatusUpdate(bool track, const QRect &bb, const QPoint &cp);
     void onStatusTick();
+    void onUpdateTrackControlEnable(int enable);
 
 protected:
     virtual void paintEvent(QPaintEvent *e);

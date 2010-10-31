@@ -17,7 +17,7 @@ const bool NetworkDeviceController::m_takesDevice = true;
 // -----------------------------------------------------------------------------
 NetworkDeviceController::NetworkDeviceController(const QString &device)
 : m_device(device), m_telem_timer(NULL), m_mjpeg_timer(NULL), m_blocksz(0),
-  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10, 5), 
+  m_state(STATE_AUTONOMOUS), m_track(QColor(159, 39, 100), 10, 20, 10, 5, 1), 
   m_track_en(false)
 {
 }
@@ -312,7 +312,8 @@ void NetworkDeviceController::onControllerTick()
 
         if (send && !sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         {
-            Logger::err("NetworkDevice: failed to send flight control request\n");
+            Logger::err("NetworkDevice: failed to send \
+                        flight control request\n");
         }
         else if (send)
         {
@@ -409,6 +410,8 @@ void NetworkDeviceController::onSocketReadyRead()
         m_telem_timer->start(67); // begin requesting telemetry
         m_mjpeg_timer->start(67); // begin requesting frames
         m_controller_timer->start(50); // begin requesting flight control
+        onUpdateColorTrackEnable(2);   // Request Color Track Enable Status
+        onUpdateTrackControlEnable(2); // Request Track Control Enable Status
         break;
     case SERVER_ACK_IGNORED:
         Logger::info("NetworkDevice: SERVER_ACK_IGNORED\n");
@@ -436,7 +439,8 @@ void NetworkDeviceController::onSocketReadyRead()
         break;
     case SERVER_ACK_MJPG_FRAME:
         framesz = packet[PKT_LENGTH] - PKT_MJPG_LENGTH;
-        emit videoFrameReady((const char *)&packet[PKT_MJPG_IMG], (size_t)framesz);
+        emit videoFrameReady((const char *)&packet[PKT_MJPG_IMG], 
+                            (size_t)framesz);
         break;
     case SERVER_UPDATE_CTL_MODE:
         // if current control mode was mixed, stop the throttle timer
@@ -506,7 +510,8 @@ void NetworkDeviceController::onSocketReadyRead()
              (int)packet[PKT_CAM_TC_TH0], 
              (int)packet[PKT_CAM_TC_TH1], 
              (int)packet[PKT_CAM_TC_FILTER], 
-             (int)packet[PKT_CAM_TC_FPS]));
+             (int)packet[PKT_CAM_TC_FPS],
+             (int)packet[PKT_CAM_TC_ENABLE]));
         break;
     case SERVER_UPDATE_CAM_DCI:
         // convert the type to a string for genericness
@@ -528,6 +533,16 @@ void NetworkDeviceController::onSocketReadyRead()
     case SERVER_UPDATE_CAM_DCM:
         emit deviceMenuUpdated(QString((char *)&packet[PKT_CAM_DCM_NAME]),
                 packet[PKT_CAM_DCM_ID], packet[PKT_CAM_DCM_INDEX]);
+        break;
+    case SERVER_ACK_TCE:
+        Logger::info(tr("NETWORK: RECEIVED \
+                New Track Control Enable: %1\n").arg(packet[PKT_TE_STATUS]));
+        emit updateTrackControlEnable(packet[PKT_TE_STATUS]);
+        break;
+    case SERVER_ACK_CTE:
+        Logger::info(tr("NETWORK: RECEIVED \
+                New Color Track Enable: %1\n").arg(packet[PKT_TE_STATUS]));
+        emit updateColorTrackEnable(packet[PKT_TE_STATUS]);
         break;
     case SERVER_ACK_GTS:
         emit trimSettingsUpdated(packet[PKT_GTS_YAW], packet[PKT_GTS_PITCH],
@@ -557,7 +572,9 @@ void NetworkDeviceController::onSocketReadyRead()
         temp.i = packet[PKT_GPIDS_SP];
         set = temp.f;
         
-        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1\tP:%2\tI:%3\tD:%4\tSetPoint:%5\n").arg(packet[PKT_GPIDS_AXIS]).arg(p).arg(i).arg(d).arg(set));
+        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1\tP:%2\tI:%3\tD:%4\
+            \tSetPoint:%5\n").arg(packet[PKT_GPIDS_AXIS]
+            ).arg(p).arg(i).arg(d).arg(set));
         
         emit pidSettingsUpdated(packet[PKT_GPIDS_AXIS], p, i, d, set);
         break;
@@ -616,12 +633,12 @@ void NetworkDeviceController::onInputReady(
             int vcm_type;
             if (STATE_MIXED_CONTROL == m_state)
             {
-                Logger::info("NetworkDevice: requesting switch to autonomous\n");
+                Logger::info("NetworkDevice:requesting switch to autonomous\n");
                 vcm_type = VCM_TYPE_AUTO;
             }
             else
             {
-                Logger::info("NetworkDevice: requesting switch to mixed mode\n");
+                Logger::info("NetworkDevice:requesting switch to mixed mode\n");
                 vcm_type = VCM_TYPE_MIXED;
             }
 
@@ -662,7 +679,8 @@ void NetworkDeviceController::onInputReady(
                 vcm_axes = BIT_INV(vcm_axes, VCM_AXIS_PITCH);
                 break;
             default:
-                Logger::warn("NetworkDevice: unknown controller button - Axis\n");
+                Logger::warn("NetworkDevice: \
+                        unknown controller button - Axis\n");
                 break;
             }
 
@@ -692,7 +710,8 @@ void NetworkDeviceController::onInputReady(
                 Logger::info("Xbox - Enable Color Tracking\n");
                 break;
             default:
-                Logger::warn("NetworkDevice: unknown controller button - Commands\n");
+                Logger::warn("NetworkDevice: unknown controller \
+                            button - Commands\n");
                 break;
             }
         }
@@ -724,19 +743,55 @@ void NetworkDeviceController::onInputReady(
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::onUpdateTrackEnabled(bool track_en)
+void NetworkDeviceController::onUpdateTrackControlEnable(int track_en)
 {
-    m_track_en = track_en;
+    uint32_t cmd_buffer[16];
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_TCE;
+    cmd_buffer[PKT_LENGTH]  = PKT_TE_LENGTH ;
+    
+    switch (track_en) {
+        case 0:
+            Logger::info(QString("NetworkController: \
+                    Requesting Track Control disable\n"));
+            break;
+        case 1:
+            Logger::info(QString("NetworkController: \
+                    Requesting Track Control enable\n"));
+            break;
+        case 2:
+            Logger::info(QString("NetworkController: \
+                    Requesting Track Control Value\n"));
+            break;              
+    }
+    
+    cmd_buffer[PKT_TE_STATUS] = track_en;
+    sendPacket(cmd_buffer, PKT_TE_LENGTH);
+}
 
-    if (m_track_en)
-        Logger::info(QString("NetworkController: tracking enabled\n"));
-    else
-        Logger::info(QString("NetworkController: tracking disabled\n"));
-
-    // update tracking on helicopter by sending a CLIENT_REQ_CAM_TC packet
-    // with m_track_en updated
-    updateTrackSettings(m_track.color.red(), m_track.color.green(), 
-            m_track.color.blue(), m_track.ht, m_track.st, m_track.ft, m_track.fps);
+// -----------------------------------------------------------------------------
+void NetworkDeviceController::onUpdateColorTrackEnable(int track_en)
+{
+    uint32_t cmd_buffer[16];
+    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CTE;
+    cmd_buffer[PKT_LENGTH]  = PKT_TE_LENGTH ;
+    
+    switch (track_en) {
+        case 0:
+            Logger::info(QString("NetworkController: \
+                    Requesting Color Track disable\n"));
+            break;
+        case 1:
+            Logger::info(QString("NetworkController: \
+                    Requesting Color Track enable\n"));
+            break;
+        case 2:
+            Logger::info(QString("NetworkController: \
+                    Requesting Color Track Value\n"));
+            break;              
+    }
+    
+    cmd_buffer[PKT_TE_STATUS] = track_en;
+    sendPacket(cmd_buffer, PKT_TE_LENGTH);
 }
 
 // -----------------------------------------------------------------------------
@@ -768,8 +823,10 @@ void NetworkDeviceController::updateTrackSettings(
     
     cmd_buffer[PKT_CAM_TC_FPS] = m_track.fps;
 
-    Logger::info(tr("request track color [%1 %2 %3] with threshold [%4 %5] with FPS %6\n")
-            .arg(r).arg(g).arg(b).arg(m_track.ht).arg(m_track.st).arg(m_track.fps));
+    Logger::info(tr("request track color [%1 %2 %3] with \
+            threshold [%4 %5] with FPS %6\n")
+            .arg(r).arg(g).arg(b).arg(m_track.ht)
+            .arg(m_track.st).arg(m_track.fps));
 
     sendPacket(cmd_buffer, PKT_CAM_TC_LENGTH);
 }
@@ -833,7 +890,8 @@ void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 }
 
 // -----------------------------------------------------------------------------
-void NetworkDeviceController::updatePIDSettings(int axis, int signal, float value)
+void NetworkDeviceController::updatePIDSettings(int axis, int signal, 
+                                                float value)
 {
     uint32_t cmd_buffer[PKT_SPIDS_LENGTH / 4];
     union { int i; float f; } temp;

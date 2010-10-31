@@ -158,6 +158,14 @@ void ApplicationFrame::connectDeviceController()
             SIGNAL(trackSettingsChanged(int, int, int, int, int, int, int)),
             m_controller,
             SLOT(updateTrackSettings(int, int, int, int, int, int, int)));
+            
+    //Track Control Enable
+    connect(this, SIGNAL(updateTrackControlEnable(int)), m_controller, 
+                SLOT(onUpdateTrackControlEnable(int)));
+    connect(m_controller, SIGNAL(updateTrackControlEnable(int)), this, 
+                SLOT(onUpdateTrackControlEnable(int)));
+    connect(m_controller, SIGNAL(updateTrackControlEnable(int)), m_video, 
+                SLOT(onUpdateTrackControlEnable(int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -649,9 +657,12 @@ void ApplicationFrame::onEditSettingsTriggered()
         connect(&sd, SIGNAL(trackSettingsChanged(int, int, int, int, int, int, int)),
                 m_controller,
                 SLOT(updateTrackSettings(int, int, int, int, int, int, int)));
-
-        connect(&sd, SIGNAL(updateTrackEnabled(bool)), m_controller, 
-                SLOT(onUpdateTrackEnabled(bool)));
+        
+        //By directional - Enable Track Control
+        connect(&sd, SIGNAL(updateColorTrackEnable(int)), m_controller, 
+                SLOT(onUpdateColorTrackEnable(int)));
+        connect(m_controller, SIGNAL(updateColorTrackEnable(int)), &sd, 
+                SLOT(onUpdateColorTrackEnable(int)));
 
         connect(&sd, SIGNAL(deviceControlChanged(int, int)),
                 m_controller, SLOT(updateDeviceControl(int, int)));
@@ -708,8 +719,8 @@ void ApplicationFrame::onEditSettingsTriggered()
     connect(&sd, SIGNAL(logSettingsChanged(const QString &, const QString &, int)), this, 
                 SLOT(onUpdateLogFile(const QString &, const QString &, int)));
         
-    connect(&sd, SIGNAL(updateTrackEnabled(bool)), this, 
-                SLOT(onUpdateTrackEnabled(bool)));
+    //connect(&sd, SIGNAL(updateTrackEnabled(bool)), this, 
+    //            SLOT(onUpdateTrackEnabled(bool)));
     sd.exec();
 }
 
@@ -825,29 +836,26 @@ void ApplicationFrame::onKillswitchClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onColorTrackingClicked()
 {
-    bool track_en;
-
-    // get current track settings
-    track_en = !m_controller->getTrackEnabled();
-
-    // update button label
-    if (track_en)
-        btnColorTrack->setText("Disable Tracking");
-    else
-        btnColorTrack->setText("Enable Tracking");
-
-    m_controller->onUpdateTrackEnabled(track_en);
+    if(btnColorTrack->text() == QString("Disable Tracking"))
+    {
+        emit updateTrackControlEnable(0);
+    } else {
+        emit updateTrackControlEnable(1);
+    }    
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onUpdateTrackEnabled(bool track_en)
+void ApplicationFrame::onUpdateTrackControlEnable(int track_en)
 {
-    // update button label
     if (track_en)
+    {
         btnColorTrack->setText("Disable Tracking");
-    else
+    } else {
+    
         btnColorTrack->setText("Enable Tracking");
+    }
 }
+
 
 // ----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)

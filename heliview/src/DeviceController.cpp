@@ -28,7 +28,7 @@ int DeviceController::currentAxes() const
 // -----------------------------------------------------------------------------
 TrackSettings DeviceController::currentTrackSettings() const
 {
-    return TrackSettings(QColor(255, 255, 255), 10, 10, 10, 12);
+    return TrackSettings(QColor(255, 255, 255), 10, 10, 10, 12, 1);
 }
 
 // -----------------------------------------------------------------------------
@@ -123,11 +123,15 @@ void DeviceController::updateTrackSettings(int r, int g, int b,
 }
 
 // -----------------------------------------------------------------------------
-void DeviceController::onUpdateTrackEnabled(bool track_en)
+void DeviceController::onUpdateTrackControlEnable(int track_en)
 {
-    Logger::info(tr("DeviceController::updateTrackEnabled(%1)\n").arg(track_en));
+    Logger::info(tr("DeviceController::updateTrackControlEnable(%1)\n").arg(track_en));
 }
-
+// -----------------------------------------------------------------------------
+void DeviceController::onUpdateColorTrackEnable(int track_en)
+{
+    Logger::info(tr("DeviceController::updateColorTrackEnable(%1)\n").arg(track_en));
+}
 // -----------------------------------------------------------------------------
 void DeviceController::updateDeviceControl(int id, int value)
 {

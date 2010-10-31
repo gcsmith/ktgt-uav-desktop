@@ -28,7 +28,7 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
     else
         btnToggleTracking->setText("Enable Tracking");
 
-    btnToggleTracking->setEnabled(track_btn_en);
+    //btnToggleTracking->setEnabled(track_btn_en);
 
     // add a vertical spacer at some absurdly high row index
     ((QGridLayout *)deviceControlScrollAreaContents->layout())->addItem(
@@ -54,7 +54,8 @@ SettingsDialog::SettingsDialog(QWidget *pp, bool track_en, bool track_btn_en,
     //Set Initial Tracking FPS
     sbTrackingFps->setValue(10);
     */
-    //TODO: Set LogFile Value
+        
+    //TODO: Set LogFile Value       
     editLogFileName->setText(logfile);
     sbLogBuffer->setValue(logbufsize);
 }
@@ -169,7 +170,11 @@ void SettingsDialog::onColorValuesUpdated(TrackSettings track)
     
     //Set Initial Tracking FPS
     sbTrackingFps->setValue(track.fps);
-   //Logger::info("SETTINGS: Color values updated\n");
+    
+    onUpdateColorTrackEnable(track.enabled); 
+    
+   //Logger::info(tr("SETTINGS: Track Enabled %1\n").arg(track.enabled));
+   
 }
 
 
@@ -264,13 +269,24 @@ void SettingsDialog::onNewColorClicked()
 // -----------------------------------------------------------------------------
 void SettingsDialog::onColorTrackingClicked()
 {
-    m_colortrack_en = !m_colortrack_en;
-    if (m_colortrack_en)
-        btnToggleTracking->setText("Disable Tracking");
-    else
-        btnToggleTracking->setText("Enable Tracking");
+    if(btnToggleTracking->text() == QString("Disable Tracking"))
+    {
+        emit updateColorTrackEnable(0);
+    } else {
+        emit updateColorTrackEnable(1);
+    }   
+}
 
-    emit updateTrackEnabled(m_colortrack_en);
+// -----------------------------------------------------------------------------
+void SettingsDialog::onUpdateColorTrackEnable(int enabled)
+{
+    m_colortrack_en = enabled; 
+    if (enabled)
+    {
+        btnToggleTracking->setText("Disable Tracking");
+    } else {
+        btnToggleTracking->setText("Enable Tracking");
+    }   
 }
 
 // -----------------------------------------------------------------------------

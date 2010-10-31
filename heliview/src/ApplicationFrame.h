@@ -41,6 +41,9 @@ public:
     void closeLogFile();
     bool enableLogging(bool enable, const QString &verbosity);
 
+signals:
+    void updateTrackControlEnable(int track_en);
+    
 public slots:
     bool connectTo(const QString &source, const QString &device);
     void onUpdateLogFile(const QString &file, const QString &tfile, int bufsize);
@@ -50,7 +53,7 @@ public slots:
     void onTelemetryReady(float yaw, float pitch, float roll, float alt,
             int rssi, int batt, int aux, int cpu);
     void onStateChanged(int state);
-    void onUpdateTrackEnabled(bool track_en);
+    void onUpdateTrackControlEnable(int track_en);
 
     // menu action triggered event callbacks
     void onFileConnectTriggered();
