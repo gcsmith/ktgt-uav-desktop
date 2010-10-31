@@ -154,8 +154,7 @@ void ApplicationFrame::connectDeviceController()
 
     connect(m_controller,
             SIGNAL(trackStatusUpdate(bool, const QRect &, const QPoint &)),
-            m_video,
-            SLOT(setTrackStatus(bool, const QRect &, const QPoint &)));
+            m_video, SLOT(setTrackStatus(bool, const QRect &, const QPoint &)));
 
     connect(m_video,
             SIGNAL(trackSettingsChanged(int, int, int, int, int, int, int)),
@@ -164,11 +163,11 @@ void ApplicationFrame::connectDeviceController()
             
     //Track Control Enable
     connect(this, SIGNAL(updateTrackControlEnable(int)), m_controller, 
-                SLOT(onUpdateTrackControlEnable(int)));
+            SLOT(onUpdateTrackControlEnable(int)));
     connect(m_controller, SIGNAL(updateTrackControlEnable(int)), this, 
-                SLOT(onUpdateTrackControlEnable(int)));
+            SLOT(onUpdateTrackControlEnable(int)));
     connect(m_controller, SIGNAL(updateTrackControlEnable(int)), m_video, 
-                SLOT(onUpdateTrackControlEnable(int)));
+            SLOT(onUpdateTrackControlEnable(int)));
 }
 
 // -----------------------------------------------------------------------------
@@ -251,7 +250,7 @@ void ApplicationFrame::openLogFile(const QString &logfile, const QString &tlogfi
         }
     }
     
-        if (!m_tele_file)
+    if (!m_tele_file)
     {
         m_tele_file = new QFile(tlogfile);
         if (!m_tele_file)
@@ -273,8 +272,8 @@ void ApplicationFrame::openLogFile(const QString &logfile, const QString &tlogfi
         Logger::err("could not open new log file\n");
         return;
     }
-    Logger::info(tr("successfully opened telemetry log '%1'\n").arg(
-                                                    m_tele_file->fileName()));
+    Logger::info(tr("successfully opened telemetry log '%1'\n")
+            .arg(m_tele_file->fileName()));
 
     if (!m_log)
     {
@@ -342,8 +341,8 @@ bool ApplicationFrame::enableLogging(bool enable, const QString &verbosity)
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::writeToLog(const QString &plain, const QString &rich, 
-                                    int log)
+void ApplicationFrame::writeToLog(const QString &plain, const QString &rich,
+        int log)
 {
     txtCommandLog->textCursor().insertHtml(rich);
    
@@ -351,7 +350,8 @@ void ApplicationFrame::writeToLog(const QString &plain, const QString &rich,
     c.movePosition(QTextCursor::End);
     txtCommandLog->setTextCursor(c);
 
-    if(log == 0){
+    if (log == 0)
+    {
         m_logbuffer->append(plain);
         if (m_logbuffer->size() >= m_bufsize)
         {
@@ -364,7 +364,8 @@ void ApplicationFrame::writeToLog(const QString &plain, const QString &rich,
             m_logbuffer->clear();
         }
     }
-    else if(log == 1){
+    else if(log == 1)
+    {
         m_tele_logbuffer->append(plain);
         if (m_tele_logbuffer->size() >= m_bufsize)
         {
@@ -380,8 +381,8 @@ void ApplicationFrame::writeToLog(const QString &plain, const QString &rich,
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onUpdateLogFile(const QString &file, const QString &tfile,
-                                        int bufsize)
+void ApplicationFrame::onUpdateLogFile(const QString &file,
+        const QString &tfile, int bufsize)
 {
     // close last file opened
     m_log->flush();
@@ -669,15 +670,13 @@ void ApplicationFrame::onEditSettingsTriggered()
 {
     QString filename = m_file ? m_file->fileName() : "";
     TrackSettings track;
-    bool track_en, btn_track_en;
+    bool track_en = false, btn_track_en;
 
     if (m_controller)
     {
-        track     = m_controller->currentTrackSettings();
-        track_en  = m_controller->getTrackEnabled();        
+        track    = m_controller->currentTrackSettings();
+        track_en = m_controller->getTrackEnabled();        
     }
-    else 
-        track_en = false;
 
     btn_track_en = btnColorTrack->isEnabled();
 
@@ -745,16 +744,12 @@ void ApplicationFrame::onEditSettingsTriggered()
         m_controller->requestPIDSettings(VCM_AXIS_ALT);
 
         m_controller->requestFilterSettings();
-        if(!m_controller->requestColors()){
-            Logger::warn("SETTINGS: Failed To send requestColors");
-        }
+        m_controller->requestColors();
     }
     
     connect(&sd, SIGNAL(logSettingsChanged(const QString &, const QString &, int)), this, 
                 SLOT(onUpdateLogFile(const QString &, const QString &, int)));
         
-    //connect(&sd, SIGNAL(updateTrackEnabled(bool)), this, 
-    //            SLOT(onUpdateTrackEnabled(bool)));
     sd.exec();
 }
 
@@ -870,26 +865,18 @@ void ApplicationFrame::onKillswitchClicked()
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onColorTrackingClicked()
 {
-    if(btnColorTrack->text() == QString("Disable Tracking"))
-    {
-        emit updateTrackControlEnable(0);
-    } else {
-        emit updateTrackControlEnable(1);
-    }    
+    int en = (btnColorTrack->text() == QString("Disable Tracking")) ? 0 : 1;
+    emit updateTrackControlEnable(en);
 }
 
 // -----------------------------------------------------------------------------
 void ApplicationFrame::onUpdateTrackControlEnable(int track_en)
 {
     if (track_en)
-    {
         btnColorTrack->setText("Disable Tracking");
-    } else {
-    
+    else
         btnColorTrack->setText("Enable Tracking");
-    }
 }
-
 
 // ----------------------------------------------------------------------------
 void ApplicationFrame::onShowXFChanged(bool flag)
