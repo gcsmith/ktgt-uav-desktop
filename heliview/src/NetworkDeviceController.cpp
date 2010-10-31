@@ -70,6 +70,8 @@ bool NetworkDeviceController::open()
     emit connectionStatusChanged(QString("Connected to ") + m_device, true);
     Logger::info(tr("NetworkDevice: connected to ") + m_device + "\n");
 
+    emit flightStateChanged(FCS_STATE_GROUNDED);
+
     startup();
     return true;
 }
@@ -127,7 +129,7 @@ void NetworkDeviceController::shutdown()
     }
 
     emit connectionStatusChanged(m_device + " disconnected", false);
-    emit stateChanged(STATE_DISCONNECTED);
+    emit controlStateChanged(STATE_DISCONNECTED);
 }
 
 // -----------------------------------------------------------------------------
@@ -182,7 +184,7 @@ bool NetworkDeviceController::requestFilterSettings() const
 // -----------------------------------------------------------------------------
 bool NetworkDeviceController::requestPIDSettings(int axis) const
 {    
-    uint32_t cmd_buffer[PKT_GPIDS_LENGTH];
+    uint32_t cmd_buffer[PKT_GPIDS_NUM];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_GPIDS;
     cmd_buffer[PKT_LENGTH]   = PKT_GPIDS_LENGTH;
     cmd_buffer[PKT_GPIDS_AXIS] = axis;
@@ -207,7 +209,7 @@ bool NetworkDeviceController::requestLanding() const
 bool NetworkDeviceController::requestManualOverride() const
 {
     Logger::info("NetworkDevice: Request Manual Override\n");
-    uint32_t cmd_buffer[4];
+    uint32_t cmd_buffer[PKT_VCM_NUM];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
     cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
     cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_RADIO;
@@ -219,7 +221,7 @@ bool NetworkDeviceController::requestManualOverride() const
 bool NetworkDeviceController::requestAutonomous() const
 {
     Logger::info("NetworkDevice: Request Autonomous\n");
-    uint32_t cmd_buffer[4];
+    uint32_t cmd_buffer[PKT_VCM_NUM];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
     cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
     cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_AUTO;
@@ -231,7 +233,7 @@ bool NetworkDeviceController::requestAutonomous() const
 bool NetworkDeviceController::requestKillswitch() const
 {
     Logger::info("NetworkDevice: Request Killswitch\n");
-    uint32_t cmd_buffer[4];
+    uint32_t cmd_buffer[PKT_VCM_NUM];
     cmd_buffer[PKT_COMMAND]  = CLIENT_REQ_SET_CTL_MODE;
     cmd_buffer[PKT_LENGTH]   = PKT_VCM_LENGTH;
     cmd_buffer[PKT_VCM_TYPE] = VCM_TYPE_KILL;
@@ -267,48 +269,40 @@ void NetworkDeviceController::onControllerTick()
 
     if (STATE_MIXED_CONTROL == m_state)
     {
-        uint32_t cmd_buffer[24];
-        union { int i; float f; } temp;
+        uint32_t cmd_buffer[PKT_MCM_AXIS_NUM];
         char send = 0;
       
         cmd_buffer[PKT_COMMAND] = CLIENT_REQ_FLIGHT_CTL;
         cmd_buffer[PKT_LENGTH]  = PKT_MCM_LENGTH;
       
-        // altitude
-        temp.f = m_ctl.alt;
-        if ((m_axes & AXIS_ALT) && (temp.f != m_prev_alt))
+        if ((m_axes & AXIS_ALT) && (m_ctl.alt != m_prev_alt))
         {
             m_prev_alt = m_ctl.alt;
             //send = 1;
         }
-        cmd_buffer[PKT_MCM_AXIS_ALT] = temp.i;
 
-        // pitch
-        temp.f = m_ctl.pitch;
-        if ((m_axes & AXIS_PITCH) && (temp.f != prev_pitch))
+        if ((m_axes & AXIS_PITCH) && (m_ctl.pitch != prev_pitch))
         {
             prev_pitch = m_ctl.pitch;
             send = 1;
         }
-        cmd_buffer[PKT_MCM_AXIS_PITCH] = temp.i;
 
-        // roll
-        temp.f = m_ctl.roll;
-        if ((m_axes & AXIS_ROLL) && (temp.f != prev_roll))
+        if ((m_axes & AXIS_ROLL) && (m_ctl.roll != prev_roll))
         {
             prev_roll = m_ctl.roll;
             send = 1;
         }
-        cmd_buffer[PKT_MCM_AXIS_ROLL] = temp.i;
 
-        // yaw
-        temp.f = m_ctl.yaw;
-        if ((m_axes & AXIS_YAW) && (temp.f != prev_yaw))
+        if ((m_axes & AXIS_YAW) && (m_ctl.yaw != prev_yaw))
         {
             prev_yaw = m_ctl.yaw;
             send = 1;
         }
-        cmd_buffer[PKT_MCM_AXIS_YAW] = temp.i;
+
+        memcpy(&cmd_buffer[PKT_MCM_AXIS_YAW],   &m_ctl.yaw,   4);
+        memcpy(&cmd_buffer[PKT_MCM_AXIS_PITCH], &m_ctl.pitch, 4);
+        memcpy(&cmd_buffer[PKT_MCM_AXIS_ROLL],  &m_ctl.roll,  4);
+        memcpy(&cmd_buffer[PKT_MCM_AXIS_ALT],   &m_ctl.alt,   4);
 
         if (send && !sendPacket(cmd_buffer, PKT_MCM_LENGTH))
         {
@@ -370,6 +364,7 @@ void NetworkDeviceController::onSocketReadyRead()
     stream.setVersion(QDataStream::Qt_4_0);
     int32_t rssi, battery, aux, framesz,cpu;
     float x, y, z, h;
+    float kp, ki, kd, sp;
     QString log_msg, type;
     QRect bbox;
     QPoint point;
@@ -491,7 +486,10 @@ void NetworkDeviceController::onSocketReadyRead()
                 m_throttle_timer->stop();
         }
         
-        emit stateChanged((int)m_state);
+        emit controlStateChanged((int)m_state);
+        break;
+    case SERVER_UPDATE_STATE:
+        emit flightStateChanged((int)packet[PKT_FCS_STATE]);
         break;
     case SERVER_UPDATE_TRACKING:
         bbox.setCoords(packet[PKT_CTS_X1], packet[PKT_CTS_Y1], 
@@ -553,30 +551,15 @@ void NetworkDeviceController::onSocketReadyRead()
                 packet[PKT_GFS_AUX], packet[PKT_GFS_BATT]);
         break;
     case SERVER_ACK_GPIDS:
-        union { int i; float f; } temp;
-        float p, i, d, set;
+        memcpy(&kp, &packet[PKT_GPIDS_KP], 4);
+        memcpy(&ki, &packet[PKT_GPIDS_KI], 4);
+        memcpy(&kd, &packet[PKT_GPIDS_KD], 4);
+        memcpy(&sp, &packet[PKT_GPIDS_SP], 4);
 
-        // get PID Kp
-        temp.i = packet[PKT_GPIDS_KP];
-        p = temp.f;
-
-        // get PID Ki
-        temp.i = packet[PKT_GPIDS_KI];
-        i = temp.f;
-
-        // get PID Kd
-        temp.i = packet[PKT_GPIDS_KD];
-        d = temp.f;
+        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1 Kp:%2 Ki:%3 Kd:%4 SP:%5\n")
+                .arg(packet[PKT_GPIDS_AXIS]).arg(kp).arg(ki).arg(kd).arg(sp));
         
-        // get PID set
-        temp.i = packet[PKT_GPIDS_SP];
-        set = temp.f;
-        
-        Logger::info(tr("NetworkDevice: Recieved GPID axis:%1\tP:%2\tI:%3\tD:%4\
-            \tSetPoint:%5\n").arg(packet[PKT_GPIDS_AXIS]
-            ).arg(p).arg(i).arg(d).arg(set));
-        
-        emit pidSettingsUpdated(packet[PKT_GPIDS_AXIS], p, i, d, set);
+        emit pidSettingsUpdated(packet[PKT_GPIDS_AXIS], kp, ki, kd, sp);
         break;
     default:
         Logger::err(tr("NetworkDevice: bad server cmd: %1\n").arg(packet[0]));
@@ -801,27 +784,23 @@ void NetworkDeviceController::updateTrackSettings(
     uint32_t cmd_buffer[16];
 
     m_track.color = QColor(r, g, b);
-    if (ht >= 0) m_track.ht = ht;
-    if (st >= 0) m_track.st = st;
-    if (ft >= 0) m_track.ft = ft;
+    if (ht  >= 0) m_track.ht = ht;
+    if (st  >= 0) m_track.st = st;
+    if (ft  >= 0) m_track.ft = ft;
     if (fps >= 0) m_track.fps = fps;
 
-    cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_TC;
-    cmd_buffer[PKT_LENGTH]  = PKT_CAM_TC_LENGTH;
-
+    cmd_buffer[PKT_COMMAND]       = CLIENT_REQ_CAM_TC;
+    cmd_buffer[PKT_LENGTH]        = PKT_CAM_TC_LENGTH;
     cmd_buffer[PKT_CAM_TC_ENABLE] = (uint32_t)m_track_en;
     cmd_buffer[PKT_CAM_TC_FMT]    = CAM_TC_FMT_RGB;
-
-    cmd_buffer[PKT_CAM_TC_CH0] = m_track.color.red();
-    cmd_buffer[PKT_CAM_TC_CH1] = m_track.color.green();
-    cmd_buffer[PKT_CAM_TC_CH2] = m_track.color.blue();
-
-    cmd_buffer[PKT_CAM_TC_TH0] = m_track.ht;
-    cmd_buffer[PKT_CAM_TC_TH1] = m_track.st;
-    cmd_buffer[PKT_CAM_TC_TH2] = 0;
+    cmd_buffer[PKT_CAM_TC_CH0]    = m_track.color.red();
+    cmd_buffer[PKT_CAM_TC_CH1]    = m_track.color.green();
+    cmd_buffer[PKT_CAM_TC_CH2]    = m_track.color.blue();
+    cmd_buffer[PKT_CAM_TC_TH0]    = m_track.ht;
+    cmd_buffer[PKT_CAM_TC_TH1]    = m_track.st;
+    cmd_buffer[PKT_CAM_TC_TH2]    = 0;
     cmd_buffer[PKT_CAM_TC_FILTER] = m_track.ft;
-    
-    cmd_buffer[PKT_CAM_TC_FPS] = m_track.fps;
+    cmd_buffer[PKT_CAM_TC_FPS]    = m_track.fps;
 
     Logger::info(tr("request track color [%1 %2 %3] with \
             threshold [%4 %5] with FPS %6\n")
@@ -834,7 +813,7 @@ void NetworkDeviceController::updateTrackSettings(
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::updateDeviceControl(int id, int value)
 {
-    uint32_t cmd_buffer[8];
+    uint32_t cmd_buffer[PKT_CAM_DCC_NUM];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_CAM_DCC;
     cmd_buffer[PKT_LENGTH]  = PKT_CAM_DCC_LENGTH;
     cmd_buffer[PKT_CAM_DCC_ID] = id;
@@ -845,7 +824,7 @@ void NetworkDeviceController::updateDeviceControl(int id, int value)
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::updateTrimSettings(int axes, int value)
 {
-    uint32_t cmd_buffer[8];
+    uint32_t cmd_buffer[PKT_STS_NUM];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_STS;
     cmd_buffer[PKT_LENGTH]  = PKT_STS_LENGTH;
 
@@ -863,7 +842,7 @@ void NetworkDeviceController::updateTrimSettings(int axes, int value)
 // -----------------------------------------------------------------------------
 void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 {
-    uint32_t cmd_buffer[8];
+    uint32_t cmd_buffer[PKT_SFS_NUM];
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SFS;
     cmd_buffer[PKT_LENGTH]  = PKT_SFS_LENGTH;
 
@@ -893,8 +872,7 @@ void NetworkDeviceController::updateFilterSettings(int signal, int samples)
 void NetworkDeviceController::updatePIDSettings(int axis, int signal, 
                                                 float value)
 {
-    uint32_t cmd_buffer[PKT_SPIDS_LENGTH / 4];
-    union { int i; float f; } temp;
+    uint32_t cmd_buffer[PKT_SPIDS_NUM];
 
     cmd_buffer[PKT_COMMAND] = CLIENT_REQ_SPIDS;
     cmd_buffer[PKT_LENGTH]  = PKT_SPIDS_LENGTH;
@@ -916,10 +894,8 @@ void NetworkDeviceController::updatePIDSettings(int axis, int signal,
             break;
     }
 
-    temp.f = value;
-
     cmd_buffer[PKT_SPIDS_PARAM] = spids_sig;
-    cmd_buffer[PKT_SPIDS_VALUE] = temp.i;
+    memcpy(&cmd_buffer[PKT_SPIDS_VALUE], &value, 4);
     cmd_buffer[PKT_SPIDS_AXIS] = axis;
     sendPacket(cmd_buffer, PKT_SPIDS_LENGTH);
 }

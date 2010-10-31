@@ -103,7 +103,8 @@ signals:
     void updateColorTrackEnable(int track_en) const;
     void filterSettingsUpdated(int imu, int alt, int aux, int batt) const;
     void pidSettingsUpdated(int axis, float p, float i, float d, float set);
-    void stateChanged(int state) const;
+    void controlStateChanged(int state) const;
+    void flightStateChanged(int state) const;
     void takeoff();
     void landing();
 };

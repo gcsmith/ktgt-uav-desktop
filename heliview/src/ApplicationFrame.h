@@ -52,7 +52,8 @@ public slots:
 
     void onTelemetryReady(float yaw, float pitch, float roll, float alt,
             int rssi, int batt, int aux, int cpu);
-    void onStateChanged(int state);
+    void onControlStateChanged(int state);
+    void onFlightStateChanged(int state);
     void onUpdateTrackControlEnable(int track_en);
 
     // menu action triggered event callbacks

@@ -43,7 +43,7 @@ bool SimulatedDeviceController::open()
         connect(timer, SIGNAL(timeout()), this, SLOT(onSimulateTick()));
     timer->start(20);
 
-    emit stateChanged(STATE_AUTONOMOUS);
+    emit controlStateChanged(STATE_AUTONOMOUS);
     emit connectionStatusChanged(QString("Simulated connection opened"), true);
     return true;
 }

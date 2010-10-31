@@ -143,8 +143,11 @@ void ApplicationFrame::connectDeviceController()
     connect(m_controller, SIGNAL(connectionStatusChanged(const QString&, bool)),
             this, SLOT(onConnectionStatusChanged(const QString&, bool)));
 
-    connect(m_controller, SIGNAL(stateChanged(int)),
-            this, SLOT(onStateChanged(int)));
+    connect(m_controller, SIGNAL(controlStateChanged(int)),
+            this, SLOT(onControlStateChanged(int)));
+
+    connect(m_controller, SIGNAL(flightStateChanged(int)),
+            this, SLOT(onFlightStateChanged(int)));
 
     connect(m_controller, SIGNAL(videoFrameReady(const char *, size_t)),
             m_video, SLOT(onImageReady(const char *, size_t)));
@@ -545,7 +548,7 @@ void ApplicationFrame::onConnectionStatusChanged(const QString &text, bool statu
 }
 
 // -----------------------------------------------------------------------------
-void ApplicationFrame::onStateChanged(int state)
+void ApplicationFrame::onControlStateChanged(int state)
 {
     switch ((DeviceState)state)
     {
@@ -570,6 +573,34 @@ void ApplicationFrame::onStateChanged(int state)
     case STATE_LOCKOUT:
         setEnabledButtons(BUTTON_NONE);
         m_ctlview->setEnabled(false);
+        break;
+    }
+}
+
+// -----------------------------------------------------------------------------
+void ApplicationFrame::onFlightStateChanged(int state)
+{
+
+    switch (state) {
+    case FCS_STATE_GROUNDED:
+        stateStatusBar->setValue(0);
+        stateStatusBar->setFormat(QString("Grounded"));
+        break;
+    case FCS_STATE_REPLAY:
+        stateStatusBar->setValue(100);
+        stateStatusBar->setFormat(QString("Replay"));
+        break;
+    case FCS_STATE_TAKEOFF:
+        stateStatusBar->setValue(50);
+        stateStatusBar->setFormat(QString("Takeoff"));
+        break;
+    case FCS_STATE_HOVERING:
+        stateStatusBar->setValue(100);
+        stateStatusBar->setFormat(QString("Hovering"));
+        break;
+    case FCS_STATE_LANDING:
+        stateStatusBar->setValue(50);
+        stateStatusBar->setFormat(QString("Landing"));
         break;
     }
 }
