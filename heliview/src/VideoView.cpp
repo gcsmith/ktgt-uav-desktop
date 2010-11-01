@@ -7,6 +7,7 @@
 // a bounding rectangle over the image to select a target tracking color.
 // -----------------------------------------------------------------------------
 
+#include <QDebug>
 #include <QDateTime>
 #include <QPainter>
 #include <QTimer>
@@ -97,17 +98,48 @@ void VideoView::paintEvent(QPaintEvent *e)
 
     if (m_showBox)
     {
+        int x_s, y_s, w_s, h_s, xc_s, yc_s, ln_m;
         float xscale = width() / (float)m_image.width();
         float yscale = height() / (float)m_image.height();
 
         // scale coordinates from client to jpeg image dimensions
-        int x_s = (int)(m_bbox.x() * xscale);
-        int y_s = (int)(m_bbox.y() * yscale);
-        int w_s = (int)(m_bbox.width() * xscale);
-        int h_s = (int)(m_bbox.height() * yscale);
-        int xc_s = (int)(m_center.x() * xscale);
-        int yc_s = (int)(m_center.y() * yscale);
-        int ln_m = std::min(w_s, h_s) / 20;
+        if (m_angle == 90)
+        {
+            w_s = (int)(m_bbox.height() * xscale);
+            h_s = (int)(m_bbox.width() * yscale);
+            x_s = width() - (int)(m_bbox.y() * xscale) - w_s;
+            y_s = (int)(m_bbox.x() * yscale);
+            xc_s = width() - (int)(m_center.y() * xscale);
+            yc_s = (int)(m_center.x() * yscale);
+        }
+        else if (m_angle == 180)
+        {
+            w_s = (int)(m_bbox.width() * xscale);
+            h_s = (int)(m_bbox.height() * yscale);
+            x_s = width() - (int)(m_bbox.x() * xscale) - w_s;
+            y_s = height() - (int)(m_bbox.y() * yscale) - h_s;
+            xc_s = width() - (int)(m_center.x() * xscale);
+            yc_s = height() - (int)(m_center.y() * yscale);
+        }
+        else if (m_angle == 270)
+        {
+            w_s = (int)(m_bbox.height() * xscale);
+            h_s = (int)(m_bbox.width() * yscale);
+            x_s = (int)(m_bbox.y() * xscale);
+            y_s = height() - (int)(m_bbox.x() * yscale) - h_s;
+            xc_s = (int)(m_center.y() * xscale);
+            yc_s = height() - (int)(m_center.x() * yscale);
+        }
+        else
+        {
+            x_s = (int)(m_bbox.x() * xscale);
+            y_s = (int)(m_bbox.y() * yscale);
+            w_s = (int)(m_bbox.width() * xscale);
+            h_s = (int)(m_bbox.height() * yscale);
+            xc_s = (int)(m_center.x() * xscale);
+            yc_s = (int)(m_center.y() * yscale);
+        }
+        ln_m = std::min(w_s, h_s) / 20;
 
         // render a wireframe rectangle around the region of interest
         painter.setPen(m_bboxPen);
@@ -219,9 +251,12 @@ void VideoView::setVideoFrame(const char *data, size_t length)
     Logger::extraDebug(tr("loading image size %1\n").arg(length));
     if (m_image.loadFromData((const uchar *)data, (int)length))
     {
-        QTransform mRot;
-        mRot.rotate(m_angle);
-        m_image = m_image.transformed(mRot);
+        if (0 != m_angle)
+        {
+            QTransform trans;
+            trans.rotate(m_angle);
+            m_image = m_image.transformed(trans);
+        }
 
         // reset the heartbeat timeout and force a redraw of the client area
         m_ticks = 0;
