@@ -18,8 +18,8 @@
 // -----------------------------------------------------------------------------
 VideoView::VideoView(QWidget *parent)
 : QWidget(parent), m_image(":/data/test_pattern.jpg"), m_angle(0), m_ticks(0),
-  m_maxTicks(25), m_showBox(false), m_dragging(false), m_bbox(0, 0, 0, 0),
-  m_dp(0, 0, 0, 0)
+  m_maxTicks(25), m_showBox(false), m_dragging(false), m_colorTrack(false), 
+  m_bbox(0, 0, 0, 0), m_dp(0, 0, 0, 0)
 {
     // create a timer to serve as a simple video feed heartbeat check
     m_timer = new QTimer(this);
@@ -96,7 +96,7 @@ void VideoView::paintEvent(QPaintEvent *e)
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.drawImage(0, 0, m_image.scaled(width(), height()));
 
-    if (m_showBox)
+    if (m_showBox && m_colorTrack)
     {
         int x_s, y_s, w_s, h_s, xc_s, yc_s, ln_m;
         float xscale = width() / (float)m_image.width();
@@ -316,9 +316,10 @@ void VideoView::onUpdateTrackControlEnable(int enable)
 void VideoView::onUpdateColorTrackEnable(int enable)
 {
     if(!enable){
-        m_showBox = false;
+        m_colorTrack = false;
         Logger::info(tr("Video: track false\n"));
     } else {
+        m_colorTrack = true;
         Logger::info(tr("Video: track true\n"));
     }
     repaint();

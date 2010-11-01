@@ -56,7 +56,7 @@ protected:
     QImage m_image;
     QTimer *m_timer;
     int m_angle, m_ticks, m_maxTicks;
-    bool m_showBox, m_dragging;
+    bool m_showBox, m_dragging, m_colorTrack;
     QRect m_bbox, m_dp;
     QPoint m_center;
     QBrush m_dragBrush, m_bboxBrush;
