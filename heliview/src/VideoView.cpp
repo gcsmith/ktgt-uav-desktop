@@ -27,6 +27,8 @@ VideoView::VideoView(QWidget *parent)
 
     m_dragBrush.setStyle(Qt::SolidPattern);
     m_bboxBrush.setStyle(Qt::SolidPattern);
+    
+    m_bboxPen.setWidth(3);
 
     setDragBoxColor(255, 0, 0, 25);
     setBoundingBoxColor(255, 0, 0, 0);
@@ -274,5 +276,16 @@ void VideoView::onUpdateTrackControlEnable(int enable)
         setBoundingBoxColor(255, 0, 0, 0);
         Logger::info(tr("Video: Box Set to RED\n"));
     }
+}
+// -----------------------------------------------------------------------------
+void VideoView::onUpdateColorTrackEnable(int enable)
+{
+    if(!enable){
+        m_showBox = false;
+        Logger::info(tr("Video: track false\n"));
+    } else {
+        Logger::info(tr("Video: track true\n"));
+    }
+    repaint();
 }
 

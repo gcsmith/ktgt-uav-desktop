@@ -168,6 +168,8 @@ void ApplicationFrame::connectDeviceController()
             SLOT(onUpdateTrackControlEnable(int)));
     connect(m_controller, SIGNAL(updateTrackControlEnable(int)), m_video, 
             SLOT(onUpdateTrackControlEnable(int)));
+    connect(m_controller, SIGNAL(updateColorTrackEnable(int)), m_video, 
+                SLOT(onUpdateColorTrackEnable(int)));
 }
 
 // -----------------------------------------------------------------------------

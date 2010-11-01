@@ -44,6 +44,7 @@ public slots:
     void setRotation(int angle);
     void onStatusTick();
     void onUpdateTrackControlEnable(int enable);
+    void onUpdateColorTrackEnable(int enable);
 
 protected:
     virtual void paintEvent(QPaintEvent *e);
