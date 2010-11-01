@@ -236,6 +236,7 @@ void VirtualView::setOrientation(float yaw, float pitch, float roll)
 // -----------------------------------------------------------------------------
 void VirtualView::setAltitude(float inches)
 {
+    inches = std::min(60.0f, inches);
     // convert to meters, add half of the helicoptor's height for model offset
     m_alt = inches * 0.0254 * 15;
     m_camera->lookAt(Ogre::Vector3(0, m_alt + 2.0f, 0));
